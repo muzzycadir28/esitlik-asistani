@@ -359,14 +359,14 @@ function MD({ text }) {
   let i = 0;
   while (i < lines.length) {
     const l = lines[i];
-    if (l.startsWith("# ")) { elements.push(<h1 key={i} style={{ fontSize: "1.35em", fontWeight: 700, color: "#1a4fa0", margin: "1em 0 0.4em", borderBottom: "1px solid #1e3448", paddingBottom: "0.3em" }}>{l.slice(2)}</h1>); }
-    else if (l.startsWith("## ")) { elements.push(<h2 key={i} style={{ fontSize: "1.1em", fontWeight: 700, color: "#1a3a90", margin: "0.9em 0 0.3em" }}>{l.slice(3)}</h2>); }
-    else if (l.startsWith("### ")) { elements.push(<h3 key={i} style={{ fontSize: "1em", fontWeight: 600, color: "#2a50a0", margin: "0.7em 0 0.25em" }}>{l.slice(4)}</h3>); }
+    if (l.startsWith("# ")) { elements.push(<h1 key={i} style={{ fontSize: "1.35em", fontWeight: 700, color: "#f0a847", margin: "1em 0 0.4em", borderBottom: "1px solid #1e3448", paddingBottom: "0.3em" }}>{l.slice(2)}</h1>); }
+    else if (l.startsWith("## ")) { elements.push(<h2 key={i} style={{ fontSize: "1.1em", fontWeight: 700, color: "#e8c87a", margin: "0.9em 0 0.3em" }}>{l.slice(3)}</h2>); }
+    else if (l.startsWith("### ")) { elements.push(<h3 key={i} style={{ fontSize: "1em", fontWeight: 600, color: "#d4b870", margin: "0.7em 0 0.25em" }}>{l.slice(4)}</h3>); }
     else if (l.startsWith("- ") || l.startsWith("☐ ") || l.startsWith("* ")) {
       const items = [];
       while (i < lines.length && (lines[i].startsWith("- ") || lines[i].startsWith("☐ ") || lines[i].startsWith("* "))) {
         const raw = lines[i].replace(/^[-*☐] /, "");
-        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#1a4fa0'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>") }} />);
+        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#f0c060'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>") }} />);
         i++;
       }
       elements.push(<ul key={`ul-${i}`} style={{ paddingLeft: "1.4em", margin: "0.4em 0" }}>{items}</ul>);
@@ -376,7 +376,7 @@ function MD({ text }) {
       const items = [];
       while (i < lines.length && /^\d+\. /.test(lines[i])) {
         const raw = lines[i].replace(/^\d+\. /, "");
-        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#1a4fa0'>$1</strong>") }} />);
+        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#f0c060'>$1</strong>") }} />);
         i++;
       }
       elements.push(<ol key={`ol-${i}`} style={{ paddingLeft: "1.4em", margin: "0.4em 0" }}>{items}</ol>);
@@ -384,7 +384,7 @@ function MD({ text }) {
     }
     else if (l.trim() === "") { elements.push(<div key={i} style={{ height: "0.5em" }} />); }
     else {
-      const html = l.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#1a4fa0'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
+      const html = l.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#f0c060'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
       elements.push(<p key={i} style={{ lineHeight: 1.7, margin: "0.2em 0" }} dangerouslySetInnerHTML={{ __html: html }} />);
     }
     i++;
@@ -436,31 +436,31 @@ export default function EsitlikAsistani() {
     setChatLoading(false);
   };
 
-  const C = { background: "#f8f6f2", surface: "#ffffff", border: "#e0dcd4", amber: "#1a4fa0", muted: "#8090a8", text: "#1a2340", dim: "#a0aab8" };
+  const C = { background: "#0d1b2a", surface: "#0a1520", border: "#1e3448", amber: "#f0a847", muted: "#5070a0", text: "#e8e0d0", dim: "#4a6070" };
 
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:${C.background}}
-    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:${C.background}}::-webkit-scrollbar-thumb{background:#c0cad8;border-radius:3px}
-    input,textarea,select{background:#f0f4fa;color:${C.text};border:1px solid #d0d8ea;font-family:inherit;outline:none;transition:border .2s}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:${C.background}}::-webkit-scrollbar-thumb{background:#2a3d52;border-radius:3px}
+    input,textarea,select{background:${C.background};color:${C.text};border:1px solid #2a3d52;font-family:inherit;outline:none;transition:border .2s}
     input:focus,textarea:focus,select:focus{border-color:${C.amber}}
     input::placeholder,textarea::placeholder{color:${C.dim}}
-    option{background:#f0f4fa}
+    option{background:#132230}
     .fade{animation:fadeUp .35s ease}
     @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     .pulse{animation:pulse 1.4s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
     .tab:hover{color:${C.amber}}
-    .chip:hover{border-color:${C.amber};color:#1a4fa0}
+    .chip:hover{border-color:${C.amber};color:${C.text}}
     .seg:hover{border-color:#3a5d7c;color:#d0c8b8}
-    .sel{background:#e8f0fc!important;border-color:${C.amber}!important;color:#1a4fa0!important}
+    .sel{background:#1a3a5c!important;border-color:${C.amber}!important;color:#f0c060!important}
     .role-card:hover{border-color:${C.amber};transform:translateY(-2px)}
-    .role-card.chosen{border-color:${C.amber};background:#e8f0fc}
-    .btn-primary{background:${C.amber};color:#ffffff;border:none;cursor:pointer;font-family:inherit;font-weight:700;transition:all .2s}
-    .btn-primary:hover:not(:disabled){background:#1240c0}
+    .role-card.chosen{border-color:${C.amber};background:#132230}
+    .btn-primary{background:${C.amber};color:#0d1b2a;border:none;cursor:pointer;font-family:inherit;font-weight:700;transition:all .2s}
+    .btn-primary:hover:not(:disabled){background:#f8bf60}
     .btn-primary:disabled{opacity:.45;cursor:not-allowed}
-    .btn-ghost{background:#f0f4fa;color:${C.text};border:1px solid #d0d8ea;cursor:pointer;font-family:inherit;transition:all .2s}
+    .btn-ghost{background:#1a3a5c;color:${C.text};border:1px solid #2a4d6c;cursor:pointer;font-family:inherit;transition:all .2s}
     .btn-ghost:hover:not(:disabled){border-color:${C.amber};color:${C.amber}}
     .btn-ghost:disabled{opacity:.45;cursor:not-allowed}
   `;
@@ -472,7 +472,7 @@ export default function EsitlikAsistani() {
       {/* Header */}
       <div style={{ borderBottom: `1px solid ${C.border}`, padding: "18px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.surface }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg,#1a4fa0,#0a2d70)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19 }}>⚖</div>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19 }}>⚖</div>
           <div>
             <div style={{ fontSize: "1.4em", fontWeight: 600, color: "#f0e8d0" }}>{L.appTitle}</div>
             <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".05em" }}>{L.appSubtitle}</div>
@@ -517,14 +517,14 @@ export default function EsitlikAsistani() {
       {/* Header */}
       <div style={{ borderBottom: `1px solid ${C.border}`, padding: "14px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.surface }}>
         <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
-          <div style={{ width: 38, height: 38, borderRadius: 9, background: "linear-gradient(135deg,#1a4fa0,#0a2d70)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17 }}>⚖</div>
+          <div style={{ width: 38, height: 38, borderRadius: 9, background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17 }}>⚖</div>
           <div>
             <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0" }}>{L.appTitle}</div>
             <div style={{ fontSize: "0.68em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".05em" }}>{L.appSubtitle}</div>
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <div style={{ fontSize: "0.75em", color: C.muted, fontFamily: "'DM Mono',monospace", background: "#e8f0fc", border: `1px solid ${C.border}`, padding: "5px 12px", borderRadius: 20 }}>
+          <div style={{ fontSize: "0.75em", color: C.muted, fontFamily: "'DM Mono',monospace", background: "#132230", border: `1px solid ${C.border}`, padding: "5px 12px", borderRadius: 20 }}>
             {L.roleSelect.roles.find(r => r.id === role)?.icon} {ROLE_LABELS[lang][role]}
           </div>
           <button className="btn-ghost" onClick={() => setRole(null)} style={{ padding: "5px 12px", borderRadius: 6, fontSize: "0.75em", fontFamily: "'DM Mono',monospace" }}>{L.chat.changeRole}</button>
@@ -553,7 +553,7 @@ export default function EsitlikAsistani() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 {L.chat.quick.map((q, i) => (
                   <button key={i} className="chip" onClick={() => sendChat(q)}
-                    style={{ background: "#f0f4fa", border: `1px solid ${C.border}`, color: "#3a5080", borderRadius: 8, padding: "10px 14px", textAlign: "left", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", lineHeight: 1.5, transition: "all .2s" }}>
+                    style={{ background: "#0a1520", border: `1px solid ${C.border}`, color: "#8aA4bc", borderRadius: 8, padding: "10px 14px", textAlign: "left", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", lineHeight: 1.5, transition: "all .2s" }}>
                     <span style={{ color: C.amber, marginRight: 6 }}>›</span>{q}
                   </button>
                 ))}
@@ -565,16 +565,16 @@ export default function EsitlikAsistani() {
               {messages.map((m, i) => (
                 <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
                   {m.role === "assistant" && (
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#1a4fa0,#0a2d70)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, marginRight: 9, flexShrink: 0, marginTop: 3 }}>⚖</div>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, marginRight: 9, flexShrink: 0, marginTop: 3 }}>⚖</div>
                   )}
-                  <div style={{ maxWidth: "80%", padding: "11px 15px", borderRadius: m.role === "user" ? "14px 4px 14px 14px" : "4px 14px 14px 14px", background: m.role === "user" ? "#1a4fa0" : C.surface, border: `1px solid ${m.role === "user" ? "#1a4fa0" : C.border}`, fontSize: "0.9em", lineHeight: 1.7 }}>
+                  <div style={{ maxWidth: "80%", padding: "11px 15px", borderRadius: m.role === "user" ? "14px 4px 14px 14px" : "4px 14px 14px 14px", background: m.role === "user" ? "#1a3a5c" : C.surface, border: `1px solid ${m.role === "user" ? "#2a4d6c" : C.border}`, fontSize: "0.9em", lineHeight: 1.7 }}>
                     {m.role === "assistant" ? <MD text={m.content} /> : m.content}
                   </div>
                 </div>
               ))}
               {chatLoading && (
                 <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#1a4fa0,#0a2d70)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>⚖</div>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>⚖</div>
                   <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.chat.thinking}</span>
                 </div>
               )}
@@ -602,7 +602,7 @@ export default function EsitlikAsistani() {
               <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0", marginBottom: 4 }}>{L.docAnalysis.title}</div>
               <div style={{ color: C.muted, fontSize: "0.82em", fontFamily: "'DM Mono',monospace" }}>{L.docAnalysis.subtitle}</div>
             </div>
-            <div style={{ border: `2px dashed #c0cad8`, borderRadius: 10, padding: "26px 18px", textAlign: "center", cursor: "pointer" }}
+            <div style={{ border: `2px dashed ${C.border}`, borderRadius: 10, padding: "26px 18px", textAlign: "center", cursor: "pointer" }}
               onDragOver={e => e.preventDefault()}
               onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) { const r = new FileReader(); r.onload = ev => setDocText(ev.target.result); r.readAsText(f); } }}>
               <div style={{ fontSize: "1.8em", marginBottom: 6 }}>📄</div>
@@ -619,7 +619,7 @@ export default function EsitlikAsistani() {
               {docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}
             </button>
             {docLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.docAnalysis.analyzing}</span>}
-            {docResult && <div className="fade" style={{ background: "#f0f4fa", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={docResult} /></div>}
+            {docResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={docResult} /></div>}
           </div>
         )}
 
@@ -637,7 +637,7 @@ export default function EsitlikAsistani() {
                 <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
                   {items.map((it, i) => (
                     <button key={i} className={`seg${val === i ? " sel" : ""}`} onClick={() => set(i)}
-                      style={{ background: val === i ? "#e8f0fc" : "#f0f4fa", border: `1px solid ${val === i ? C.amber : C.border}`, color: val === i ? "#1a4fa0" : "#6080a0", borderRadius: 7, padding: "8px 14px", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}>
+                      style={{ background: val === i ? "#1a3a5c" : "#0a1520", border: `1px solid ${val === i ? C.amber : C.border}`, color: val === i ? "#f0c060" : "#6080a0", borderRadius: 7, padding: "8px 14px", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}>
                       {it}
                     </button>
                   ))}
@@ -649,7 +649,7 @@ export default function EsitlikAsistani() {
               {clLoading ? L.checklist.generating : L.checklist.generate}
             </button>
             {clLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.checklist.generating}</span>}
-            {clResult && <div className="fade" style={{ background: "#f0f4fa", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={clResult} /></div>}
+            {clResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={clResult} /></div>}
           </div>
         )}
 
@@ -686,11 +686,11 @@ export default function EsitlikAsistani() {
               {rpLoading ? L.report.generating : L.report.generate}
             </button>
             {rpLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.report.generating}</span>}
-            {rpResult && <div className="fade" style={{ background: "#f0f4fa", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={rpResult} /></div>}
+            {rpResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={rpResult} /></div>}
           </div>
         )}
 
-        <div style={{ marginTop: 44, paddingTop: 18, borderTop: `1px solid #e0dcd4`, textAlign: "center", color: "#a0aab8", fontSize: "0.7em", fontFamily: "'DM Mono',monospace" }}>{L.poweredBy}</div>
+        <div style={{ marginTop: 44, paddingTop: 18, borderTop: `1px solid #1a2e40`, textAlign: "center", color: "#384c5c", fontSize: "0.7em", fontFamily: "'DM Mono',monospace" }}>{L.poweredBy}</div>
       </div>
     </div>
   );
