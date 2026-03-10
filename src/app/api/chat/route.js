@@ -1,6 +1,6 @@
 
 import Anthropic from "@anthropic-ai/sdk";
-import { KEEDB_DOC } from "../../lib/keedb-doc";
+import { KEEDB_DOC } from "../../../lib/keedb-doc";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
