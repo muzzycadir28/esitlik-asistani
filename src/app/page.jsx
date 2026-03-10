@@ -65,7 +65,16 @@ const LANG = {
       generate: "Rapor Taslağı Oluştur",
       generating: "Oluşturuluyor…",
     },
-  },
+      resources: {
+      title: "Referans Kurumlar ve Önemli Web Siteleri",
+      subtitle: "KEEDB çalışmalarında sık başvurulan ulusal ve uluslararası kaynaklar",
+      links: [
+        { label: "T.C. Strateji ve Bütçe Başkanlığı", url: "https://www.sbb.gov.tr" },
+        { label: "T.C. Aile ve Sosyal Hizmetler Bakanlığı", url: "https://www.aile.gov.tr" },
+        { label: "UN Women", url: "https://www.unwomen.org" },
+        { label: "OECD Gender Data Portal", url: "https://www.oecd.org/en/data/datasets/oecd-gender-data-portal.html" },
+      ],
+    },},
   en: {
     appTitle: "Equality Assistant",
     appSubtitle: "Gender Responsive Budgeting Advisory System",
@@ -127,7 +136,17 @@ const LANG = {
       generate: "Generate Report Draft",
       generating: "Generating…",
     },
-  },
+  },    resources: {
+      title: "Reference Institutions and Key Websites",
+      subtitle: "Frequently used national and international resources for GRB work",
+      links: [
+        { label: "Presidency of Strategy and Budget (TR)", url: "https://www.sbb.gov.tr" },
+        { label: "Ministry of Family and Social Services (TR)", url: "https://www.aile.gov.tr" },
+        { label: "UN Women", url: "https://www.unwomen.org" },
+        { label: "UNDP Türkiye", url: "https://www.undp.org/tr/turkiye" },
+        { label: "OECD Gender Data Portal", url: "https://www.oecd.org/en/data/datasets/oecd-gender-data-portal.html" },
+      ],
+    },
 };
 
 const ROLE_LABELS = {
@@ -690,8 +709,38 @@ export default function EsitlikAsistani() {
           </div>
         )}
 
-        <div style={{ marginTop: 44, paddingTop: 18, borderTop: `1px solid #1a2e40`, textAlign: "center", color: "#384c5c", fontSize: "0.7em", fontFamily: "'DM Mono',monospace" }}>{L.poweredBy}</div>
-      </div>
+                <section aria-labelledby="references-title" style={{ marginTop: 40, padding: "18px 16px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#0a1520" }}>
+          <div id="references-title" style={{ fontSize: "0.85em", color: "#f0e8d0", fontWeight: 600, marginBottom: 4 }}>{L.resources.title}</div>
+          <div style={{ color: C.muted, fontSize: "0.74em", fontFamily: "'DM Mono',monospace", marginBottom: 12 }}>{L.resources.subtitle}</div>
+          <ul style={{ display: "flex", flexWrap: "wrap", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
+            {L.resources.links.map((item) => (
+              <li key={item.url}>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="chip"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    background: "#0f1f2e",
+                    border: `1px solid ${C.border}`,
+                    color: "#8aa4bc",
+                    borderRadius: 8,
+                    padding: "8px 12px",
+                    textDecoration: "none",
+                    fontSize: "0.8em",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  ↗ {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid #1a2e40`, textAlign: "center", color: "#384c5c", fontSize: "0.7em", fontFamily: "'DM Mono',monospace" }}>{L.poweredBy}</div>      </div>
     </div>
   );
 }
