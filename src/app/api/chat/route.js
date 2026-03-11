@@ -70,3 +70,13 @@ export async function POST(req) {
     });
 
     const text = response.content.map((b) => b.te
+js    const text = response.content.map((b) => b.text || "").join("\n");
+    return Response.json({ text });
+  } catch (err) {
+    console.error(err);
+    const payload = getErrorPayload(err);
+    const safeMessage = payload?.message || err.message || "Bilinmeyen sunucu hatası.";
+    return Response.json({ error: safeMessage }, { status: 500 });
+  }
+}
+                                      
