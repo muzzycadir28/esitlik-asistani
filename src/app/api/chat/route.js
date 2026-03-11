@@ -69,8 +69,7 @@ export async function POST(req) {
       messages,
     });
 
-    const text = response.content.map((b) => b.te
-js    const text = response.content.map((b) => b.text || "").join("\n");
+    const text = response.content.map((b) => b.text || "").join("\n");
     return Response.json({ text });
   } catch (err) {
     console.error(err);
