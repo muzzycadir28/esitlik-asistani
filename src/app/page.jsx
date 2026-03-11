@@ -566,18 +566,34 @@ Include concrete recommendations, sample indicators and references to internatio
 
 // ─── API CALL ─────────────────────────────────────────────────────────────────
 async function callClaude(userContent, systemPrompt, history = [], lang, role) {
-  const messages = [
-    ...history,
-    { role: "user", content: userContent },
-  ];
-  const res = await fetch("/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, lang, role, customSystem: systemPrompt }),
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data.text || "—";
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+  try {
+    const messages = [
+      ...history,
+      { role: "user", content: userContent },
+    ];
+
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages, lang, role, customSystem: systemPrompt }),
+      signal: controller.signal,
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || "Sunucu hatası oluştu.");
+    if (data.error) throw new Error(data.error);
+    return data.text || "—";
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("Yanıt zaman aşımına uğradı. Lütfen tekrar deneyin.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 // ─── MARKDOWN RENDERER ────────────────────────────────────────────────────────
@@ -665,10 +681,18 @@ export default function EsitlikAsistani() {
     }
 
     setChatLoading(true);
-    const history = messages.map(m => ({ role: m.role, content: m.content }));
-    const reply = await callClaude(text, buildSystemPrompt(lang, role), history, lang, role);
-    setMessages([...newHistory, { role: "assistant", content: reply }]);
-    setChatLoading(false);
+    try {
+      const history = messages.map(m => ({ role: m.role, content: m.content }));
+      const reply = await callClaude(text, buildSystemPrompt(lang, role), history, lang, role);
+      setMessages([...newHistory, { role: "assistant", content: reply }]);
+    } catch (error) {
+      const msg = lang === "tr"
+        ? `Üzgünüm, yanıt üretilirken bir hata oluştu: ${error.message}`
+        : `Sorry, an error occurred while generating the response: ${error.message}`;
+      setMessages([...newHistory, { role: "assistant", content: msg }]);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   const C = { background: "#0d1b2a", surface: "#0a1520", border: "#1e3448", amber: "#f0a847", muted: "#5070a0", text: "#e8e0d0", dim: "#4a6070" };
