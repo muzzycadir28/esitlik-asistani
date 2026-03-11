@@ -1,8 +1,21 @@
 
 import Anthropic from "@anthropic-ai/sdk";
+import fs from "node:fs";
+import path from "node:path";
 import { KEEDB_DOC } from "../../../lib/keedb-doc";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+
+const MEMORY_PATH = path.join(process.cwd(), "memory.md");
+const MEMORY_RULES = (() => {
+  try {
+    return fs.readFileSync(MEMORY_PATH, "utf8").trim();
+  } catch (error) {
+    console.warn("memory.md okunamadı, varsayılan kurallarla devam ediliyor.", error);
+    return "";
+  }
+})();
 
 const ROLE_CTX = {
   tr: {
@@ -21,29 +34,33 @@ const ROLE_CTX = {
 
 function buildSystem(lang, role) {
   const ctx = ROLE_CTX[lang]?.[role] || ROLE_CTX.tr.official;
+  const memorySection = MEMORY_RULES
+    ? `\n\n---\nmemory.md — ASİSTAN KURAL SETİ:\n${MEMORY_RULES}`
+    : "";
   const docSection = `\n\n---\nKEEDB EĞİTİCİ REHBERİ (UN Women / AB, Mayıs 2024) — ÖNCELİKLİ REFERANS:\n${KEEDB_DOC}`;
 
   if (lang === "tr") {
     return `Sen "Eşitlik Asistanı" — KEEDB uzmanı bir yapay zeka danışmanısın.
 Kullanıcı profili: ${ctx}
 Türkçe yanıtlarda "KEEDB" terimini kullan. Konu dışı sorularda espirili şekilde yönlendir.
-Önce verilen rehber dokümanını kontrol et, sonra genel bilgini kullan. APA 7 kaynakça ekle.${docSection}`;
+Önce memory.md kurallarını uygula, sonra verilen rehber dokümanını kontrol et, ardından genel bilgini kullan. APA 7 kaynakça ekle.${memorySection}${docSection}`;
   }
   return `You are "Equality Assistant" — a GRB expert AI advisor.
 User profile: ${ctx}
 Use "GRB" in English responses. Redirect off-topic questions humorously.
-Check the provided guide document first, then use general knowledge. Add APA 7 references.${docSection}`;
+Apply memory.md rules first, then check the provided guide document, then use general knowledge. Add APA 7 references.${memorySection}${docSection}`;
 }
 
 export async function POST(req) {
   try {
     const { messages, lang, role, customSystem } = await req.json();
+    const baseSystem = buildSystem(lang || "tr", role || "official");
     const system = customSystem
-      ? customSystem + `\n\n---\nKEEDB EĞİTİCİ REHBERİ:\n${KEEDB_DOC}`
-      : buildSystem(lang || "tr", role || "official");
+      ? `${customSystem}\n\n---\nMerkezi Sistem Kuralları:\n${baseSystem}`
+      : baseSystem;
 
     const response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-3-5-haiku-latest",
       max_tokens: 2000,
       system,
       messages,
