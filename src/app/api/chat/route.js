@@ -21,6 +21,17 @@ const MEMORY_RULES = (() => {
   }
 })();
 
+
+const MEMORY_PATH = path.join(process.cwd(), "memory.md");
+const MEMORY_RULES = (() => {
+  try {
+    return fs.readFileSync(MEMORY_PATH, "utf8").trim();
+  } catch (error) {
+    console.warn("memory.md okunamadı, varsayılan kurallarla devam ediliyor.", error);
+    return "";
+  }
+})();
+
 const ROLE_CTX = {
   tr: {
     official: "Kullanıcı merkezi kamu idaresinde çalışan bir kamu görevlisidir. Bakanlık düzeyinde bütçe süreçleri, performans programları ve stratejik planlar bağlamında öneriler geliştir.",
@@ -55,48 +66,6 @@ Use "GRB" in English responses. Redirect off-topic questions humorously.
 Apply memory.md rules first, then check the provided guide document, then use general knowledge. Add APA 7 references.${memorySection}${docSection}`;
 }
 
-function getErrorPayload(err) {
-  if (!err) return null;
-  if (err.error && typeof err.error === "object") return err.error;
-  if (typeof err.message !== "string") return null;
-
-  const match = err.message.match(/\{[\s\S]*\}$/);
-  if (!match) return null;
-  try {
-    const parsed = JSON.parse(match[0]);
-    return parsed?.error || parsed;
-  } catch {
-    return null;
-  }
-}
-
-function isRetryableModelError(err) {
-  const payload = getErrorPayload(err);
-  return payload?.type === "not_found_error" || payload?.type === "invalid_request_error";
-}
-
-async function createMessageWithFallback({ messages, system }) {
-  let lastError;
-
-  for (const model of MODEL_CANDIDATES) {
-    try {
-      return await client.messages.create({
-        model,
-        max_tokens: 2000,
-        system,
-        messages,
-      });
-    } catch (error) {
-      lastError = error;
-      if (!isRetryableModelError(error)) {
-        throw error;
-      }
-    }
-  }
-
-  throw lastError || new Error("No Anthropic models configured.");
-}
-
 export async function POST(req) {
   try {
     const { messages, lang, role, customSystem } = await req.json();
@@ -105,7 +74,12 @@ export async function POST(req) {
       ? `${customSystem}\n\n---\nMerkezi Sistem Kuralları:\n${baseSystem}`
       : baseSystem;
 
-    const response = await createMessageWithFallback({ messages, system });
+    const response = await client.messages.create({
+      model: "claude-3-5-haiku-20241022",
+      max_tokens: 2000,
+      system,
+      messages,
+    });
 
     const text = response.content.map((b) => b.text || "").join("\n");
     return Response.json({ text });
