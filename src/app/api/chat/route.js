@@ -1,4 +1,3 @@
-
 import Anthropic from "@anthropic-ai/sdk";
 import fs from "node:fs";
 import path from "node:path";
@@ -9,18 +8,6 @@ const MODEL_CANDIDATES = (process.env.ANTHROPIC_MODELS || "claude-3-5-haiku-late
   .split(",")
   .map((m) => m.trim())
   .filter(Boolean);
-
-
-const MEMORY_PATH = path.join(process.cwd(), "memory.md");
-const MEMORY_RULES = (() => {
-  try {
-    return fs.readFileSync(MEMORY_PATH, "utf8").trim();
-  } catch (error) {
-    console.warn("memory.md okunamadı, varsayılan kurallarla devam ediliyor.", error);
-    return "";
-  }
-})();
-
 
 const MEMORY_PATH = path.join(process.cwd(), "memory.md");
 const MEMORY_RULES = (() => {
@@ -81,12 +68,4 @@ export async function POST(req) {
       messages,
     });
 
-    const text = response.content.map((b) => b.text || "").join("\n");
-    return Response.json({ text });
-  } catch (err) {
-    console.error(err);
-    const payload = getErrorPayload(err);
-    const safeMessage = payload?.message || err.message || "Bilinmeyen sunucu hatası.";
-    return Response.json({ error: safeMessage }, { status: 500 });
-  }
-}
+    const text = response.content.map((b) => b.te
