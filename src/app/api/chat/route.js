@@ -10,18 +10,6 @@ const MODEL_CANDIDATES = (process.env.ANTHROPIC_MODELS || "claude-3-5-haiku-late
   .map((m) => m.trim())
   .filter(Boolean);
 
-
-const MEMORY_PATH = path.join(process.cwd(), "memory.md");
-const MEMORY_RULES = (() => {
-  try {
-    return fs.readFileSync(MEMORY_PATH, "utf8").trim();
-  } catch (error) {
-    console.warn("memory.md okunamadı, varsayılan kurallarla devam ediliyor.", error);
-    return "";
-  }
-})();
-
-
 const MEMORY_PATH = path.join(process.cwd(), "memory.md");
 const MEMORY_RULES = (() => {
   try {
@@ -90,3 +78,4 @@ export async function POST(req) {
     return Response.json({ error: safeMessage }, { status: 500 });
   }
 }
+                                      
