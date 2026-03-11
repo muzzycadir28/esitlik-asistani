@@ -149,6 +149,205 @@ const LANG = {
     },
 };
 
+const QUICK_PRESET_RESPONSES = {
+  tr: {
+    "keedb nedir ve neden önemlidir?": `## Kısa Özet
+
+Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu bütçelerinin hazırlanması, uygulanması ve izlenmesi süreçlerinde kadınların ve erkeklerin farklı ihtiyaç ve önceliklerini dikkate alan bir yaklaşımdır. Amaç, kamu kaynaklarının kadın erkek eşitliğini destekleyecek şekilde adil ve etkili kullanılmasını sağlamaktır.
+
+## KEEDB Nedir?
+
+Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu politikaları ve bütçelerin kadınlar ve erkekler üzerindeki etkilerini analiz eden ve bütçe kararlarını bu analizlere göre şekillendiren bir kamu yönetimi yaklaşımıdır.
+
+Bu yaklaşımda:
+- Kamu harcamalarının ve gelirlerinin kadınlar ve erkekler üzerindeki etkisi analiz edilir.
+- Politikalar ve programlar eşitsizlikleri azaltacak şekilde tasarlanır.
+- Bütçe süreçlerine eşit katılım ve şeffaflık sağlanır.
+
+Başka bir ifadeyle KEEDB, bütçenin sadece mali bir araç değil, aynı zamanda eşitliği ilerleten bir politika aracı olarak kullanılmasını sağlar.
+
+## KEEDB Ne Değildir?
+
+❌ Kadınlara ayrı bir bütçe oluşturmak değildir.
+
+❌ Sadece sosyal politikalarla sınırlı değildir.
+
+❌ Sadece kadınlara yönelik projeler anlamına gelmez.
+
+✔️ Aslında KEEDB, tüm kamu politikalarında kadın erkek eşitliği perspektifinin dikkate alınmasıdır.
+
+## KEEDB Neden Önemlidir?
+
+1️⃣ Eşitsizlikleri görünür kılar
+
+Kadın ve erkeklerin farklı ihtiyaçları ve fırsatlara erişim düzeyleri vardır. KEEDB bu farkları veri ve analizlerle ortaya çıkarır.
+
+2️⃣ Kamu kaynaklarının daha adil kullanılmasını sağlar
+
+Bütçeler toplumdaki tüm grupların ihtiyaçlarını dikkate alarak hazırlanır.
+
+3️⃣ Kamu hizmetlerinin erişilebilirliğini artırır
+
+Örneğin:
+- ulaşım
+- bakım hizmetleri
+- istihdam programları
+
+Bu hizmetlerin kadınlar ve erkekler için eşit şekilde erişilebilir olması sağlanır.
+
+4️⃣ Hesap verebilirliği ve şeffaflığı artırır
+
+Bütçelerin kimin için, nasıl kullanıldığını görünür hale getirir.
+
+5️⃣ Sürdürülebilir kalkınmayı destekler
+
+Kadın erkek eşitliği, ekonomik büyüme ve sosyal kalkınma ile doğrudan ilişkilidir.
+
+## KEEDB'nin Nihai Hedefi
+
+➡️ Kadınların ve erkeklerin eşit hak, fırsat ve imkanlara sahip olduğu bir toplum oluşturmaktır.`,
+    "keedb için hangi ilk adımları atabiliriz?": `## Kısa Özet
+
+Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uygulamasına başlamak için genellikle 5 temel ilk adım önerilir:
+
+- Kurumsal farkındalık ve siyasi/kurumsal sahiplenme oluşturmak
+- Mevcut durum analizi yapmak (veri ve eşitsizlik analizi)
+- Politika ve stratejik planlara eşitlik hedefleri koymak
+- Bütçe ve programları eşitlik perspektifiyle analiz etmek
+- İzleme ve göstergeler geliştirmek
+
+Bu adımlar, KEEDB'nin planlama-bütçe döngüsüne sistematik olarak entegre edilmesini sağlar.
+
+## KEEDB'ye Başlamak İçin İlk Adımlar
+
+1️⃣ Kurumsal farkındalık ve sahiplenme oluşturmak
+
+Yapılabilecekler:
+- Üst yönetimin desteğini almak
+- Kurum içinde KEEDB çalışma grubu / odak noktası belirlemek
+- Personel için kısa eğitim veya bilgilendirme yapmak
+- Stratejik plan ve bütçe süreçlerinde eşitlik perspektifinin gerekliliğini anlatmak
+
+2️⃣ Mevcut durum analizi yapmak
+
+Analiz kapsamında:
+- Cinsiyete göre ayrıştırılmış veri toplamak
+- Hizmetlerden kimlerin yararlandığını analiz etmek
+- Kurum faaliyetlerinin kadınlar ve erkekler üzerindeki etkisini incelemek
+
+3️⃣ Stratejik plan ve politikalara eşitlik hedefleri koymak
+
+Örnek hedefler:
+- İstihdam: Kadın istihdamını artıran programlar
+- Eğitim: Kız çocuklarının STEM alanına katılımını artırmak
+- Yerel hizmetler: Kadınların güvenli ulaşım erişimini artırmak
+
+4️⃣ Bütçe ve programları eşitlik açısından analiz etmek
+
+Sorulabilecek sorular:
+- Bu program kadınlar ve erkekler için eşit fayda sağlıyor mu?
+- Kaynak dağılımı eşitsizlikleri azaltıyor mu?
+- Kadınların erişimini engelleyen faktörler var mı?
+
+5️⃣ İzleme ve göstergeler geliştirmek
+
+Örnek göstergeler:
+- Programlardan yararlanan kadın/erkek sayısı
+- Kadın girişimcilere verilen destek miktarı
+- Kadınların karar alma mekanizmalarındaki oranı
+
+## Pratik Başlangıç Checklist'i
+
+☐ Kurum içinde KEEDB sorumlusu belirle
+☐ Personel için farkındalık eğitimi yap
+☐ Cinsiyete göre ayrıştırılmış veri topla
+☐ Stratejik plan hedeflerine eşitlik göstergesi ekle
+☐ Bir pilot program veya faaliyet seç
+☐ O program için KEEDB analizi yap`,
+    "planları ve bütçeleri nasıl duyarlı hale getirebilirim?": `Planları ve bütçeleri Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) yaklaşımıyla duyarlı hale getirmek için politika-planlama-bütçe döngüsünün tüm aşamalarına eşitlik perspektifi eklemek gerekir.
+
+## Planları ve Bütçeleri Eşitliğe Duyarlı Hale Getirme
+
+1️⃣ Durum Analizi Yap (Eşitsizlikleri Tanımla)
+- Bu politika / hizmetten kim yararlanıyor?
+- Kadınlar ve erkekler eşit erişime sahip mi?
+- Veriler kadın ve erkek olarak ayrıştırılmış mı?
+
+2️⃣ Eşitliğe Duyarlı Hedefler Belirle
+- İstihdam: Kadınların işgücüne katılımını artırmak
+- Ulaşım: Kadınların güvenli ulaşım erişimini artırmak
+- Eğitim: STEM alanlarında kız öğrencilerin oranını artırmak
+
+3️⃣ Program ve Faaliyetleri Gözden Geçir
+- Mesleki eğitim: Kadınların katılımı için çocuk bakım desteği
+- Spor yatırımları: Kadınlara özel saat veya alan
+- Tarım destekleri: Kadın çiftçiler için erişim kriterleri
+
+4️⃣ Bütçeyi Eşitlik Perspektifiyle Analiz Et
+- Kaynakların ne kadarı eşitliği destekleyen faaliyetlere gidiyor?
+- Kadınlar ve erkekler bu harcamalardan nasıl etkileniyor?
+- Harcamalar eşitsizlikleri azaltıyor mu?
+
+5️⃣ İzleme ve Değerlendirme Yap
+- Kadın ve erkek yararlanıcı sayısı
+- Kadın istihdam oranı
+- Kadın girişimci destekleri
+- Güvenli kamusal alan sayısı
+
+## Planlama ve Bütçe Sürecinde KEEDB Döngüsü
+
+1️⃣ Sorun analizi
+2️⃣ Eşitlik hedefleri belirleme
+3️⃣ Faaliyet ve program tasarımı
+4️⃣ Bütçe tahsisi
+5️⃣ İzleme ve değerlendirme
+
+✅ Kısa özet:
+- cinsiyete göre ayrıştırılmış veri kullan
+- eşitlik hedefleri koy
+- programları bu hedeflere göre tasarla
+- bütçeyi bu faaliyetlere yönlendir
+- sonuçları düzenli olarak izle`,
+    "türkiye'den başarılı bir örnek paylaşır mısın?": `## 🇹🇷 Türkiye'den KEEDB Başarılı Uygulama Örneği
+
+### Yerel Yönetimlerde Pilot KEEDB Uygulamaları
+
+Türkiye'de yürütülen projelerde bazı belediyelerde planlama, performans programı ve bütçe süreçlerine kadın erkek eşitliği perspektifi entegre edilmiştir.
+
+### Uygulamada Yapılan Somut Adımlar
+
+1️⃣ Durum Analizi
+- Kadın ve erkeklerin belediye hizmetlerinden yararlanma durumu incelendi
+- Spor tesisleri, meslek kursları, bakım hizmetleri gibi alanlar analiz edildi
+
+2️⃣ Eşitlik Hedeflerinin Belirlenmesi
+- Kadın istihdamını artıran kurslar
+- Bakım hizmetlerini genişletmek
+- Kadınların yerel karar süreçlerine katılımını artırmak
+
+3️⃣ Bütçe ile Bağlantı Kurma
+- Meslek kursları → Kadın istihdamı
+- Kreş hizmetleri → Kadınların işgücüne katılımı
+- Kadın danışma merkezleri → Şiddetle mücadele
+
+4️⃣ İzleme ve Raporlama
+- Performans göstergeleri oluşturuldu
+- Faaliyet raporlarında eşitlik etkisi izlenmeye başlandı
+
+### Bu Örneğin Önemi
+
+- yerel yönetimlere uygulanabilir bir model sunuyor
+- stratejik plan - performans programı - bütçe bağlantısını gösteriyor
+- eşitlik politikalarının bütçeyle desteklenmesini sağlıyor`,
+  },
+};
+
+const normalizeQuickQuestion = (value = "") => value.trim().toLocaleLowerCase("tr-TR");
+
+function getQuickPresetResponse(lang, question) {
+  return QUICK_PRESET_RESPONSES[lang]?.[normalizeQuickQuestion(question)] || null;
+}
+
 const ROLE_LABELS = {
   tr: { official: "Kamu Görevlisi", local: "Yerel Yönetim", academic: "Akademisyen", ngo: "Sivil Toplum" },
   en: { official: "Public Official", local: "Local Government", academic: "Academic", ngo: "Civil Society" },
@@ -448,6 +647,13 @@ export default function EsitlikAsistani() {
     setChatInput("");
     const newHistory = [...messages, { role: "user", content: text }];
     setMessages(newHistory);
+
+    const presetReply = getQuickPresetResponse(lang, text);
+    if (presetReply) {
+      setMessages([...newHistory, { role: "assistant", content: presetReply }]);
+      return;
+    }
+
     setChatLoading(true);
     const history = messages.map(m => ({ role: m.role, content: m.content }));
     const reply = await callClaude(text, buildSystemPrompt(lang, role), history, lang, role);
