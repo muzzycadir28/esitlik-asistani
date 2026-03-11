@@ -5,6 +5,21 @@ import path from "node:path";
 import { KEEDB_DOC } from "../../../lib/keedb-doc";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const MODEL_CANDIDATES = (process.env.ANTHROPIC_MODELS || "claude-3-5-haiku-latest,claude-3-5-sonnet-latest")
+  .split(",")
+  .map((m) => m.trim())
+  .filter(Boolean);
+
+
+const MEMORY_PATH = path.join(process.cwd(), "memory.md");
+const MEMORY_RULES = (() => {
+  try {
+    return fs.readFileSync(MEMORY_PATH, "utf8").trim();
+  } catch (error) {
+    console.warn("memory.md okunamadı, varsayılan kurallarla devam ediliyor.", error);
+    return "";
+  }
+})();
 
 
 const MEMORY_PATH = path.join(process.cwd(), "memory.md");
@@ -70,6 +85,8 @@ export async function POST(req) {
     return Response.json({ text });
   } catch (err) {
     console.error(err);
-    return Response.json({ error: err.message }, { status: 500 });
+    const payload = getErrorPayload(err);
+    const safeMessage = payload?.message || err.message || "Bilinmeyen sunucu hatası.";
+    return Response.json({ error: safeMessage }, { status: 500 });
   }
 }
