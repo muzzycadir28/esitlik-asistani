@@ -146,7 +146,7 @@ const LANG = {
       generate: "Generate Report Draft",
       generating: "Generating…",
     },
-  },    resources: {
+    resources: {
       title: "Reference Institutions and Key Websites",
       subtitle: "Frequently used national and international resources for GRB work",
       links: [
