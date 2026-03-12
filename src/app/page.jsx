@@ -299,6 +299,38 @@ Sorulabilecek sorular:
 - programları bu hedeflere göre tasarla
 - bütçeyi bu faaliyetlere yönlendir
 - sonuçları düzenli olarak izle`,
+    "keedb sadece kadınlara yönelik bir bütçe midir?": `## Kısa Cevap
+
+Hayır. Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) sadece kadınlara yönelik ayrı bir bütçe değildir. Amaç, kamu bütçesinin kadınlar ve erkekler üzerindeki farklı etkilerini analiz ederek daha adil ve eşit bir kaynak dağılımı sağlamaktır.
+
+## KEEDB Ne Değildir?
+
+KEEDB çoğu zaman yanlış anlaşılır. Şunlar KEEDB değildir:
+
+- ❌ Sadece kadınlara ayrılmış ayrı bir bütçe
+- ❌ Kadın projeleri için ekstra bir fon
+- ❌ Sadece sosyal politikalarla sınırlı bir yaklaşım
+
+Aslında KEEDB, tüm kamu bütçesine eşitlik perspektifi ekleyen bir yöntemdir.
+
+## KEEDB Aslında Nedir?
+
+KEEDB, bütçe süreçlerinde şu soruların sorulmasını sağlar:
+
+- Bu politika kadınları ve erkekleri nasıl etkiliyor?
+- Kamu hizmetlerinden kim daha fazla yararlanıyor?
+- Kaynak dağılımı eşitsizlikleri azaltıyor mu yoksa artırıyor mu?
+
+Bu nedenle KEEDB; planlama, bütçe hazırlama, uygulama ve izleme & değerlendirme aşamalarının tamamına eşitlik perspektifini entegre eder.
+
+## Basit Bir Örnek
+
+Bir belediyenin spor tesisleri bütçesini düşünelim:
+
+- **KEEDB olmadan:** Futbol sahalarına ağırlık verilir, kim kullandığı analiz edilmez, kaynaklar eşit kullanılmayabilir.
+- **KEEDB ile:** Kadınların kullandığı spor alanları da planlanır, kadın-erkek kullanım oranı analiz edilir, hizmetler herkes için erişilebilir olur.
+
+✅ **Özet:** KEEDB kadınlara ayrı bir bütçe oluşturmaz. Ama bütçenin kadınlar ve erkekler için eşit ve adil sonuçlar üretmesini sağlamaya çalışır.`,
     "türkiye'den başarılı bir örnek paylaşır mısın?": `## 🇹🇷 Türkiye'den KEEDB Başarılı Uygulama Örneği
 
 ### Yerel Yönetimlerde Pilot KEEDB Uygulamaları
