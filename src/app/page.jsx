@@ -801,55 +801,90 @@ export default function EsitlikAsistani() {
         ))}
       </div>
 
-      <div style={{ maxWidth: 860, margin: "0 auto", padding: "28px 20px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 20px" }}>
 
         {/* TAB 0 – Chat */}
         {activeTab === 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {/* Quick questions */}
-            <div>
-              <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".07em", marginBottom: 10 }}>{L.chat.quickTitle}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                {L.chat.quick.map((q, i) => (
-                  <button key={i} className="chip" onClick={() => sendChat(q)}
-                    style={{ background: "#0a1520", border: `1px solid ${C.border}`, color: "#8aA4bc", borderRadius: 8, padding: "10px 14px", textAlign: "left", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", lineHeight: 1.5, transition: "all .2s" }}>
-                    <span style={{ color: C.amber, marginRight: 6 }}>›</span>{q}
-                  </button>
-                ))}
+          <div style={{ display: "flex", minHeight: "calc(100vh - 220px)", border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden", background: "#08121a" }}>
+            <aside style={{ width: "30%", minWidth: 260, padding: "18px 14px", borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", gap: 18, overflowY: "auto" }}>
+              <div>
+                <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".07em", marginBottom: 10 }}>{L.chat.quickTitle}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {L.chat.quick.map((q, i) => (
+                    <button key={i} className="chip" onClick={() => sendChat(q)}
+                      style={{ background: "#0a1520", border: `1px solid ${C.border}`, color: "#8aA4bc", borderRadius: 8, padding: "10px 14px", textAlign: "left", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", lineHeight: 1.5, transition: "all .2s" }}>
+                      <span style={{ color: C.amber, marginRight: 6 }}>›</span>{q}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Messages */}
-            <div style={{ minHeight: 260, maxHeight: 420, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
-              {messages.map((m, i) => (
-                <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
-                  {m.role === "assistant" && (
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, marginRight: 9, flexShrink: 0, marginTop: 3 }}>⚖</div>
-                  )}
-                  <div style={{ maxWidth: "80%", padding: "11px 15px", borderRadius: m.role === "user" ? "14px 4px 14px 14px" : "4px 14px 14px 14px", background: m.role === "user" ? "#1a3a5c" : C.surface, border: `1px solid ${m.role === "user" ? "#2a4d6c" : C.border}`, fontSize: "0.9em", lineHeight: 1.7 }}>
-                    {m.role === "assistant" ? <MD text={m.content} /> : m.content}
+              <section aria-labelledby="references-title" style={{ padding: "14px 12px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#0a1520" }}>
+                <div id="references-title" style={{ fontSize: "0.85em", color: "#f0e8d0", fontWeight: 600, marginBottom: 4 }}>{L.resources.title}</div>
+                <div style={{ color: C.muted, fontSize: "0.74em", fontFamily: "'DM Mono',monospace", marginBottom: 12 }}>{L.resources.subtitle}</div>
+                <ul style={{ display: "flex", flexDirection: "column", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
+                  {L.resources.links.map((item) => (
+                    <li key={item.url}>
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="chip"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          width: "100%",
+                          background: "#0f1f2e",
+                          border: `1px solid ${C.border}`,
+                          color: "#8aa4bc",
+                          borderRadius: 8,
+                          padding: "8px 12px",
+                          textDecoration: "none",
+                          fontSize: "0.8em",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        ↗ {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </aside>
+
+            <div style={{ width: "70%", display: "flex", flexDirection: "column", minWidth: 0 }}>
+              {/* Messages */}
+              <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12, padding: "20px" }}>
+                {messages.map((m, i) => (
+                  <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
+                    {m.role === "assistant" && (
+                      <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, marginRight: 9, flexShrink: 0, marginTop: 3 }}>⚖</div>
+                    )}
+                    <div style={{ maxWidth: "80%", padding: "11px 15px", borderRadius: m.role === "user" ? "14px 4px 14px 14px" : "4px 14px 14px 14px", background: m.role === "user" ? "#1a3a5c" : C.surface, border: `1px solid ${m.role === "user" ? "#2a4d6c" : C.border}`, fontSize: "0.9em", lineHeight: 1.7 }}>
+                      {m.role === "assistant" ? <MD text={m.content} /> : m.content}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {chatLoading && (
-                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>⚖</div>
-                  <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.chat.thinking}</span>
-                </div>
-              )}
-              <div ref={endRef} />
-            </div>
+                ))}
+                {chatLoading && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>⚖</div>
+                    <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.chat.thinking}</span>
+                  </div>
+                )}
+                <div ref={endRef} />
+              </div>
 
-            {/* Input */}
-            <div style={{ display: "flex", gap: 9 }}>
-              <textarea value={chatInput} onChange={e => setChatInput(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
-                placeholder={L.chat.placeholder}
-                style={{ flex: 1, padding: "11px 14px", borderRadius: 10, fontSize: "0.88em", resize: "none", height: 60, lineHeight: 1.5 }} />
-              <button className="btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}
-                style={{ padding: "0 20px", borderRadius: 10, fontSize: "0.88em" }}>
-                {L.chat.send}
-              </button>
+              {/* Input */}
+              <div style={{ display: "flex", gap: 9, padding: "14px 20px 18px", borderTop: `1px solid ${C.border}`, background: "#08121a" }}>
+                <textarea value={chatInput} onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
+                  placeholder={L.chat.placeholder}
+                  style={{ flex: 1, padding: "11px 14px", borderRadius: 10, fontSize: "0.88em", resize: "none", height: 60, lineHeight: 1.5 }} />
+                <button className="btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}
+                  style={{ padding: "0 20px", borderRadius: 10, fontSize: "0.88em" }}>
+                  {L.chat.send}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -948,37 +983,6 @@ export default function EsitlikAsistani() {
             {rpResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={rpResult} /></div>}
           </div>
         )}
-
-                <section aria-labelledby="references-title" style={{ marginTop: 40, padding: "18px 16px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#0a1520" }}>
-          <div id="references-title" style={{ fontSize: "0.85em", color: "#f0e8d0", fontWeight: 600, marginBottom: 4 }}>{L.resources.title}</div>
-          <div style={{ color: C.muted, fontSize: "0.74em", fontFamily: "'DM Mono',monospace", marginBottom: 12 }}>{L.resources.subtitle}</div>
-          <ul style={{ display: "flex", flexWrap: "wrap", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
-            {L.resources.links.map((item) => (
-              <li key={item.url}>
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="chip"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    background: "#0f1f2e",
-                    border: `1px solid ${C.border}`,
-                    color: "#8aa4bc",
-                    borderRadius: 8,
-                    padding: "8px 12px",
-                    textDecoration: "none",
-                    fontSize: "0.8em",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  ↗ {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
 
         <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid #1a2e40`, textAlign: "center", color: "#384c5c", fontSize: "0.7em", fontFamily: "'DM Mono',monospace" }}>{L.poweredBy}</div>      </div>
     </div>
