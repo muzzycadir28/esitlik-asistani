@@ -870,7 +870,7 @@ export default function EsitlikAsistani() {
   const resultCard = (content) => content && <div className="surface fade" style={{ padding: "1rem 1.2rem" }}><MD text={content} /></div>;
 
   if (!role) return (
-    <div className="app">
+    <div className="app" suppressHydrationWarning>
       <style>{css}</style>
       <div className="header" style={{ padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
@@ -897,7 +897,7 @@ export default function EsitlikAsistani() {
   );
 
   return (
-    <div className="app">
+    <div className="app" suppressHydrationWarning>
       <style>{css}</style>
       <div className="header" style={{ padding: "0.8rem 1.2rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
         <div style={{ display: "flex", gap: "0.7rem", alignItems: "center" }}>
