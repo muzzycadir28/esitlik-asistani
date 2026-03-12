@@ -844,7 +844,7 @@ export default function EsitlikAsistani() {
         ))}
       </div>
 
-      <div style={{ maxWidth: 860, margin: "0 auto", padding: "28px 20px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 20px" }}>
 
         {/* TAB 0 – Chat */}
         {activeTab === 0 && (
@@ -860,7 +860,6 @@ export default function EsitlikAsistani() {
                   </button>
                 ))}
               </div>
-            </div>
 
             {/* Messages */}
             <div style={{ minHeight: 260, maxHeight: 420, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
