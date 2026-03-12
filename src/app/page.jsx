@@ -603,14 +603,14 @@ function MD({ text }) {
   let i = 0;
   while (i < lines.length) {
     const l = lines[i];
-    if (l.startsWith("# ")) { elements.push(<h1 key={i} style={{ fontSize: "1.35em", fontWeight: 700, color: "#f0a847", margin: "1em 0 0.4em", borderBottom: "1px solid #1e3448", paddingBottom: "0.3em" }}>{l.slice(2)}</h1>); }
-    else if (l.startsWith("## ")) { elements.push(<h2 key={i} style={{ fontSize: "1.1em", fontWeight: 700, color: "#e8c87a", margin: "0.9em 0 0.3em" }}>{l.slice(3)}</h2>); }
-    else if (l.startsWith("### ")) { elements.push(<h3 key={i} style={{ fontSize: "1em", fontWeight: 600, color: "#d4b870", margin: "0.7em 0 0.25em" }}>{l.slice(4)}</h3>); }
+    if (l.startsWith("# ")) { elements.push(<h1 key={i} style={{ fontSize: "1.35em", fontWeight: 600, color: "var(--accent)", margin: "1em 0 0.4em", borderBottom: "1px solid var(--border)", paddingBottom: "0.3em" }}>{l.slice(2)}</h1>); }
+    else if (l.startsWith("## ")) { elements.push(<h2 key={i} style={{ fontSize: "1.1em", fontWeight: 600, color: "var(--text-primary)", margin: "0.9em 0 0.3em" }}>{l.slice(3)}</h2>); }
+    else if (l.startsWith("### ")) { elements.push(<h3 key={i} style={{ fontSize: "1em", fontWeight: 600, color: "var(--text-primary)", margin: "0.7em 0 0.25em" }}>{l.slice(4)}</h3>); }
     else if (l.startsWith("- ") || l.startsWith("☐ ") || l.startsWith("* ")) {
       const items = [];
       while (i < lines.length && (lines[i].startsWith("- ") || lines[i].startsWith("☐ ") || lines[i].startsWith("* "))) {
         const raw = lines[i].replace(/^[-*☐] /, "");
-        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#f0c060'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>") }} />);
+        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:var(--accent)'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>") }} />);
         i++;
       }
       elements.push(<ul key={`ul-${i}`} style={{ paddingLeft: "1.4em", margin: "0.4em 0" }}>{items}</ul>);
@@ -620,7 +620,7 @@ function MD({ text }) {
       const items = [];
       while (i < lines.length && /^\d+\. /.test(lines[i])) {
         const raw = lines[i].replace(/^\d+\. /, "");
-        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#f0c060'>$1</strong>") }} />);
+        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:var(--accent)'>$1</strong>") }} />);
         i++;
       }
       elements.push(<ol key={`ol-${i}`} style={{ paddingLeft: "1.4em", margin: "0.4em 0" }}>{items}</ol>);
@@ -628,8 +628,8 @@ function MD({ text }) {
     }
     else if (l.trim() === "") { elements.push(<div key={i} style={{ height: "0.5em" }} />); }
     else {
-      const html = l.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#f0c060'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
-      elements.push(<p key={i} style={{ lineHeight: 1.7, margin: "0.2em 0" }} dangerouslySetInnerHTML={{ __html: html }} />);
+      const html = l.replace(/\*\*(.+?)\*\*/g, "<strong style='color:var(--accent)'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
+      elements.push(<p key={i} style={{ lineHeight: 1.75, margin: "0.2em 0" }} dangerouslySetInnerHTML={{ __html: html }} />);
     }
     i++;
   }
@@ -695,62 +695,105 @@ export default function EsitlikAsistani() {
     }
   };
 
-  const C = { background: "#0d1b2a", surface: "#0a1520", border: "#1e3448", amber: "#f0a847", muted: "#5070a0", text: "#e8e0d0", dim: "#4a6070" };
+  const C = {
+    background: "var(--bg)",
+    surface: "var(--surface)",
+    border: "var(--border)",
+    primary: "var(--accent)",
+    muted: "var(--text-secondary)",
+    text: "var(--text-primary)",
+    dim: "var(--text-secondary)",
+    inputBg: "var(--surface)",
+    userBubble: "var(--accent-soft)",
+    userBubbleBorder: "var(--accent-border)",
+    shadow: "var(--shadow)",
+  };
 
   const css = `
-    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    :root{
+      --bg:#F8F9FA;
+      --surface:#FFFFFF;
+      --accent:#2563EB;
+      --accent-soft:#DBEAFE;
+      --accent-border:#93C5FD;
+      --text-primary:#111827;
+      --text-secondary:#6B7280;
+      --border:#E5E7EB;
+      --shadow:0 8px 24px rgba(15,23,42,.08);
+      --focus:0 0 0 3px rgba(37,99,235,.22);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0F172A;
+        --surface:#1E293B;
+        --accent:#3B82F6;
+        --accent-soft:#1D4ED8;
+        --accent-border:#3B82F6;
+        --text-primary:#F1F5F9;
+        --text-secondary:#94A3B8;
+        --border:#334155;
+        --shadow:0 10px 26px rgba(2,6,23,.38);
+        --focus:0 0 0 3px rgba(59,130,246,.3);
+      }
+    }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{background:${C.background}}
-    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:${C.background}}::-webkit-scrollbar-thumb{background:#2a3d52;border-radius:3px}
-    input,textarea,select{background:${C.background};color:${C.text};border:1px solid #2a3d52;font-family:inherit;outline:none;transition:border .2s}
-    input:focus,textarea:focus,select:focus{border-color:${C.amber}}
-    input::placeholder,textarea::placeholder{color:${C.dim}}
-    option{background:#132230}
+    body{background:var(--bg);color:var(--text-primary);font-family:'Inter',system-ui,sans-serif;line-height:1.6}
+    ::-webkit-scrollbar{width:8px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px}
+    input,textarea,select{background:var(--surface);color:var(--text-primary);border:1px solid var(--border);font-family:inherit;outline:none;transition:all .2s;border-radius:10px}
+    input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:var(--focus)}
+    input::placeholder,textarea::placeholder{color:var(--text-secondary)}
+    option{background:var(--surface);color:var(--text-primary)}
     .fade{animation:fadeUp .35s ease}
     @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     .pulse{animation:pulse 1.4s infinite}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-    .tab:hover{color:${C.amber}}
-    .chip:hover{border-color:${C.amber};color:${C.text}}
-    .seg:hover{border-color:#3a5d7c;color:#d0c8b8}
-    .sel{background:#1a3a5c!important;border-color:${C.amber}!important;color:#f0c060!important}
-    .role-card:hover{border-color:${C.amber};transform:translateY(-2px)}
-    .role-card.chosen{border-color:${C.amber};background:#132230}
-    .btn-primary{background:${C.amber};color:#0d1b2a;border:none;cursor:pointer;font-family:inherit;font-weight:700;transition:all .2s}
-    .btn-primary:hover:not(:disabled){background:#f8bf60}
-    .btn-primary:disabled{opacity:.45;cursor:not-allowed}
-    .btn-ghost{background:#1a3a5c;color:${C.text};border:1px solid #2a4d6c;cursor:pointer;font-family:inherit;transition:all .2s}
-    .btn-ghost:hover:not(:disabled){border-color:${C.amber};color:${C.amber}}
-    .btn-ghost:disabled{opacity:.45;cursor:not-allowed}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+    .tab{font-weight:500}
+    .tab:hover{color:var(--accent)}
+    .chip:hover{border-color:var(--accent);color:var(--text-primary)}
+    .seg:hover{border-color:var(--accent);color:var(--text-primary)}
+    .sel{background:var(--accent-soft)!important;border-color:var(--accent)!important;color:var(--text-primary)!important}
+    .role-card{box-shadow:var(--shadow)}
+    .role-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .role-card.chosen{border-color:var(--accent);background:var(--accent-soft)}
+    .btn-primary{background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:inherit;font-weight:500;transition:all .2s;box-shadow:var(--shadow)}
+    .btn-primary:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-1px)}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+    .btn-ghost{background:var(--surface);color:var(--text-primary);border:1px solid var(--border);cursor:pointer;font-family:inherit;font-weight:500;transition:all .2s}
+    .btn-ghost:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+    .btn-ghost:disabled{opacity:.5;cursor:not-allowed}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow)}
   `;
 
   // ── Role selection screen ──
   if (!role) return (
-    <div style={{ minHeight: "100vh", background: C.background, fontFamily: "'Lora','Georgia',serif", color: C.text, display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: C.background, fontFamily: "'Inter',system-ui,sans-serif", color: C.text, display: "flex", flexDirection: "column" }}>
       <style>{css}</style>
       {/* Header */}
       <div style={{ borderBottom: `1px solid ${C.border}`, padding: "18px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.surface }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19 }}>⚖</div>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19 }}>⚖</div>
           <div>
-            <div style={{ fontSize: "1.4em", fontWeight: 600, color: "#f0e8d0" }}>{L.appTitle}</div>
-            <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".05em" }}>{L.appSubtitle}</div>
+            <div style={{ fontSize: "1.625rem", fontWeight: 600, color: "var(--text-primary)" }}>{L.appTitle}</div>
+            <div style={{ fontSize: "0.8em", color: C.muted, fontFamily: "inherit", letterSpacing: ".05em" }}>{L.appSubtitle}</div>
           </div>
         </div>
-        <button className="btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")} style={{ padding: "7px 16px", borderRadius: 6, fontSize: "0.82em", fontFamily: "'DM Mono',monospace" }}>{L.langToggle}</button>
+        <button className="btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")} style={{ padding: "7px 16px", borderRadius: 10, fontSize: "0.95em", fontFamily: "inherit" }}>{L.langToggle}</button>
       </div>
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 24px" }}>
         <div style={{ maxWidth: 560, width: "100%", textAlign: "center" }}>
-          <div style={{ fontSize: "1.7em", fontWeight: 600, color: "#f0e8d0", marginBottom: 10 }}>{L.roleSelect.title}</div>
+          <div style={{ fontSize: "2rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: 10 }}>{L.roleSelect.title}</div>
           <div style={{ color: C.muted, fontSize: "0.92em", marginBottom: 36, lineHeight: 1.6 }}>{L.roleSelect.subtitle}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
             {L.roleSelect.roles.map(r => (
               <div key={r.id} className={`role-card${role === r.id ? " chosen" : ""}`}
                 onClick={() => setRole(r.id)}
-                style={{ border: `1px solid ${role === r.id ? C.amber : C.border}`, background: role === r.id ? "#132230" : C.surface, borderRadius: 12, padding: "20px 16px", cursor: "pointer", textAlign: "left", transition: "all .2s" }}>
+                style={{ border: `1px solid ${role === r.id ? C.primary : C.border}`, background: role === r.id ? "var(--surface)" : C.surface, borderRadius: 12, padding: "20px 16px", cursor: "pointer", textAlign: "left", transition: "all .2s" }}>
                 <div style={{ fontSize: "1.8em", marginBottom: 8 }}>{r.icon}</div>
-                <div style={{ fontWeight: 600, color: "#f0e8d0", marginBottom: 4 }}>{r.label}</div>
+                <div style={{ fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>{r.label}</div>
                 <div style={{ fontSize: "0.8em", color: C.muted, lineHeight: 1.5 }}>{r.desc}</div>
               </div>
             ))}
@@ -758,7 +801,7 @@ export default function EsitlikAsistani() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {L.roleSelect.roles.map(r => (
               <button key={r.id} className="btn-primary" onClick={() => setRole(r.id)}
-                style={{ padding: "12px", borderRadius: 8, fontSize: "0.9em" }}>
+                style={{ padding: "12px", borderRadius: 10, fontSize: "0.95em" }}>
                 {r.icon} {r.label}
               </button>
             ))}
@@ -770,24 +813,24 @@ export default function EsitlikAsistani() {
 
   // ── Main app ──
   return (
-    <div style={{ minHeight: "100vh", background: C.background, fontFamily: "'Lora','Georgia',serif", color: C.text }}>
+    <div style={{ minHeight: "100vh", background: C.background, fontFamily: "'Inter',system-ui,sans-serif", color: C.text }}>
       <style>{css}</style>
 
       {/* Header */}
       <div style={{ borderBottom: `1px solid ${C.border}`, padding: "14px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.surface }}>
         <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
-          <div style={{ width: 38, height: 38, borderRadius: 9, background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17 }}>⚖</div>
+          <div style={{ width: 38, height: 38, borderRadius: 10, background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17 }}>⚖</div>
           <div>
-            <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0" }}>{L.appTitle}</div>
-            <div style={{ fontSize: "0.68em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".05em" }}>{L.appSubtitle}</div>
+            <div style={{ fontSize: "1.5rem", fontWeight: 600, color: "var(--text-primary)" }}>{L.appTitle}</div>
+            <div style={{ fontSize: "0.68em", color: C.muted, fontFamily: "inherit", letterSpacing: ".05em" }}>{L.appSubtitle}</div>
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <div style={{ fontSize: "0.75em", color: C.muted, fontFamily: "'DM Mono',monospace", background: "#132230", border: `1px solid ${C.border}`, padding: "5px 12px", borderRadius: 20 }}>
+          <div style={{ fontSize: "0.75em", color: C.muted, fontFamily: "inherit", background: "var(--surface)", border: `1px solid ${C.border}`, padding: "5px 12px", borderRadius: 20 }}>
             {L.roleSelect.roles.find(r => r.id === role)?.icon} {ROLE_LABELS[lang][role]}
           </div>
-          <button className="btn-ghost" onClick={() => setRole(null)} style={{ padding: "5px 12px", borderRadius: 6, fontSize: "0.75em", fontFamily: "'DM Mono',monospace" }}>{L.chat.changeRole}</button>
-          <button className="btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")} style={{ padding: "5px 12px", borderRadius: 6, fontSize: "0.75em", fontFamily: "'DM Mono',monospace" }}>{L.langToggle}</button>
+          <button className="btn-ghost" onClick={() => setRole(null)} style={{ padding: "5px 12px", borderRadius: 10, fontSize: "0.75em", fontFamily: "inherit" }}>{L.chat.changeRole}</button>
+          <button className="btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")} style={{ padding: "5px 12px", borderRadius: 10, fontSize: "0.75em", fontFamily: "inherit" }}>{L.langToggle}</button>
         </div>
       </div>
 
@@ -795,7 +838,7 @@ export default function EsitlikAsistani() {
       <div style={{ borderBottom: `1px solid ${C.border}`, padding: "0 28px", background: C.surface, display: "flex" }}>
         {L.tabs.map((t, i) => (
           <button key={i} className="tab" onClick={() => setActiveTab(i)}
-            style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: "13px 18px", fontSize: "0.88em", color: activeTab === i ? C.amber : "#5a7090", borderBottom: activeTab === i ? `2px solid ${C.amber}` : "2px solid transparent", transition: "all .2s", letterSpacing: ".02em" }}>
+            style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: "13px 18px", fontSize: "0.95em", color: activeTab === i ? C.primary : "var(--text-secondary)", borderBottom: activeTab === i ? `2px solid ${C.primary}` : "2px solid transparent", transition: "all .2s", letterSpacing: ".02em" }}>
             {t}
           </button>
         ))}
@@ -805,133 +848,97 @@ export default function EsitlikAsistani() {
 
         {/* TAB 0 – Chat */}
         {activeTab === 0 && (
-          <div style={{ display: "flex", minHeight: "calc(100vh - 220px)", border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden", background: "#08121a" }}>
-            <aside style={{ width: "30%", minWidth: 260, padding: "18px 14px", borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", gap: 18, overflowY: "auto" }}>
-              <div>
-                <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".07em", marginBottom: 10 }}>{L.chat.quickTitle}</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {L.chat.quick.map((q, i) => (
-                    <button key={i} className="chip" onClick={() => sendChat(q)}
-                      style={{ background: "#0a1520", border: `1px solid ${C.border}`, color: "#8aA4bc", borderRadius: 8, padding: "10px 14px", textAlign: "left", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", lineHeight: 1.5, transition: "all .2s" }}>
-                      <span style={{ color: C.amber, marginRight: 6 }}>›</span>{q}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <section aria-labelledby="references-title" style={{ padding: "14px 12px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#0a1520" }}>
-                <div id="references-title" style={{ fontSize: "0.85em", color: "#f0e8d0", fontWeight: 600, marginBottom: 4 }}>{L.resources.title}</div>
-                <div style={{ color: C.muted, fontSize: "0.74em", fontFamily: "'DM Mono',monospace", marginBottom: 12 }}>{L.resources.subtitle}</div>
-                <ul style={{ display: "flex", flexDirection: "column", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
-                  {L.resources.links.map((item) => (
-                    <li key={item.url}>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="chip"
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          width: "100%",
-                          background: "#0f1f2e",
-                          border: `1px solid ${C.border}`,
-                          color: "#8aa4bc",
-                          borderRadius: 8,
-                          padding: "8px 12px",
-                          textDecoration: "none",
-                          fontSize: "0.8em",
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        ↗ {item.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            </aside>
-
-            <div style={{ width: "70%", display: "flex", flexDirection: "column", minWidth: 0 }}>
-              {/* Messages */}
-              <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12, padding: "20px" }}>
-                {messages.map((m, i) => (
-                  <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
-                    {m.role === "assistant" && (
-                      <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, marginRight: 9, flexShrink: 0, marginTop: 3 }}>⚖</div>
-                    )}
-                    <div style={{ maxWidth: "80%", padding: "11px 15px", borderRadius: m.role === "user" ? "14px 4px 14px 14px" : "4px 14px 14px 14px", background: m.role === "user" ? "#1a3a5c" : C.surface, border: `1px solid ${m.role === "user" ? "#2a4d6c" : C.border}`, fontSize: "0.9em", lineHeight: 1.7 }}>
-                      {m.role === "assistant" ? <MD text={m.content} /> : m.content}
-                    </div>
-                  </div>
+          <div className="card" style={{ display: "flex", flexDirection: "column", gap: 16, padding: 20 }}>
+            {/* Quick questions */}
+            <div>
+              <div style={{ fontSize: "0.8em", color: C.muted, fontFamily: "inherit", letterSpacing: ".07em", marginBottom: 10 }}>{L.chat.quickTitle}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {L.chat.quick.map((q, i) => (
+                  <button key={i} className="chip" onClick={() => sendChat(q)}
+                    style={{ background: "var(--surface)", border: `1px solid ${C.border}`, color: "var(--text-secondary)", borderRadius: 10, padding: "10px 14px", textAlign: "left", fontSize: "0.92em", cursor: "pointer", fontFamily: "inherit", lineHeight: 1.5, transition: "all .2s" }}>
+                    <span style={{ color: C.primary, marginRight: 6 }}>›</span>{q}
+                  </button>
                 ))}
-                {chatLoading && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>⚖</div>
-                    <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.chat.thinking}</span>
-                  </div>
-                )}
-                <div ref={endRef} />
               </div>
 
-              {/* Input */}
-              <div style={{ display: "flex", gap: 9, padding: "14px 20px 18px", borderTop: `1px solid ${C.border}`, background: "#08121a" }}>
-                <textarea value={chatInput} onChange={e => setChatInput(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
-                  placeholder={L.chat.placeholder}
-                  style={{ flex: 1, padding: "11px 14px", borderRadius: 10, fontSize: "0.88em", resize: "none", height: 60, lineHeight: 1.5 }} />
-                <button className="btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}
-                  style={{ padding: "0 20px", borderRadius: 10, fontSize: "0.88em" }}>
-                  {L.chat.send}
-                </button>
-              </div>
+            {/* Messages */}
+            <div style={{ minHeight: 260, maxHeight: 420, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
+              {messages.map((m, i) => (
+                <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
+                  {m.role === "assistant" && (
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, marginRight: 9, flexShrink: 0, marginTop: 3 }}>⚖</div>
+                  )}
+                  <div style={{ maxWidth: "80%", padding: "11px 15px", borderRadius: m.role === "user" ? "14px 4px 14px 14px" : "4px 14px 14px 14px", background: m.role === "user" ? C.userBubble : C.surface, border: `1px solid ${m.role === "user" ? C.userBubbleBorder : C.border}`, fontSize: "0.95em", lineHeight: 1.75 }}>
+                    {m.role === "assistant" ? <MD text={m.content} /> : m.content}
+                  </div>
+                </div>
+              ))}
+              {chatLoading && (
+                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>⚖</div>
+                  <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.92em" }} className="pulse">{L.chat.thinking}</span>
+                </div>
+              )}
+              <div ref={endRef} />
+            </div>
+
+            {/* Input */}
+            <div style={{ display: "flex", gap: 9 }}>
+              <textarea value={chatInput} onChange={e => setChatInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
+                placeholder={L.chat.placeholder}
+                style={{ flex: 1, padding: "11px 14px", borderRadius: 10, fontSize: "0.95em", resize: "none", height: 60, lineHeight: 1.5 }} />
+              <button className="btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}
+                style={{ padding: "0 20px", borderRadius: 10, fontSize: "0.95em" }}>
+                {L.chat.send}
+              </button>
             </div>
           </div>
         )}
 
         {/* TAB 1 – Doc Analysis */}
         {activeTab === 1 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <div className="card" style={{ display: "flex", flexDirection: "column", gap: 18, padding: 20 }}>
             <div>
-              <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0", marginBottom: 4 }}>{L.docAnalysis.title}</div>
-              <div style={{ color: C.muted, fontSize: "0.82em", fontFamily: "'DM Mono',monospace" }}>{L.docAnalysis.subtitle}</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>{L.docAnalysis.title}</div>
+              <div style={{ color: C.muted, fontSize: "0.95em", fontFamily: "inherit" }}>{L.docAnalysis.subtitle}</div>
             </div>
             <div style={{ border: `2px dashed ${C.border}`, borderRadius: 10, padding: "26px 18px", textAlign: "center", cursor: "pointer" }}
               onDragOver={e => e.preventDefault()}
               onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) { const r = new FileReader(); r.onload = ev => setDocText(ev.target.result); r.readAsText(f); } }}>
               <div style={{ fontSize: "1.8em", marginBottom: 6 }}>📄</div>
-              <div style={{ color: "#5a7090" }}>{L.docAnalysis.upload}</div>
-              <div style={{ color: C.dim, fontSize: "0.75em", marginTop: 4, fontFamily: "'DM Mono',monospace" }}>{L.docAnalysis.uploadHint}</div>
+              <div style={{ color: "var(--text-secondary)" }}>{L.docAnalysis.upload}</div>
+              <div style={{ color: C.dim, fontSize: "0.75em", marginTop: 4, fontFamily: "inherit" }}>{L.docAnalysis.uploadHint}</div>
             </div>
             <div>
-              <div style={{ fontSize: "0.75em", color: C.muted, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>{L.docAnalysis.pasteLabel}</div>
+              <div style={{ fontSize: "0.75em", color: C.muted, fontFamily: "inherit", marginBottom: 6 }}>{L.docAnalysis.pasteLabel}</div>
               <textarea value={docText} onChange={e => setDocText(e.target.value)} placeholder={L.docAnalysis.pastePlaceholder}
-                style={{ width: "100%", height: 150, padding: "11px 14px", borderRadius: 8, fontSize: "0.85em", resize: "vertical", lineHeight: 1.6 }} />
+                style={{ width: "100%", height: 150, padding: "11px 14px", borderRadius: 10, fontSize: "0.85em", resize: "vertical", lineHeight: 1.6 }} />
             </div>
             <button className="btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, docText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }}
-              disabled={docLoading || !docText.trim()} style={{ padding: "12px 26px", borderRadius: 8, fontSize: "0.9em", alignSelf: "flex-start" }}>
+              disabled={docLoading || !docText.trim()} style={{ padding: "12px 26px", borderRadius: 10, fontSize: "0.95em", alignSelf: "flex-start" }}>
               {docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}
             </button>
-            {docLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.docAnalysis.analyzing}</span>}
-            {docResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={docResult} /></div>}
+            {docLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.92em" }} className="pulse">{L.docAnalysis.analyzing}</span>}
+            {docResult && <div className="fade" style={{ background: "var(--surface)", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.primary}`, borderRadius: 10, padding: "18px 22px" }}><MD text={docResult} /></div>}
           </div>
         )}
 
         {/* TAB 2 – Checklist */}
         {activeTab === 2 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <div className="card" style={{ display: "flex", flexDirection: "column", gap: 18, padding: 20 }}>
             <div>
-              <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0", marginBottom: 4 }}>{L.checklist.title}</div>
-              <div style={{ color: C.muted, fontSize: "0.82em", fontFamily: "'DM Mono',monospace" }}>{L.checklist.subtitle}</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>{L.checklist.title}</div>
+              <div style={{ color: C.muted, fontSize: "0.95em", fontFamily: "inherit" }}>{L.checklist.subtitle}</div>
             </div>
             {[{ label: L.checklist.phaseLabel, items: L.checklist.phases, val: phase, set: setPhase },
               { label: L.checklist.sectorLabel, items: L.checklist.sectors, val: sector, set: setSector }].map(({ label, items, val, set }, gi) => (
               <div key={gi}>
-                <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".07em", marginBottom: 8 }}>{label}</div>
+                <div style={{ fontSize: "0.8em", color: C.muted, fontFamily: "inherit", letterSpacing: ".07em", marginBottom: 8 }}>{label}</div>
                 <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
                   {items.map((it, i) => (
                     <button key={i} className={`seg${val === i ? " sel" : ""}`} onClick={() => set(i)}
-                      style={{ background: val === i ? "#1a3a5c" : "#0a1520", border: `1px solid ${val === i ? C.amber : C.border}`, color: val === i ? "#f0c060" : "#6080a0", borderRadius: 7, padding: "8px 14px", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}>
+                      style={{ background: val === i ? "var(--accent-soft)" : "var(--surface)", border: `1px solid ${val === i ? C.primary : C.border}`, color: val === i ? "var(--text-primary)" : "var(--text-secondary)", borderRadius: 10, padding: "8px 14px", fontSize: "0.95em", cursor: "pointer", fontFamily: "inherit", fontWeight: 500, transition: "all .2s" }}>
                       {it}
                     </button>
                   ))}
@@ -939,52 +946,83 @@ export default function EsitlikAsistani() {
               </div>
             ))}
             <button className="btn-primary" onClick={async () => { setClLoading(true); setClResult(""); const r = await callClaude(buildChecklistPrompt(lang, L.checklist.phases[phase], L.checklist.sectors[sector]), buildSystemPrompt(lang, role)); setClResult(r); setClLoading(false); }}
-              disabled={clLoading} style={{ padding: "12px 26px", borderRadius: 8, fontSize: "0.9em", alignSelf: "flex-start" }}>
+              disabled={clLoading} style={{ padding: "12px 26px", borderRadius: 10, fontSize: "0.95em", alignSelf: "flex-start" }}>
               {clLoading ? L.checklist.generating : L.checklist.generate}
             </button>
-            {clLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.checklist.generating}</span>}
-            {clResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={clResult} /></div>}
+            {clLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.92em" }} className="pulse">{L.checklist.generating}</span>}
+            {clResult && <div className="fade" style={{ background: "var(--surface)", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.primary}`, borderRadius: 10, padding: "18px 22px" }}><MD text={clResult} /></div>}
           </div>
         )}
 
         {/* TAB 3 – Report */}
         {activeTab === 3 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <div className="card" style={{ display: "flex", flexDirection: "column", gap: 18, padding: 20 }}>
             <div>
-              <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0", marginBottom: 4 }}>{L.report.title}</div>
-              <div style={{ color: C.muted, fontSize: "0.82em", fontFamily: "'DM Mono',monospace" }}>{L.report.subtitle}</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>{L.report.title}</div>
+              <div style={{ color: C.muted, fontSize: "0.95em", fontFamily: "inherit" }}>{L.report.subtitle}</div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {[{ key: "institution", label: L.report.institution }, { key: "year", label: L.report.year }].map(({ key, label }) => (
                 <div key={key}>
-                  <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>{label}</div>
+                  <div style={{ fontSize: "0.8em", color: C.muted, fontFamily: "inherit", marginBottom: 6 }}>{label}</div>
                   <input value={rpForm[key]} onChange={e => setRpForm(f => ({ ...f, [key]: e.target.value }))}
-                    style={{ width: "100%", padding: "9px 13px", borderRadius: 7, fontSize: "0.88em" }} />
+                    style={{ width: "100%", padding: "9px 13px", borderRadius: 10, fontSize: "0.95em" }} />
                 </div>
               ))}
             </div>
             <div>
-              <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>{L.report.sector}</div>
+              <div style={{ fontSize: "0.8em", color: C.muted, fontFamily: "inherit", marginBottom: 6 }}>{L.report.sector}</div>
               <select value={rpForm.sector} onChange={e => setRpForm(f => ({ ...f, sector: e.target.value }))}
-                style={{ width: "100%", padding: "9px 13px", borderRadius: 7, fontSize: "0.88em" }}>
+                style={{ width: "100%", padding: "9px 13px", borderRadius: 10, fontSize: "0.95em" }}>
                 {L.checklist.sectors.map((s, i) => <option key={i} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>{L.report.context}</div>
+              <div style={{ fontSize: "0.8em", color: C.muted, fontFamily: "inherit", marginBottom: 6 }}>{L.report.context}</div>
               <textarea value={rpForm.context} onChange={e => setRpForm(f => ({ ...f, context: e.target.value }))} placeholder={L.report.contextPlaceholder}
-                style={{ width: "100%", height: 90, padding: "9px 13px", borderRadius: 7, fontSize: "0.88em", resize: "vertical", lineHeight: 1.6 }} />
+                style={{ width: "100%", height: 90, padding: "9px 13px", borderRadius: 10, fontSize: "0.95em", resize: "vertical", lineHeight: 1.6 }} />
             </div>
             <button className="btn-primary" onClick={async () => { setRpLoading(true); setRpResult(""); const r = await callClaude(buildReportPrompt(lang, rpForm.institution, rpForm.year, rpForm.sector || L.checklist.sectors[0], rpForm.context), buildSystemPrompt(lang, role)); setRpResult(r); setRpLoading(false); }}
-              disabled={rpLoading || !rpForm.institution || !rpForm.year} style={{ padding: "12px 26px", borderRadius: 8, fontSize: "0.9em", alignSelf: "flex-start" }}>
+              disabled={rpLoading || !rpForm.institution || !rpForm.year} style={{ padding: "12px 26px", borderRadius: 10, fontSize: "0.95em", alignSelf: "flex-start" }}>
               {rpLoading ? L.report.generating : L.report.generate}
             </button>
-            {rpLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.report.generating}</span>}
-            {rpResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={rpResult} /></div>}
+            {rpLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.92em" }} className="pulse">{L.report.generating}</span>}
+            {rpResult && <div className="fade" style={{ background: "var(--surface)", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.primary}`, borderRadius: 10, padding: "18px 22px" }}><MD text={rpResult} /></div>}
           </div>
         )}
 
-        <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid #1a2e40`, textAlign: "center", color: "#384c5c", fontSize: "0.7em", fontFamily: "'DM Mono',monospace" }}>{L.poweredBy}</div>      </div>
+                <section aria-labelledby="references-title" className="card" style={{ marginTop: 40, padding: "18px 16px" }}>
+          <div id="references-title" style={{ fontSize: "0.85em", color: "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>{L.resources.title}</div>
+          <div style={{ color: C.muted, fontSize: "0.74em", fontFamily: "inherit", marginBottom: 12 }}>{L.resources.subtitle}</div>
+          <ul style={{ display: "flex", flexWrap: "wrap", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
+            {L.resources.links.map((item) => (
+              <li key={item.url}>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="chip"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    background: "var(--surface)",
+                    border: `1px solid ${C.border}`,
+                    color: "var(--text-secondary)",
+                    borderRadius: 10,
+                    padding: "8px 12px",
+                    textDecoration: "none",
+                    fontSize: "0.8em",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  ↗ {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.border}`, textAlign: "center", color: "var(--text-secondary)", fontSize: "0.7em", fontFamily: "inherit" }}>{L.poweredBy}</div>      </div>
     </div>
   );
 }
