@@ -569,6 +569,53 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 45000);
 
+  const parseJsonSafely = (rawText) => {
+    if (!rawText?.trim()) return null;
+    try {
+      return JSON.parse(rawText);
+    } catch {
+      return null;
+    }
+  };
+
+  const parseSseToText = (rawText) => {
+    if (!rawText?.trim()) return "";
+    const lines = rawText.split("\n");
+    const chunks = [];
+
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+
+      const json = parseJsonSafely(payload);
+      if (!json) {
+        chunks.push(payload);
+        continue;
+      }
+
+      if (typeof json.text === "string") chunks.push(json.text);
+      if (typeof json.delta === "string") chunks.push(json.delta);
+      if (typeof json.content === "string") chunks.push(json.content);
+    }
+
+    return chunks.join("").trim();
+  };
+
+  const extractResponsePayload = (rawText, contentType = "") => {
+    const isSse = contentType.includes("text/event-stream") || rawText.includes("\ndata:");
+    if (isSse) {
+      const streamText = parseSseToText(rawText);
+      if (streamText) return { text: streamText };
+    }
+
+    const json = parseJsonSafely(rawText);
+    if (json) return json;
+
+    if (rawText?.trim()) return { text: rawText.trim() };
+    return null;
+  };
+
   try {
     const messages = [
       ...history,
@@ -582,13 +629,37 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
       signal: controller.signal,
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || "Sunucu hatası oluştu.");
+    const rawText = await res.text();
+    const data = extractResponsePayload(rawText, res.headers.get("content-type") || "");
+
+    if (!res.ok) {
+      throw new Error(
+        data?.error ||
+        data?.message ||
+        (lang === "tr" ? "Sunucuya ulaşıldı ancak geçerli bir yanıt alınamadı." : "Server responded, but a valid response could not be parsed.")
+      );
+    }
+
+    if (!data) {
+      throw new Error(
+        lang === "tr"
+          ? "Sunucudan boş yanıt alındı. Lütfen tekrar deneyin."
+          : "Empty response from server. Please try again."
+      );
+    }
+
     if (data.error) throw new Error(data.error);
     return data.text || "—";
   } catch (error) {
     if (error.name === "AbortError") {
       throw new Error("Yanıt zaman aşımına uğradı. Lütfen tekrar deneyin.");
+    }
+    if (error instanceof SyntaxError) {
+      throw new Error(
+        lang === "tr"
+          ? "Sunucu yanıtı okunamadı. Lütfen tekrar deneyin."
+          : "Could not read the server response. Please try again."
+      );
     }
     throw error;
   } finally {
