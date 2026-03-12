@@ -54,6 +54,16 @@ Use "GRB" in English responses. Redirect off-topic questions humorously.
 Apply memory.md rules first, then check the provided guide document, then use general knowledge. Add APA 7 references.${memorySection}${docSection}`;
 }
 
+function getErrorPayload(error) {
+  if (!error) return null;
+
+  // Anthropic SDK hatalarında body veya error nesnesi taşıyabilir.
+  const sdkPayload = error?.error || error?.body || null;
+  if (sdkPayload && typeof sdkPayload === "object") return sdkPayload;
+
+  return null;
+}
+
 export async function POST(req) {
   try {
     const { messages, lang, role, customSystem } = await req.json();
@@ -72,10 +82,18 @@ export async function POST(req) {
     const text = response.content.map((b) => b.text || "").join("\n");
     return Response.json({ text });
   } catch (err) {
-    console.error(err);
+    console.error("/api/chat error:", err);
     const payload = getErrorPayload(err);
-    const safeMessage = payload?.message || err.message || "Bilinmeyen sunucu hatası.";
-    return Response.json({ error: safeMessage }, { status: 500 });
+    const safeMessage = payload?.message || err?.message || "Bilinmeyen sunucu hatası.";
+    const status = Number.isInteger(err?.status) ? err.status : 500;
+
+    return Response.json(
+      {
+        error: safeMessage,
+        details: payload,
+      },
+      { status },
+    );
   }
 }
                                       
