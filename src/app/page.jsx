@@ -831,6 +831,256 @@ const CHECKLIST_PRESETS = {
   },
 };
 
+const CHECKLIST_PRESETS_EN = {
+  "Policy Design": {
+    "General": `## Policy Design — General Checklist
+
+☐ Are there differences between women and men in terms of access, use, or outcomes in this policy area, and what data sources demonstrate these differences?
+
+☐ Were sex-disaggregated data used during policy design, and what are the sources of these data?
+
+☐ Are the policy objectives designed to address the different needs and priorities of women and men?
+
+☐ Have measurable targets been established to reduce gender inequalities as a result of the policy implementation?`,
+
+    "Health": `## Policy Design — Health Checklist
+
+☐ Have geographical or socioeconomic disparities between women and men in accessing health services been analysed?
+
+☐ Are gender-specific health needs, such as maternal health, reproductive health, or male-specific health risks, considered in the policy design?
+
+☐ Have the utilization rates of health services been analysed by sex and integrated into policy objectives?
+
+☐ Does the policy include specific programmes or services aimed at improving access to healthcare for women or men?`,
+
+    "Education": `## Policy Design — Education Checklist
+
+☐ Have access to and retention in education for girls and boys been analysed using sex-disaggregated data?
+
+☐ Does the education policy address the different learning needs and opportunities of female and male students?
+
+☐ Have school dropout rates and academic achievement been analysed by sex and reflected in policy targets?
+
+☐ Does the policy include measures to address structural barriers faced by girls in education?`,
+
+    "Transport": `## Policy Design — Transport Checklist
+
+☐ Have travel patterns and mobility needs of women and men been analysed using evidence-based data?
+
+☐ Are women's safety experiences in transport systems (e.g., lighting, safety at stops and stations) considered in policy design?
+
+☐ Does the transport policy address the multi-stop travel patterns often associated with care responsibilities?
+
+☐ Has the accessibility of transport services for women and men with disabilities been considered?`,
+
+    "Agriculture": `## Policy Design — Agriculture Checklist
+
+☐ Have differences between women and men in access to productive resources (land, credit, inputs) been analysed?
+
+☐ Has the gender distribution of beneficiaries of agricultural support programmes been examined?
+
+☐ Are women farmers' access to training, finance, and cooperatives considered in the policy analysis?
+
+☐ Does the policy include objectives to strengthen women's participation and empowerment in agricultural production?`,
+
+    "Social Protection": `## Policy Design — Social Protection Checklist
+
+☐ Have the impacts of social assistance and services on women and men been analysed?
+
+☐ Has the burden of unpaid care work, particularly on women, been considered in policy design?
+
+☐ Are social protection policies designed to support women's economic empowerment and labour market participation?
+
+☐ Does the policy include targeted support mechanisms for disadvantaged groups of women and men?`,
+  },
+
+  "Budget Preparation": {
+    "General": `## Budget Preparation — General Checklist
+
+☐ Are policy objectives integrated into budget programmes from a gender equality perspective?
+
+☐ During budget preparation, have the different impacts of public expenditure on women and men been analysed?
+
+☐ Have specific budget allocations been established to support gender equality objectives?
+
+☐ Are performance indicators defined in a way that allows results to be measured separately for women and men?`,
+
+    "Health": `## Budget Preparation — Health Checklist
+
+☐ Is sufficient funding allocated to programmes aimed at improving women's access to healthcare services?
+
+☐ Are expenditures related to maternal health and women's health services clearly visible in the budget?
+
+☐ Do budget allocations include preventive programmes addressing major health risks affecting men?
+
+☐ Are resources allocated to strengthen healthcare services in rural or disadvantaged areas?`,
+
+    "Education": `## Budget Preparation — Education Checklist
+
+☐ Does the budget include programmes aimed at increasing girls' access to education?
+
+☐ Are initiatives promoting girls' participation in STEM fields adequately financed?
+
+☐ Are there budget allocations for programmes aimed at reducing school dropout rates?
+
+☐ Are educational materials and programmes financed in ways that promote gender equality in education?`,
+
+    "Transport": `## Budget Preparation — Transport Checklist
+
+☐ Are funds allocated for infrastructure improvements that enhance transport safety?
+
+☐ Are resources dedicated to safety measures in public transport systems?
+
+☐ Does the budget include investments that improve accessibility for persons with disabilities?
+
+☐ Are investments planned to improve service quality on transport routes frequently used by women?`,
+
+    "Agriculture": `## Budget Preparation — Agriculture Checklist
+
+☐ Are there dedicated budget allocations for programmes supporting women farmers?
+
+☐ Are resources allocated to increase women's participation in agricultural training and advisory services?
+
+☐ Are rural development programmes supporting women's entrepreneurship in agriculture included in the budget?
+
+☐ Has the distribution of agricultural subsidies been analysed from a gender equality perspective?`,
+
+    "Social Protection": `## Budget Preparation — Social Protection Checklist
+
+☐ Are sufficient resources allocated for childcare, care services, or social support programmes?
+
+☐ Does the budget include programmes aimed at supporting women's labour force participation?
+
+☐ Has the distribution of social benefits been analysed by sex of beneficiaries?
+
+☐ Are poverty reduction programmes financed in ways that support women's economic independence?`,
+  },
+
+  "Implementation": {
+    "General": `## Implementation — General Checklist
+
+☐ Is the distribution of beneficiaries by sex regularly monitored during programme implementation?
+
+☐ Have barriers affecting women's and men's access to services been identified during implementation?
+
+☐ Are there implementation mechanisms supporting the achievement of gender equality objectives?
+
+☐ Are feedback and experiences from women and men users systematically collected?`,
+
+    "Health": `## Implementation — Health Checklist
+
+☐ Is the sex distribution of healthcare service users regularly monitored?
+
+☐ Are healthcare services accessible to women in rural or disadvantaged areas?
+
+☐ Are programmes targeting women's health effectively delivered in practice?
+
+☐ Is user satisfaction with healthcare services assessed separately for women and men?`,
+
+    "Education": `## Implementation — Education Checklist
+
+☐ Are participation rates in education programmes monitored by sex?
+
+☐ Are school dropout rates tracked separately for girls and boys?
+
+☐ Are education programmes implemented in ways that address the needs of both girls and boys?
+
+☐ Are student achievement indicators regularly analysed to assess equality of opportunity?`,
+
+    "Transport": `## Implementation — Transport Checklist
+
+☐ Is the rate of women's use of transport services monitored?
+
+☐ Are safety concerns in transport systems regularly assessed?
+
+☐ Are public transport services designed to accommodate users with care responsibilities?
+
+☐ Is transport infrastructure implemented in a way that ensures accessibility for women and men with disabilities?`,
+
+    "Agriculture": `## Implementation — Agriculture Checklist
+
+☐ Is the share of women farmers benefiting from agricultural subsidies monitored?
+
+☐ Is women's participation in agricultural training programmes tracked?
+
+☐ Are programmes supporting women farmers effectively implemented in practice?
+
+☐ Is the distribution of agricultural support balanced between women and men farmers?`,
+
+    "Social Protection": `## Implementation — Social Protection Checklist
+
+☐ Is the sex distribution of beneficiaries of social services monitored?
+
+☐ Do social programmes contribute to women's economic empowerment?
+
+☐ Do care services support women's participation in the labour market?
+
+☐ Are there differences between women and men in access to social services?`,
+  },
+
+  "Monitoring & Evaluation": {
+    "General": `## Monitoring & Evaluation — General Checklist
+
+☐ Are programme results analysed separately for women and men?
+
+☐ Is progress towards policy objectives measured using gender equality indicators?
+
+☐ Have programme results contributed to reducing gender inequalities?
+
+☐ Are monitoring results used as feedback for future policy and budgeting processes?`,
+
+    "Health": `## Monitoring & Evaluation — Health Checklist
+
+☐ Has the gap between women and men in access to healthcare services decreased?
+
+☐ Are maternal health and other health indicators evaluated using sex-disaggregated data?
+
+☐ Are the impacts of health programmes measured separately for women and men?
+
+☐ Are health policy outcomes reported from a gender equality perspective?`,
+
+    "Education": `## Monitoring & Evaluation — Education Checklist
+
+☐ Are indicators of equal opportunities in education monitored by sex?
+
+☐ Are school dropout rates and academic achievement regularly analysed by sex?
+
+☐ Are the impacts of education policies on girls and boys assessed?
+
+☐ Are education policy outcomes reported using a gender equality perspective?`,
+
+    "Transport": `## Monitoring & Evaluation — Transport Checklist
+
+☐ Is women's perception of safety in transport systems measured?
+
+☐ Are transport usage rates analysed using sex-disaggregated data?
+
+☐ Are the impacts of transport investments on women and men evaluated?
+
+☐ Are the gender equality impacts of transport policies reported?`,
+
+    "Agriculture": `## Monitoring & Evaluation — Agriculture Checklist
+
+☐ Has the share of women farmers benefiting from subsidies increased?
+
+☐ Is the impact of agricultural programmes on women's income and livelihoods measured?
+
+☐ Are the impacts of agricultural policies on women and men farmers assessed?
+
+☐ Is the distribution of agricultural support reported from a gender equality perspective?`,
+
+    "Social Protection": `## Monitoring & Evaluation — Social Protection Checklist
+
+☐ Have social programmes reduced the poverty risk among women?
+
+☐ Is the distribution of social benefits equitable between women and men?
+
+☐ Is the impact of social protection programmes on women's economic independence measured?
+
+☐ Are the gender equality impacts of social protection policies regularly reported?`,
+  },
+};
+
 // ─── API CALL ─────────────────────────────────────────────────────────────────
 async function callClaude(userContent, systemPrompt, history = [], lang, role) {
   const controller = new AbortController();
@@ -1179,7 +1429,8 @@ export default function EsitlikAsistani() {
             <button className="btn btn-primary" onClick={() => {
               const phaseName = L.checklist.phases[phase];
               const sectorName = L.checklist.sectors[sector];
-              const preset = CHECKLIST_PRESETS[phaseName]?.[sectorName];
+              const activePresets = lang === "en" ? CHECKLIST_PRESETS_EN : CHECKLIST_PRESETS;
+              const preset = activePresets[L.checklist.phases[phase]]?.[L.checklist.sectors[sector]];
               if (preset) {
                 setClResult(preset);
               } else {
