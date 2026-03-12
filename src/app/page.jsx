@@ -331,6 +331,80 @@ Bir belediyenin spor tesisleri bütçesini düşünelim:
 - **KEEDB ile:** Kadınların kullandığı spor alanları da planlanır, kadın-erkek kullanım oranı analiz edilir, hizmetler herkes için erişilebilir olur.
 
 ✅ **Özet:** KEEDB kadınlara ayrı bir bütçe oluşturmaz. Ama bütçenin kadınlar ve erkekler için eşit ve adil sonuçlar üretmesini sağlamaya çalışır.`,
+    "keedb'nin temel araçları nelerdir?": `## Kısa Özet
+
+Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu politikası ve bütçe süreçlerinde kadın ve erkeklerin farklı ihtiyaç ve etkilerini dikkate almak için çeşitli analiz, planlama, izleme ve raporlama araçları kullanır.
+
+## KEEDB'nin Temel Araçları
+
+1️⃣ **Kadın Erkek Eşitliği Analizi** — Politika, program veya bütçelerin kadınlar ve erkekler üzerindeki etkisini inceler. Kadın ve erkeklerin farklı ihtiyaçlarını, hizmetlere erişimi, kaynak dağılımını ve mevcut eşitsizlikleri analiz eder.
+
+2️⃣ **Cinsiyete Göre Ayrıştırılmış Veri ve Göstergeler** — Kadın/erkek istihdam oranı, eğitimde kız/erkek öğrenci sayısı, kamu hizmetlerinden yararlanan kadın ve erkek sayısı gibi veriler eşitlik sorunlarının tespitini sağlar.
+
+3️⃣ **Kadın Erkek Eşitliğine Duyarlı Bütçe Analizi** — Mevcut bütçenin eşitlik açısından değerlendirilmesidir. Bütçe kimlere fayda sağlıyor? Kaynak dağılımı eşitsizlikleri azaltıyor mu?
+
+4️⃣ **Kadın Erkek Eşitliğine Duyarlı Planlama** — Stratejik plan, program ve faaliyetlerin eşitlik perspektifiyle tasarlanmasıdır. Eşitliğin politika hedeflerine entegre edilmesini sağlar.
+
+5️⃣ **Bütçe Takibi (Expenditure Tracking)** — Kamu harcamalarının gerçekten eşitlik hedeflerine gidip gitmediğini izler. Hesap verebilirliği artırır.
+
+6️⃣ **Kadın Erkek Eşitliğine Duyarlı İzleme ve Değerlendirme** — Program ve bütçelerin sonuçlarını değerlendirir. Kadın istihdamındaki artış, kamu hizmetlerine erişim ve karar alma süreçlerine katılım gibi göstergeler kullanılır.
+
+## KEEDB Araçlarının Bütçe Döngüsündeki Yeri
+
+- **Sorun analizi:** Eşitlik analizi, veri ve göstergeler
+- **Planlama:** KEEDB planlama ve hedef belirleme
+- **Bütçe hazırlama:** Bütçe analizi
+- **Uygulama:** Harcama takibi
+- **İzleme:** İzleme ve değerlendirme
+
+✅ Bu araçlar birlikte kullanıldığında bütçe sürecinin tamamına eşitlik perspektifi yerleştirilmiş olur.`,
+    "keedb hangi politika döngüsü aşamalarında uygulanabilir?": `## Kısa Özet
+
+Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) yalnızca bütçe hazırlama aşamasında değil, kamu politika döngüsünün tüm aşamalarında uygulanabilir.
+
+## KEEDB'nin Uygulanabildiği Aşamalar
+
+1️⃣ **Sorun Analizi / Gündem Belirleme** — Kadın ve erkeklerin farklı ihtiyaçlarının belirlenmesi, cinsiyete göre ayrıştırılmış verilerin kullanılması ve eşitsizliklerin tespiti. Örnek: Ulaşım politikası hazırlanırken kadınların gece ulaşım güvenliği sorunlarının analiz edilmesi.
+
+2️⃣ **Politika ve Program Tasarımı** — Eşitliğe duyarlı hedef ve göstergeler belirleme, kadın ve erkeklerin ihtiyaçlarına uygun politika araçları geliştirme. Örnek: Kadın istihdamını artırmaya yönelik eğitim programlarının tasarlanması.
+
+3️⃣ **Bütçe Hazırlama** — Kadın erkek eşitliğine duyarlı bütçe analizi, eşitlik hedeflerine uygun kaynak dağılımı. Bu aşamada bütçenin kimlere fayda sağladığı analiz edilir.
+
+4️⃣ **Uygulama** — Kadın ve erkeklerin hizmetlere erişiminin izlenmesi, harcamaların eşitlik hedeflerine uygun kullanılması.
+
+5️⃣ **İzleme ve Değerlendirme** — Eşitliğe duyarlı performans göstergeleri, bütçe etkisinin değerlendirilmesi, politika sonuçlarının kadınlar ve erkekler üzerindeki etkisinin analizi.
+
+✅ **Sonuç:** KEEDB, bütçenin yalnızca hazırlanmasında değil; politika geliştirme, planlama, uygulama ve değerlendirme süreçlerinin tamamında uygulanabilen bir yaklaşımdır.`,
+    "dünya'dan başarılı örnekler paylaşır mısın?": `## Kısa Özet
+
+Dünyada KEEDB uygulamasında öne çıkan birçok başarılı örnek vardır. Özellikle Avusturya, İsveç ve Güney Kore KEEDB'yi bütçe sistemine kurumsal olarak entegre etmiş ülkeler arasında gösterilir.
+
+## Dünyadan Başarılı KEEDB Örnekleri
+
+🇦🇹 **Avusturya – Anayasal Düzeyde KEEDB**
+2009'da bütçe reformu ile eşitlik hedefleri bütçe sistemine dahil edildi. Tüm kamu kurumları eşitliğe duyarlı performans hedefleri belirlemek zorundadır. Bütçe belgelerinde Gender Budget Statement yer alır.
+
+🇸🇪 **İsveç – Politika Anaakımlaştırması**
+Tüm politika alanlarında eşitlik etkisi analizi yapılır. Bakanlıklar bütçe tekliflerinde kadın ve erkek üzerindeki etkileri analiz eder. Eğitim, istihdam ve bakım ekonomisi politikalarında eşitsizlikleri azaltan reformlar yapılmıştır.
+
+🇰🇷 **Güney Kore – Bütçe Belgelerinde KEEDB**
+Her yıl Gender Budget Statement hazırlanır, uygulamadan sonra Gender Budget Report yayımlanır. 30'dan fazla kamu kurumu eşitlik etkisi analizleri yapar.
+
+🇪🇸 **İspanya – Bölgesel KEEDB Uygulamaları**
+Endülüs Bölgesi öncü örneklerden biridir. Bütçe tekliflerinde eşitlik etki raporu hazırlanır, kadın girişimciliği ve sosyal hizmetlere ayrılan bütçe artırılmıştır.
+
+🇷🇼 **Ruanda – Afrika'nın En İyi Örneklerinden Biri**
+Tüm bakanlıklar Gender Budget Statement hazırlar. Eğitim ve sağlık hizmetlerine kadınların erişimi önemli ölçüde artmıştır.
+
+## Başarılı Uygulamaların Ortak Özellikleri
+
+- **Yasal çerçeve:** KEEDB'nin mevzuat veya anayasa ile desteklenmesi
+- **Veri sistemi:** Cinsiyete göre ayrıştırılmış veri kullanımı
+- **Kurumsal sorumluluk:** Bakanlıkların eşitlik hedefleri belirlemesi
+- **Bütçe belgeleri:** Gender Budget Statement gibi resmi belgeler
+- **İzleme:** Bütçe etkisinin düzenli olarak değerlendirilmesi
+
+💡 Dünya genelinde KEEDB 80'den fazla ülkede çeşitli düzeylerde uygulanmaktadır.`,
     "türkiye'den başarılı bir örnek paylaşır mısın?": `## 🇹🇷 Türkiye'den KEEDB Başarılı Uygulama Örneği
 
 ### Yerel Yönetimlerde Pilot KEEDB Uygulamaları
