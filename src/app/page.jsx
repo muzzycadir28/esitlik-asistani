@@ -1203,6 +1203,7 @@ export default function EsitlikAsistani() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [activeQuick, setActiveQuick] = useState(null);
+  const [openGroup, setOpenGroup] = useState(0);
   const endRef = useRef(null);
   const lastAssistantRef = useRef(null);
   const lastUserMsgRef = useRef(null);
@@ -1334,10 +1335,38 @@ export default function EsitlikAsistani() {
   const lastAssistantIndex = [...messages].map((m) => m.role).lastIndexOf("assistant");
   const lastUserIndex = [...messages].map((m) => m.role).lastIndexOf("user");
 
+  const quickGroups = lang === "tr" ? [
+    {
+      title: "KEEDB Nedir?",
+      questions: ["KEEDB nedir ve neden önemlidir?", "KEEDB sadece kadınlara yönelik bir bütçe midir?"],
+    },
+    {
+      title: "Araçlar & Uygulama",
+      questions: ["KEEDB'nin temel araçları nelerdir?", "KEEDB hangi politika döngüsü aşamalarında uygulanabilir?", "KEEDB için hangi ilk adımları atabiliriz?", "Planları ve bütçeleri nasıl duyarlı hale getirebilirim?"],
+    },
+    {
+      title: "Örnekler",
+      questions: ["Dünya'dan başarılı örnekler paylaşır mısın?", "Türkiye'den başarılı bir örnek paylaşır mısın?"],
+    },
+  ] : [
+    {
+      title: "What is GRB?",
+      questions: ["What is GRB and why does it matter?", "Is GRB only a budget for women?"],
+    },
+    {
+      title: "Tools & Application",
+      questions: ["What are the core tools of GRB?", "At which policy cycle stages can GRB be applied?", "What are the first steps we can take for GRB?", "How can I make plans and budgets gender-responsive?"],
+    },
+    {
+      title: "Examples",
+      questions: ["Can you share successful examples from around the world?", "Can you share a successful example from Turkey?"],
+    },
+  ];
+
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    :root{--bg:#F8F9FA;--surface:#FFFFFF;--primary:#2563EB;--accent:#2563EB;--text:#111827;--text-secondary:#6B7280;--border:#E5E7EB;--shadow:0 8px 24px rgba(15,23,42,.06);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)}
-    @media (prefers-color-scheme: dark){:root{--bg:#0F172A;--surface:#1E293B;--primary:#3B82F6;--accent:#3B82F6;--text:#F1F5F9;--text-secondary:#94A3B8;--border:#334155;--shadow:0 8px 24px rgba(2,6,23,.45);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1e40af 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%)}}
+    :root{--bg:#F8F9FA;--surface:#FFFFFF;--primary:#2563EB;--accent:#2563EB;--accent-soft:color-mix(in oklab,var(--accent) 10%, var(--surface));--text:#111827;--text-secondary:#6B7280;--border:#E5E7EB;--shadow:0 8px 24px rgba(15,23,42,.06);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)}
+    @media (prefers-color-scheme: dark){:root{--bg:#0F172A;--surface:#1E293B;--primary:#3B82F6;--accent:#3B82F6;--accent-soft:color-mix(in oklab,var(--accent) 16%, var(--surface));--text:#F1F5F9;--text-secondary:#94A3B8;--border:#334155;--shadow:0 8px 24px rgba(2,6,23,.45);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1e40af 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%)}}
     *{box-sizing:border-box}
     body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
     .app{min-height:100vh;color:var(--text)}
@@ -1363,16 +1392,18 @@ export default function EsitlikAsistani() {
     .md-content p,.md-content li{font-size:.95rem;line-height:1.75}
     .md-content strong{color:var(--primary);font-weight:600}
     .md-content ul,.md-content ol{padding-left:1.2rem;margin:.35rem 0}
-    .advisor-layout{padding:0;display:flex;flex-direction:row;min-height:560px}
+    .advisor-layout{padding:0;display:flex;flex-direction:row;height:calc(100vh - 120px);overflow:hidden}
     .advisor-quick-panel{width:300px;flex-shrink:0;border-right:1px solid var(--border);padding:1rem;position:sticky;top:0;align-self:flex-start}
     .advisor-quick-list{display:grid;grid-template-columns:1fr;gap:.5rem}
-    .advisor-chat-panel{flex:1;padding:1rem;display:flex;flex-direction:column;gap:1rem;min-width:0}
-    .advisor-chat-messages{flex:1;min-height:260px;max-height:520px;overflow-y:auto;display:grid;gap:.75rem;background:var(--surface)}
+    .advisor-chat-panel{flex:1;min-width:0;min-height:0}
+    .advisor-chat-messages{display:grid;gap:.75rem;background:var(--surface)}
     .advisor-input-row{display:flex;gap:.5rem}
+    .quick-group{overflow:hidden;transition:max-height .3s ease,opacity .3s ease;opacity:0;max-height:0}
+    .quick-group.open{opacity:1;max-height:360px}
     @media (max-width: 767px){
       .advisor-layout{flex-direction:column}
       .advisor-quick-panel{width:100%;position:static;border-right:none;border-bottom:1px solid var(--border)}
-      .advisor-chat-messages{max-height:440px}
+      .advisor-chat-messages{max-height:none}
     }
   `;
 
@@ -1457,16 +1488,45 @@ export default function EsitlikAsistani() {
           <div className="surface advisor-layout">
             <div className="advisor-quick-panel">
               <div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.chat.quickTitle}</div>
-              <div className="advisor-quick-list">{L.chat.quick.map((q, i) => <button key={i} className="chip" onClick={() => sendChat(q, true)} style={{ background: activeQuick === q ? 'var(--accent)' : 'var(--surface)', color: activeQuick === q ? '#ffffff' : 'var(--text-secondary)', border: `1px solid ${activeQuick === q ? 'var(--accent)' : 'var(--border)'}`, fontWeight: activeQuick === q ? 600 : 400 }}>{q}</button>)}</div>
+              <div className="advisor-quick-list">
+                {quickGroups.map((group, i) => {
+                  const isOpen = openGroup === i;
+                  return (
+                    <div key={group.title}>
+                      <button
+                        className="btn"
+                        onClick={() => setOpenGroup(isOpen ? -1 : i)}
+                        style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--accent-soft)", borderRadius: 8, padding: "10px 14px", fontWeight: 600, border: "1px solid var(--border)", color: "var(--text)" }}
+                      >
+                        <span>{group.title}</span>
+                        <span>{isOpen ? "▲" : "▼"}</span>
+                      </button>
+                      <div className={`quick-group ${isOpen ? "open" : ""}`}>
+                        <div style={{ display: "grid", gap: ".5rem", marginTop: ".5rem" }}>
+                          {group.questions.map((q, questionIndex) => (
+                            <button key={questionIndex} className="chip" onClick={() => sendChat(q, true)} style={{ background: activeQuick === q ? "var(--accent)" : "var(--surface)", color: activeQuick === q ? "#ffffff" : "var(--text-secondary)", border: `1px solid ${activeQuick === q ? "var(--accent)" : "var(--border)"}`, fontWeight: activeQuick === q ? 600 : 400 }}>{q}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             <div className="advisor-chat-panel">
-            <div className="advisor-chat-messages">
-              {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : m.role === "user" && i === lastUserIndex ? lastUserMsgRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
-              {chatLoading && <div ref={endRef} className="muted pulse">{L.chat.thinking}</div>}
-            </div>
-            <div className="advisor-input-row">
-              <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
-              <button className="btn btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>{L.chat.send}</button>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+              <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+                <div className="advisor-chat-messages">
+                  {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : m.role === "user" && i === lastUserIndex ? lastUserMsgRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
+                  {chatLoading && <div ref={endRef} className="muted pulse">{L.chat.thinking}</div>}
+                </div>
+              </div>
+              <div style={{ borderTop: "1px solid var(--border)", padding: "12px", background: "var(--surface)", flexShrink: 0 }}>
+                <div className="advisor-input-row">
+                  <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
+                  <button className="btn btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>{L.chat.send}</button>
+                </div>
+              </div>
             </div>
             </div>
           </div>
