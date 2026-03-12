@@ -19,7 +19,6 @@ const LANG = {
         { id: "academic", label: "Akademisyen", icon: "🎓", desc: "Araştırmacı, öğretim üyesi" },
         { id: "ngo", label: "Sivil Toplum", icon: "🤝", desc: "STK, vakıf, savunuculuk kuruluşu" },
       ],
-      confirm: "Devam Et",
     },
     chat: {
       quickTitle: "Hızlı Sorular",
@@ -86,7 +85,6 @@ const LANG = {
         { id: "academic", label: "Academic", icon: "🎓", desc: "Researcher or faculty member" },
         { id: "ngo", label: "Civil Society", icon: "🤝", desc: "NGO, foundation or advocacy organization" },
       ],
-      confirm: "Continue",
     },
     chat: {
       quickTitle: "Quick Questions",
@@ -996,7 +994,6 @@ export default function EsitlikAsistani() {
   const [lang, setLang] = useState("tr");
   const [activeTab, setActiveTab] = useState(0);
   const [role, setRole] = useState(null);
-  const [confirmedRole, setConfirmedRole] = useState(null);
   const L = LANG[lang];
 
   const [messages, setMessages] = useState([]);
@@ -1035,7 +1032,7 @@ export default function EsitlikAsistani() {
     setChatLoading(true);
     try {
       const history = messages.map(m => ({ role: m.role, content: m.content }));
-      const reply = await callClaude(text, buildSystemPrompt(lang, confirmedRole), history, lang, confirmedRole);
+      const reply = await callClaude(text, buildSystemPrompt(lang, role), history, lang, role);
       setMessages([...newHistory, { role: "assistant", content: reply }]);
     } catch (error) {
       const msg = lang === "tr"
@@ -1091,7 +1088,7 @@ export default function EsitlikAsistani() {
 
   const resultCard = (content) => content && <div className="surface fade" style={{ padding: "1rem 1.2rem" }}><MD text={content} /></div>;
 
-  if (!confirmedRole) return (
+  if (!role) return (
     <div className="app" suppressHydrationWarning>
       <style>{css}</style>
       <div className="header" style={{ padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1142,11 +1139,6 @@ export default function EsitlikAsistani() {
               </button>
             ))}
           </div>
-          <div style={{ marginTop: "1.1rem", display: "flex", justifyContent: "flex-end" }}>
-            <button className="btn" onClick={() => setConfirmedRole(role)} disabled={!role} style={{ background: "transparent", borderColor: "#fff", color: "var(--text)", borderWidth: 1, borderStyle: "solid" }}>
-              {L.roleSelect.confirm}
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -1161,7 +1153,7 @@ export default function EsitlikAsistani() {
           <div><div style={{ fontSize: "1.15rem", fontWeight: 600 }}>{L.appTitle}</div><div className="muted" style={{ fontSize: ".8rem" }}>{L.appSubtitle}</div></div>
         </div>
         <div style={{ display: "flex", gap: ".5rem" }}>
-          <button className="btn btn-ghost" onClick={() => { setRole(null); setConfirmedRole(null); }}>{L.chat.changeRole}</button>
+          <button className="btn btn-ghost" onClick={() => { setRole(null); }}>{L.chat.changeRole}</button>
           <button className="btn btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")}>{L.langToggle}</button>
         </div>
       </div>
@@ -1198,7 +1190,7 @@ export default function EsitlikAsistani() {
               <div style={{ fontSize: "1.6rem" }}>📄</div><div>{L.docAnalysis.upload}</div><div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.uploadHint}</div>
             </div>
             <div><div className="muted" style={{ fontWeight: 500 }}>{L.docAnalysis.pasteLabel}</div><textarea value={docText} onChange={e => setDocText(e.target.value)} placeholder={L.docAnalysis.pastePlaceholder} style={{ minHeight: 150 }} /></div>
-              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, docText), buildSystemPrompt(lang, confirmedRole)); setDocResult(r); setDocLoading(false); }} disabled={docLoading || !docText.trim()}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
+              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, docText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }} disabled={docLoading || !docText.trim()}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
             {docLoading && <span className="muted pulse">{L.docAnalysis.analyzing}</span>}
             {resultCard(docResult)}
           </div>
@@ -1220,7 +1212,7 @@ export default function EsitlikAsistani() {
                 // fallback to API if no preset found
                 setClLoading(true);
                 setClResult("");
-                callClaude(buildChecklistPrompt(lang, phaseName, sectorName), buildSystemPrompt(lang, confirmedRole))
+                callClaude(buildChecklistPrompt(lang, phaseName, sectorName), buildSystemPrompt(lang, role))
                   .then(r => setClResult(r))
                   .finally(() => setClLoading(false));
               }
@@ -1238,7 +1230,7 @@ export default function EsitlikAsistani() {
             </div>
             <div><div className="muted" style={{ fontWeight: 500 }}>{L.report.sector}</div><select value={rpForm.sector} onChange={e => setRpForm(f => ({ ...f, sector: e.target.value }))}>{L.checklist.sectors.map((s, i) => <option key={i} value={s}>{s}</option>)}</select></div>
             <div><div className="muted" style={{ fontWeight: 500 }}>{L.report.context}</div><textarea value={rpForm.context} onChange={e => setRpForm(f => ({ ...f, context: e.target.value }))} placeholder={L.report.contextPlaceholder} style={{ minHeight: 96 }} /></div>
-            <button className="btn btn-primary" onClick={async () => { setRpLoading(true); setRpResult(""); const r = await callClaude(buildReportPrompt(lang, rpForm.institution, rpForm.year, rpForm.sector || L.checklist.sectors[0], rpForm.context), buildSystemPrompt(lang, confirmedRole)); setRpResult(r); setRpLoading(false); }} disabled={rpLoading || !rpForm.institution || !rpForm.year}>{rpLoading ? L.report.generating : L.report.generate}</button>
+            <button className="btn btn-primary" onClick={async () => { setRpLoading(true); setRpResult(""); const r = await callClaude(buildReportPrompt(lang, rpForm.institution, rpForm.year, rpForm.sector || L.checklist.sectors[0], rpForm.context), buildSystemPrompt(lang, role)); setRpResult(r); setRpLoading(false); }} disabled={rpLoading || !rpForm.institution || !rpForm.year}>{rpLoading ? L.report.generating : L.report.generate}</button>
             {rpLoading && <span className="muted pulse">{L.report.generating}</span>}
             {resultCard(rpResult)}
           </div>
