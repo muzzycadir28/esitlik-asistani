@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
 
 // ─── LANGUAGE STRINGS ────────────────────────────────────────────────────────
@@ -961,6 +961,7 @@ export default function EsitlikAsistani() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const endRef = useRef(null);
+  const lastAssistantRef = useRef(null);
 
   const [docText, setDocText] = useState("");
   const [docResult, setDocResult] = useState("");
@@ -975,18 +976,22 @@ export default function EsitlikAsistani() {
   const [rpResult, setRpResult] = useState("");
   const [rpLoading, setRpLoading] = useState(false);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-
   const sendChat = async (override) => {
     const text = override ?? chatInput;
     if (!text.trim() || chatLoading) return;
     setChatInput("");
     const newHistory = [...messages, { role: "user", content: text }];
     setMessages(newHistory);
+    requestAnimationFrame(() => {
+      endRef.current?.scrollIntoView({ behavior: "smooth" });
+    });
 
     const presetReply = getQuickPresetResponse(lang, text);
     if (presetReply) {
       setMessages([...newHistory, { role: "assistant", content: presetReply }]);
+      requestAnimationFrame(() => {
+        lastAssistantRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
       return;
     }
 
@@ -995,15 +1000,23 @@ export default function EsitlikAsistani() {
       const history = messages.map(m => ({ role: m.role, content: m.content }));
       const reply = await callClaude(text, buildSystemPrompt(lang, role), history, lang, role);
       setMessages([...newHistory, { role: "assistant", content: reply }]);
+      requestAnimationFrame(() => {
+        lastAssistantRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } catch (error) {
       const msg = lang === "tr"
         ? `Üzgünüm, yanıt üretilirken bir hata oluştu: ${error.message}`
         : `Sorry, an error occurred while generating the response: ${error.message}`;
       setMessages([...newHistory, { role: "assistant", content: msg }]);
+      requestAnimationFrame(() => {
+        lastAssistantRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } finally {
       setChatLoading(false);
     }
   };
+
+  const lastAssistantIndex = [...messages].map((m) => m.role).lastIndexOf("assistant");
 
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
@@ -1132,7 +1145,7 @@ export default function EsitlikAsistani() {
             </div>
             <div className="advisor-chat-panel">
             <div className="advisor-chat-messages">
-              {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
+              {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
               {chatLoading && <div className="muted pulse">{L.chat.thinking}</div>}
               <div ref={endRef} />
             </div>
