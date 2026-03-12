@@ -622,6 +622,256 @@ Additional context: ${context || "Not provided"}
 
 Include concrete recommendations, sample indicators and references to international good practices in each section.`;
 
+const CHECKLIST_PRESETS = {
+  "Politika Tasarımı": {
+    "Genel": `## Politika Tasarımı — Genel Kontrol Listesi
+
+☐ Bu politika alanında kadınlar ve erkekler arasında erişim, kullanım veya sonuç açısından fark var mı ve bu fark hangi verilerle ortaya konmuştur?
+
+☐ Politika hazırlanırken cinsiyete göre ayrıştırılmış veri kullanıldı mı ve veri kaynağı nedir?
+
+☐ Politika hedefleri kadın ve erkeklerin farklı ihtiyaçlarını dikkate alacak şekilde tasarlandı mı?
+
+☐ Politikanın uygulanması sonucunda eşitsizliklerin azalmasına yönelik ölçülebilir hedefler belirlendi mi?`,
+
+    "Sağlık": `## Politika Tasarımı — Sağlık Kontrol Listesi
+
+☐ Kadın ve erkeklerin sağlık hizmetlerine erişiminde coğrafi veya sosyoekonomik farklılıklar analiz edildi mi?
+
+☐ Anne sağlığı, üreme sağlığı veya erkeklere özgü sağlık riskleri gibi cinsiyete özgü sağlık ihtiyaçları politika tasarımında dikkate alındı mı?
+
+☐ Sağlık hizmetlerinin kullanım oranları cinsiyete göre analiz edilerek politika hedeflerine yansıtıldı mı?
+
+☐ Politika kadınların veya erkeklerin sağlık hizmetlerine erişimini artırmak için özel program veya hizmetler içeriyor mu?`,
+
+    "Eğitim": `## Politika Tasarımı — Eğitim Kontrol Listesi
+
+☐ Kız ve erkek çocukların eğitime erişim ve devam durumları cinsiyete göre analiz edildi mi?
+
+☐ Eğitim politikası kız ve erkek öğrencilerin farklı öğrenme ve fırsat ihtiyaçlarını dikkate alıyor mu?
+
+☐ Okul terk oranları veya başarı düzeyleri cinsiyete göre değerlendirilerek politika hedeflerine yansıtıldı mı?
+
+☐ Politika kız çocuklarının eğitimde karşılaştığı yapısal engelleri azaltacak önlemler içeriyor mu?`,
+
+    "Ulaşım": `## Politika Tasarımı — Ulaşım Kontrol Listesi
+
+☐ Kadın ve erkeklerin ulaşım kullanım alışkanlıkları veri temelli olarak analiz edildi mi?
+
+☐ Ulaşım güvenliği (aydınlatma, durak güvenliği vb.) açısından kadınların deneyimleri politika tasarımına dahil edildi mi?
+
+☐ Ulaşım politikası bakım sorumluluğu olan bireylerin çoklu yolculuk ihtiyaçlarını dikkate alıyor mu?
+
+☐ Engelli kadın ve erkeklerin ulaşım hizmetlerine erişimi politika tasarımında değerlendirildi mi?`,
+
+    "Tarım": `## Politika Tasarımı — Tarım Kontrol Listesi
+
+☐ Tarım politikası hazırlanırken kadın ve erkek çiftçilerin üretim kaynaklarına erişimi analiz edildi mi?
+
+☐ Tarımsal destek programlarından yararlananların cinsiyet dağılımı incelendi mi?
+
+☐ Kadın çiftçilerin eğitim, kredi ve kooperatiflere erişim durumları politika analizine dahil edildi mi?
+
+☐ Politika kadınların tarımsal üretimdeki rolünü güçlendirecek hedefler içeriyor mu?`,
+
+    "Sosyal Koruma": `## Politika Tasarımı — Sosyal Koruma Kontrol Listesi
+
+☐ Sosyal yardım ve hizmet programlarının kadın ve erkeklere etkisi analiz edildi mi?
+
+☐ Bakım sorumluluğunun kadınlar üzerindeki etkisi politika tasarımında dikkate alındı mı?
+
+☐ Sosyal koruma politikaları kadınların ekonomik güçlenmesini destekleyecek şekilde tasarlandı mı?
+
+☐ Politika dezavantajlı gruplardaki kadın ve erkekler için özel destek mekanizmaları içeriyor mu?`,
+  },
+
+  "Bütçe Hazırlığı": {
+    "Genel": `## Bütçe Hazırlığı — Genel Kontrol Listesi
+
+☐ Politika hedefleri bütçe programlarına eşitlik perspektifi ile yansıtıldı mı?
+
+☐ Bütçe hazırlanırken kamu harcamalarının kadın ve erkekler üzerindeki farklı etkileri analiz edildi mi?
+
+☐ Eşitlik hedeflerini destekleyen faaliyetler için ayrı bütçe kalemleri oluşturuldu mu?
+
+☐ Performans göstergeleri kadın ve erkekler için ayrı ayrı ölçülebilecek şekilde tanımlandı mı?`,
+
+    "Sağlık": `## Bütçe Hazırlığı — Sağlık Kontrol Listesi
+
+☐ Kadınların sağlık hizmetlerine erişimini artıracak programlar için yeterli bütçe ayrıldı mı?
+
+☐ Anne sağlığı veya kadın sağlığı hizmetlerine yönelik harcamalar bütçede görünür mü?
+
+☐ Erkeklerin yüksek riskli sağlık sorunlarına yönelik önleyici programlar bütçede yer alıyor mu?
+
+☐ Kırsal veya dezavantajlı bölgelerde sağlık hizmetlerini güçlendirmek için kaynak ayrıldı mı?`,
+
+    "Eğitim": `## Bütçe Hazırlığı — Eğitim Kontrol Listesi
+
+☐ Kız çocuklarının eğitime erişimini artıran programlar bütçede yer alıyor mu?
+
+☐ STEM alanlarında kız öğrencilerin katılımını artırmaya yönelik faaliyetler finanse ediliyor mu?
+
+☐ Okul terk oranlarını azaltmaya yönelik programlar için bütçe tahsisi yapılmış mı?
+
+☐ Eğitim materyalleri ve programları eşitlik perspektifini destekleyecek şekilde finanse ediliyor mu?`,
+
+    "Ulaşım": `## Bütçe Hazırlığı — Ulaşım Kontrol Listesi
+
+☐ Ulaşım güvenliğini artırmaya yönelik altyapı yatırımları için bütçe ayrıldı mı?
+
+☐ Toplu taşıma sistemlerinde güvenlik önlemleri için kaynak tahsis edildi mi?
+
+☐ Engelli bireylerin ulaşım erişimini artıracak yatırımlar bütçede yer alıyor mu?
+
+☐ Kadınların yoğun kullandığı ulaşım güzergahlarında hizmet kalitesini artıracak yatırımlar planlandı mı?`,
+
+    "Tarım": `## Bütçe Hazırlığı — Tarım Kontrol Listesi
+
+☐ Kadın çiftçilere yönelik destek programları için özel bütçe kalemleri var mı?
+
+☐ Tarımsal eğitim ve danışmanlık hizmetlerinden kadınların yararlanmasını artıracak kaynak ayrıldı mı?
+
+☐ Kadın girişimciliğini destekleyen kırsal kalkınma programları bütçede yer alıyor mu?
+
+☐ Tarımsal desteklerin dağılımı kadın ve erkek çiftçiler açısından eşitlik perspektifiyle analiz edildi mi?`,
+
+    "Sosyal Koruma": `## Bütçe Hazırlığı — Sosyal Koruma Kontrol Listesi
+
+☐ Kreş, bakım hizmetleri veya sosyal destek programları için yeterli kaynak ayrıldı mı?
+
+☐ Kadınların işgücüne katılımını destekleyen sosyal programlar bütçede yer alıyor mu?
+
+☐ Sosyal yardımların dağılımı kadın ve erkek yararlanıcılar açısından analiz edildi mi?
+
+☐ Yoksullukla mücadele programları kadınların ekonomik bağımsızlığını destekleyecek şekilde finanse edildi mi?`,
+  },
+
+  "Uygulama": {
+    "Genel": `## Uygulama — Genel Kontrol Listesi
+
+☐ Program ve hizmetlerden yararlananların cinsiyete göre dağılımı düzenli olarak izleniyor mu?
+
+☐ Uygulama sürecinde kadın ve erkeklerin hizmetlere erişiminde engeller tespit edildi mi?
+
+☐ Program uygulamasında eşitlik hedeflerine ulaşmayı destekleyen uygulama mekanizmaları var mı?
+
+☐ Hizmet sunumunda kadın ve erkeklerin geri bildirimleri sistematik olarak toplanıyor mu?`,
+
+    "Sağlık": `## Uygulama — Sağlık Kontrol Listesi
+
+☐ Sağlık hizmetlerinden yararlananların cinsiyet dağılımı izleniyor mu?
+
+☐ Sağlık hizmetleri kırsal veya dezavantajlı bölgelerde kadınlar için erişilebilir mi?
+
+☐ Kadınlara yönelik sağlık hizmetleri uygulamada etkin şekilde sunuluyor mu?
+
+☐ Sağlık hizmetlerinden memnuniyet kadın ve erkekler için ayrı ayrı değerlendiriliyor mu?`,
+
+    "Eğitim": `## Uygulama — Eğitim Kontrol Listesi
+
+☐ Eğitim programlarına katılım oranları cinsiyete göre izleniyor mu?
+
+☐ Okul terk oranları uygulama sürecinde cinsiyete göre takip ediliyor mu?
+
+☐ Eğitim programları kız ve erkek öğrencilerin ihtiyaçlarına uygun şekilde uygulanıyor mu?
+
+☐ Öğrenci başarıları ve fırsat eşitliği göstergeleri düzenli olarak analiz ediliyor mu?`,
+
+    "Ulaşım": `## Uygulama — Ulaşım Kontrol Listesi
+
+☐ Kadınların ulaşım hizmetlerinden yararlanma oranı izleniyor mu?
+
+☐ Ulaşım hizmetlerinde güvenlik sorunları düzenli olarak değerlendiriliyor mu?
+
+☐ Toplu taşıma hizmetleri bakım sorumluluğu olan bireyler için uygun mu?
+
+☐ Ulaşım altyapısı engelli kadın ve erkeklerin kullanımına uygun şekilde uygulanıyor mu?`,
+
+    "Tarım": `## Uygulama — Tarım Kontrol Listesi
+
+☐ Tarım desteklerinden yararlanan kadın çiftçilerin oranı izleniyor mu?
+
+☐ Tarımsal eğitim programlarına kadınların katılımı takip ediliyor mu?
+
+☐ Kadın çiftçilere yönelik destek programları sahada etkin şekilde uygulanıyor mu?
+
+☐ Tarımsal desteklerin dağılımı kadın ve erkekler arasında dengeli mi?`,
+
+    "Sosyal Koruma": `## Uygulama — Sosyal Koruma Kontrol Listesi
+
+☐ Sosyal hizmetlerden yararlananların cinsiyet dağılımı izleniyor mu?
+
+☐ Sosyal programlar kadınların ekonomik güçlenmesine katkı sağlıyor mu?
+
+☐ Bakım hizmetleri kadınların işgücüne katılımını destekliyor mu?
+
+☐ Sosyal hizmetlere erişimde kadın ve erkekler arasında fark var mı?`,
+  },
+
+  "İzleme & Değerlendirme": {
+    "Genel": `## İzleme & Değerlendirme — Genel Kontrol Listesi
+
+☐ Program sonuçları kadın ve erkekler için ayrı ayrı analiz ediliyor mu?
+
+☐ Politika hedeflerine ulaşma düzeyi eşitlik göstergeleri ile ölçülüyor mu?
+
+☐ Program sonuçları eşitsizliklerin azalmasına katkı sağladı mı?
+
+☐ İzleme sonuçları politika ve bütçe süreçlerine geri bildirim olarak kullanılıyor mu?`,
+
+    "Sağlık": `## İzleme & Değerlendirme — Sağlık Kontrol Listesi
+
+☐ Sağlık hizmetlerine erişimde kadın ve erkekler arasındaki fark azaldı mı?
+
+☐ Anne sağlığı ve genel sağlık göstergeleri cinsiyete göre değerlendiriliyor mu?
+
+☐ Sağlık programlarının kadın ve erkekler üzerindeki etkisi ölçülüyor mu?
+
+☐ Sağlık politikası sonuçları eşitlik açısından raporlanıyor mu?`,
+
+    "Eğitim": `## İzleme & Değerlendirme — Eğitim Kontrol Listesi
+
+☐ Eğitimde fırsat eşitliği göstergeleri cinsiyete göre izleniyor mu?
+
+☐ Okul terk oranları ve başarı göstergeleri düzenli olarak analiz ediliyor mu?
+
+☐ Eğitim politikalarının kız ve erkek öğrenciler üzerindeki etkisi ölçülüyor mu?
+
+☐ Eğitim politikası sonuçları eşitlik perspektifi ile raporlanıyor mu?`,
+
+    "Ulaşım": `## İzleme & Değerlendirme — Ulaşım Kontrol Listesi
+
+☐ Kadınların ulaşım güvenliği algısı ölçülüyor mu?
+
+☐ Ulaşım hizmetlerinin kullanım oranları cinsiyete göre analiz ediliyor mu?
+
+☐ Ulaşım yatırımlarının kadın ve erkekler üzerindeki etkisi değerlendiriliyor mu?
+
+☐ Ulaşım politikalarının eşitlik üzerindeki etkisi raporlanıyor mu?`,
+
+    "Tarım": `## İzleme & Değerlendirme — Tarım Kontrol Listesi
+
+☐ Tarım desteklerinden yararlanan kadın çiftçi oranı arttı mı?
+
+☐ Tarımsal programların kadınların gelirine etkisi ölçülüyor mu?
+
+☐ Tarım politikalarının kadın ve erkek çiftçiler üzerindeki etkisi değerlendiriliyor mu?
+
+☐ Tarım desteklerinin dağılımı eşitlik perspektifiyle raporlanıyor mu?`,
+
+    "Sosyal Koruma": `## İzleme & Değerlendirme — Sosyal Koruma Kontrol Listesi
+
+☐ Sosyal programlar kadınların yoksulluk riskini azalttı mı?
+
+☐ Sosyal yardımların dağılımı kadın ve erkekler açısından eşit mi?
+
+☐ Sosyal koruma programlarının kadınların ekonomik bağımsızlığına etkisi ölçülüyor mu?
+
+☐ Sosyal koruma politikalarının eşitlik üzerindeki etkisi düzenli olarak raporlanıyor mu?`,
+  },
+};
+
 // ─── API CALL ─────────────────────────────────────────────────────────────────
 async function callClaude(userContent, systemPrompt, history = [], lang, role) {
   const controller = new AbortController();
@@ -925,7 +1175,21 @@ export default function EsitlikAsistani() {
             {[{ label: L.checklist.phaseLabel, items: L.checklist.phases, val: phase, set: setPhase }, { label: L.checklist.sectorLabel, items: L.checklist.sectors, val: sector, set: setSector }].map(({ label, items, val, set }, idx) => (
               <div key={idx}><div className="muted" style={{ fontWeight: 500, marginBottom: ".4rem" }}>{label}</div><div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}>{items.map((it, i) => <button key={i} className={`seg ${val === i ? "selected" : ""}`} onClick={() => set(i)} style={{ width: "auto" }}>{it}</button>)}</div></div>
             ))}
-            <button className="btn btn-primary" onClick={async () => { setClLoading(true); setClResult(""); const r = await callClaude(buildChecklistPrompt(lang, L.checklist.phases[phase], L.checklist.sectors[sector]), buildSystemPrompt(lang, role)); setClResult(r); setClLoading(false); }} disabled={clLoading}>{clLoading ? L.checklist.generating : L.checklist.generate}</button>
+            <button className="btn btn-primary" onClick={() => {
+              const phaseName = L.checklist.phases[phase];
+              const sectorName = L.checklist.sectors[sector];
+              const preset = CHECKLIST_PRESETS[phaseName]?.[sectorName];
+              if (preset) {
+                setClResult(preset);
+              } else {
+                // fallback to API if no preset found
+                setClLoading(true);
+                setClResult("");
+                callClaude(buildChecklistPrompt(lang, phaseName, sectorName), buildSystemPrompt(lang, role))
+                  .then(r => setClResult(r))
+                  .finally(() => setClLoading(false));
+              }
+            }} disabled={clLoading}>{clLoading ? L.checklist.generating : L.checklist.generate}</button>
             {clLoading && <span className="muted pulse">{L.checklist.generating}</span>}
             {resultCard(clResult)}
           </div>
