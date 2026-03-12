@@ -153,10 +153,10 @@ const LANG = {
         { label: "Presidency of Strategy and Budget (TR)", url: "https://www.sbb.gov.tr" },
         { label: "Ministry of Family and Social Services (TR)", url: "https://www.aile.gov.tr" },
         { label: "UN Women", url: "https://www.unwomen.org" },
-        { label: "UNDP Türkiye", url: "https://www.undp.org/tr/turkiye" },
         { label: "OECD Gender Data Portal", url: "https://www.oecd.org/en/data/datasets/oecd-gender-data-portal.html" },
       ],
     },
+  },
 };
 
 const QUICK_PRESET_RESPONSES = {
