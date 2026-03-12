@@ -996,6 +996,7 @@ export default function EsitlikAsistani() {
   const [lang, setLang] = useState("tr");
   const [activeTab, setActiveTab] = useState(0);
   const [role, setRole] = useState(null);
+  const [confirmedRole, setConfirmedRole] = useState(null);
   const L = LANG[lang];
 
   const [messages, setMessages] = useState([]);
@@ -1034,7 +1035,7 @@ export default function EsitlikAsistani() {
     setChatLoading(true);
     try {
       const history = messages.map(m => ({ role: m.role, content: m.content }));
-      const reply = await callClaude(text, buildSystemPrompt(lang, role), history, lang, role);
+      const reply = await callClaude(text, buildSystemPrompt(lang, confirmedRole), history, lang, confirmedRole);
       setMessages([...newHistory, { role: "assistant", content: reply }]);
     } catch (error) {
       const msg = lang === "tr"
@@ -1048,8 +1049,8 @@ export default function EsitlikAsistani() {
 
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    :root{--bg:#F8F9FA;--surface:#FFFFFF;--primary:#2563EB;--text:#111827;--text-secondary:#6B7280;--border:#E5E7EB;--shadow:0 8px 24px rgba(15,23,42,.06)}
-    @media (prefers-color-scheme: dark){:root{--bg:#0F172A;--surface:#1E293B;--primary:#3B82F6;--text:#F1F5F9;--text-secondary:#94A3B8;--border:#334155;--shadow:0 8px 24px rgba(2,6,23,.45)}}
+    :root{--bg:#F8F9FA;--surface:#FFFFFF;--primary:#2563EB;--text:#111827;--text-secondary:#6B7280;--border:#E5E7EB;--shadow:0 8px 24px rgba(15,23,42,.06);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)}
+    @media (prefers-color-scheme: dark){:root{--bg:#0F172A;--surface:#1E293B;--primary:#3B82F6;--text:#F1F5F9;--text-secondary:#94A3B8;--border:#334155;--shadow:0 8px 24px rgba(2,6,23,.45);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1e40af 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%)}}
     *{box-sizing:border-box}
     body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
     .app{min-height:100vh;background:var(--bg);color:var(--text)}
@@ -1090,7 +1091,7 @@ export default function EsitlikAsistani() {
 
   const resultCard = (content) => content && <div className="surface fade" style={{ padding: "1rem 1.2rem" }}><MD text={content} /></div>;
 
-  if (!role) return (
+  if (!confirmedRole) return (
     <div className="app" suppressHydrationWarning>
       <style>{css}</style>
       <div className="header" style={{ padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1104,13 +1105,47 @@ export default function EsitlikAsistani() {
         <div className="surface" style={{ padding: "1.4rem" }}>
           <h1 style={{ margin: 0, fontSize: "1.7rem", fontWeight: 600 }}>{L.roleSelect.title}</h1>
           <p className="muted" style={{ margin: ".4rem 0 1.3rem" }}>{L.roleSelect.subtitle}</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "0.8rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "0.9rem" }}>
             {L.roleSelect.roles.map(r => (
-              <button key={r.id} className="chip" onClick={() => setRole(r.id)} style={{ textAlign: "left", borderColor: role === r.id ? "var(--primary)" : undefined }}>
-                <div style={{ fontSize: "1.2rem" }}>{r.icon} <span style={{ fontWeight: 600 }}>{r.label}</span></div>
-                <div className="muted" style={{ fontSize: ".86rem" }}>{r.desc}</div>
+              <button
+                key={r.id}
+                onClick={() => setRole(r.id)}
+                style={{
+                  background: role === r.id ? "var(--role-gradient-active)" : "var(--role-gradient)",
+                  border: role === r.id ? "2px solid rgba(255,255,255,0.5)" : "none",
+                  borderRadius: 16,
+                  padding: "28px 24px",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  boxShadow: role === r.id ? "0 14px 32px rgba(37,99,235,0.45), inset 0 0 0 1px rgba(255,255,255,0.2)" : "0 8px 24px rgba(37,99,235,0.35)",
+                  color: "#ffffff",
+                  transition: "all 0.2s ease",
+                  display: "grid",
+                  gap: "0.45rem",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "translateY(-3px)";
+                  e.currentTarget.style.boxShadow = role === r.id
+                    ? "0 14px 32px rgba(37,99,235,0.45), inset 0 0 0 1px rgba(255,255,255,0.2)"
+                    : "0 14px 32px rgba(37,99,235,0.45)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = role === r.id
+                    ? "0 14px 32px rgba(37,99,235,0.45), inset 0 0 0 1px rgba(255,255,255,0.2)"
+                    : "0 8px 24px rgba(37,99,235,0.35)";
+                }}
+              >
+                <div style={{ fontSize: "2em", lineHeight: 1 }}>{r.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: "1.1em", color: "#fff" }}>{r.label}</div>
+                <div style={{ fontSize: "0.82em", color: "rgba(255,255,255,0.75)" }}>{r.desc}</div>
               </button>
             ))}
+          </div>
+          <div style={{ marginTop: "1.1rem", display: "flex", justifyContent: "flex-end" }}>
+            <button className="btn" onClick={() => setConfirmedRole(role)} disabled={!role} style={{ background: "transparent", borderColor: "#fff", color: "var(--text)", borderWidth: 1, borderStyle: "solid" }}>
+              {L.roleSelect.confirm}
+            </button>
           </div>
         </div>
       </div>
@@ -1126,7 +1161,7 @@ export default function EsitlikAsistani() {
           <div><div style={{ fontSize: "1.15rem", fontWeight: 600 }}>{L.appTitle}</div><div className="muted" style={{ fontSize: ".8rem" }}>{L.appSubtitle}</div></div>
         </div>
         <div style={{ display: "flex", gap: ".5rem" }}>
-          <button className="btn btn-ghost" onClick={() => setRole(null)}>{L.chat.changeRole}</button>
+          <button className="btn btn-ghost" onClick={() => { setRole(null); setConfirmedRole(null); }}>{L.chat.changeRole}</button>
           <button className="btn btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")}>{L.langToggle}</button>
         </div>
       </div>
@@ -1163,7 +1198,7 @@ export default function EsitlikAsistani() {
               <div style={{ fontSize: "1.6rem" }}>📄</div><div>{L.docAnalysis.upload}</div><div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.uploadHint}</div>
             </div>
             <div><div className="muted" style={{ fontWeight: 500 }}>{L.docAnalysis.pasteLabel}</div><textarea value={docText} onChange={e => setDocText(e.target.value)} placeholder={L.docAnalysis.pastePlaceholder} style={{ minHeight: 150 }} /></div>
-            <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, docText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }} disabled={docLoading || !docText.trim()}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
+              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, docText), buildSystemPrompt(lang, confirmedRole)); setDocResult(r); setDocLoading(false); }} disabled={docLoading || !docText.trim()}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
             {docLoading && <span className="muted pulse">{L.docAnalysis.analyzing}</span>}
             {resultCard(docResult)}
           </div>
@@ -1185,7 +1220,7 @@ export default function EsitlikAsistani() {
                 // fallback to API if no preset found
                 setClLoading(true);
                 setClResult("");
-                callClaude(buildChecklistPrompt(lang, phaseName, sectorName), buildSystemPrompt(lang, role))
+                callClaude(buildChecklistPrompt(lang, phaseName, sectorName), buildSystemPrompt(lang, confirmedRole))
                   .then(r => setClResult(r))
                   .finally(() => setClLoading(false));
               }
@@ -1203,7 +1238,7 @@ export default function EsitlikAsistani() {
             </div>
             <div><div className="muted" style={{ fontWeight: 500 }}>{L.report.sector}</div><select value={rpForm.sector} onChange={e => setRpForm(f => ({ ...f, sector: e.target.value }))}>{L.checklist.sectors.map((s, i) => <option key={i} value={s}>{s}</option>)}</select></div>
             <div><div className="muted" style={{ fontWeight: 500 }}>{L.report.context}</div><textarea value={rpForm.context} onChange={e => setRpForm(f => ({ ...f, context: e.target.value }))} placeholder={L.report.contextPlaceholder} style={{ minHeight: 96 }} /></div>
-            <button className="btn btn-primary" onClick={async () => { setRpLoading(true); setRpResult(""); const r = await callClaude(buildReportPrompt(lang, rpForm.institution, rpForm.year, rpForm.sector || L.checklist.sectors[0], rpForm.context), buildSystemPrompt(lang, role)); setRpResult(r); setRpLoading(false); }} disabled={rpLoading || !rpForm.institution || !rpForm.year}>{rpLoading ? L.report.generating : L.report.generate}</button>
+            <button className="btn btn-primary" onClick={async () => { setRpLoading(true); setRpResult(""); const r = await callClaude(buildReportPrompt(lang, rpForm.institution, rpForm.year, rpForm.sector || L.checklist.sectors[0], rpForm.context), buildSystemPrompt(lang, confirmedRole)); setRpResult(r); setRpLoading(false); }} disabled={rpLoading || !rpForm.institution || !rpForm.year}>{rpLoading ? L.report.generating : L.report.generate}</button>
             {rpLoading && <span className="muted pulse">{L.report.generating}</span>}
             {resultCard(rpResult)}
           </div>
