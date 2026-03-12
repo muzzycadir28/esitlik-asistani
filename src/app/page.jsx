@@ -1392,7 +1392,7 @@ export default function EsitlikAsistani() {
     .md-content p,.md-content li{font-size:.95rem;line-height:1.75}
     .md-content strong{color:var(--primary);font-weight:600}
     .md-content ul,.md-content ol{padding-left:1.2rem;margin:.35rem 0}
-    .advisor-layout{padding:0;display:flex;flex-direction:row;height:calc(100vh - 120px);overflow:hidden}
+    .advisor-layout{padding:0;display:flex;flex-direction:row;height:calc(100vh - 160px);overflow:hidden}
     .advisor-quick-panel{width:300px;flex-shrink:0;border-right:1px solid var(--border);padding:1rem;position:sticky;top:0;align-self:flex-start}
     .advisor-quick-list{display:grid;grid-template-columns:1fr;gap:.5rem}
     .advisor-chat-panel{flex:1;min-width:0;min-height:0}
@@ -1514,18 +1514,35 @@ export default function EsitlikAsistani() {
               </div>
             </div>
             <div className="advisor-chat-panel">
-            <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-              <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+            <div style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              height: "calc(100vh - 160px)",
+              minHeight: 0,
+              overflow: "hidden"
+            }}>
+              <div style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "16px",
+                minHeight: 0
+              }}>
                 <div className="advisor-chat-messages">
                   {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : m.role === "user" && i === lastUserIndex ? lastUserMsgRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
                   {chatLoading && <div ref={endRef} className="muted pulse">{L.chat.thinking}</div>}
                 </div>
               </div>
-              <div style={{ borderTop: "1px solid var(--border)", padding: "12px", background: "var(--surface)", flexShrink: 0 }}>
-                <div className="advisor-input-row">
-                  <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
-                  <button className="btn btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>{L.chat.send}</button>
-                </div>
+              <div style={{
+                flexShrink: 0,
+                borderTop: "1px solid var(--border)",
+                padding: "12px 16px",
+                background: "var(--surface)",
+                display: "flex",
+                gap: 9
+              }}>
+                <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
+                <button className="btn btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>{L.chat.send}</button>
               </div>
             </div>
             </div>
