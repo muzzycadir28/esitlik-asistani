@@ -146,7 +146,7 @@ const LANG = {
       generate: "Generate Report Draft",
       generating: "Generating…",
     },
-  },    resources: {
+    resources: {
       title: "Reference Institutions and Key Websites",
       subtitle: "Frequently used national and international resources for GRB work",
       links: [
@@ -157,6 +157,7 @@ const LANG = {
         { label: "OECD Gender Data Portal", url: "https://www.oecd.org/en/data/datasets/oecd-gender-data-portal.html" },
       ],
     },
+  },
 };
 
 const QUICK_PRESET_RESPONSES = {
@@ -767,6 +768,13 @@ export default function EsitlikAsistani() {
     .md-content p,.md-content li{font-size:.95rem;line-height:1.75}
     .md-content strong{color:var(--primary);font-weight:600}
     .md-content ul,.md-content ol{padding-left:1.2rem;margin:.35rem 0}
+    .advisor-layout{padding:0;display:grid;grid-template-columns:30% 70%;min-height:calc(100vh - 220px)}
+    .advisor-sidebar{padding:1rem;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:1rem;overflow-y:auto}
+    .advisor-main{padding:1rem;display:flex;flex-direction:column;min-height:0}
+    .advisor-quick{display:grid;grid-template-columns:1fr;gap:.5rem}
+    .advisor-messages{flex:1;min-height:0;overflow-y:auto;display:grid;gap:.75rem;padding-right:.25rem}
+    .advisor-input{position:sticky;bottom:0;display:flex;gap:.5rem;padding-top:.75rem;background:linear-gradient(to bottom, color-mix(in oklab,var(--surface) 40%, transparent), var(--surface) 28%)}
+    @media (max-width:900px){.advisor-layout{grid-template-columns:1fr}.advisor-sidebar{border-right:none;border-bottom:1px solid var(--border)}}
   `;
 
   const resultCard = (content) => content && <div className="surface fade" style={{ padding: "1rem 1.2rem" }}><MD text={content} /></div>;
@@ -816,18 +824,37 @@ export default function EsitlikAsistani() {
         {L.tabs.map((t, i) => <button key={i} className={`tab ${activeTab === i ? "active" : ""}`} onClick={() => setActiveTab(i)}>{t}</button>)}
       </div>
 
-      <div style={{ maxWidth: 900, margin: "1.2rem auto", padding: "0 1rem 1.5rem" }}>
+      <div style={{ maxWidth: 1100, margin: "1.2rem auto", padding: "0 1rem 1.5rem" }}>
         {activeTab === 0 && (
-          <div className="surface" style={{ padding: "1rem", display: "grid", gap: "1rem" }}>
-            <div><div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.chat.quickTitle}</div><div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: ".5rem" }}>{L.chat.quick.map((q, i) => <button key={i} className="chip" onClick={() => sendChat(q)}>{q}</button>)}</div></div>
-            <div style={{ minHeight: 260, maxHeight: 440, overflowY: "auto", display: "grid", gap: ".75rem" }}>
+          <div className="surface advisor-layout">
+            <aside className="advisor-sidebar">
+              <div>
+                <div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.chat.quickTitle}</div>
+                <div className="advisor-quick">{L.chat.quick.map((q, i) => <button key={i} className="chip" onClick={() => sendChat(q)}>{q}</button>)}</div>
+              </div>
+              {L.resources?.links?.length > 0 && (
+                <div>
+                  <div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.resources.title}</div>
+                  <div className="muted" style={{ fontSize: ".8rem", marginBottom: ".6rem" }}>{L.resources.subtitle}</div>
+                  <div style={{ display: "grid", gap: ".5rem" }}>
+                    {L.resources.links.map((link) => (
+                      <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="chip" style={{ textDecoration: "none", display: "block" }}>{link.label}</a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </aside>
+
+            <div className="advisor-main">
+            <div className="advisor-messages">
               {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
               {chatLoading && <div className="muted pulse">{L.chat.thinking}</div>}
               <div ref={endRef} />
             </div>
-            <div style={{ display: "flex", gap: ".5rem" }}>
+            <div className="advisor-input">
               <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
               <button className="btn btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>{L.chat.send}</button>
+            </div>
             </div>
           </div>
         )}
