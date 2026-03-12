@@ -155,7 +155,7 @@ const LANG = {
 
 const QUICK_PRESET_RESPONSES = {
   tr: {
-    "keedb nedir ve neden önemlidir?": `## Kısa Özet
+    "keedb nedir ve neden önemlidir?": `## 
 
 Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu bütçelerinin hazırlanması, uygulanması ve izlenmesi süreçlerinde kadınların ve erkeklerin farklı ihtiyaç ve önceliklerini dikkate alan bir yaklaşımdır. Amaç, kamu kaynaklarının kadın erkek eşitliğini destekleyecek şekilde adil ve etkili kullanılmasını sağlamaktır.
 
@@ -210,7 +210,7 @@ Kadın erkek eşitliği, ekonomik büyüme ve sosyal kalkınma ile doğrudan ili
 ## KEEDB'nin Nihai Hedefi
 
 ➡️ Kadınların ve erkeklerin eşit hak, fırsat ve imkanlara sahip olduğu bir toplum oluşturmaktır.`,
-    "keedb için hangi ilk adımları atabiliriz?": `## Kısa Özet
+    "keedb için hangi ilk adımları atabiliriz?": `##
 
 Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uygulamasına başlamak için genellikle 5 temel ilk adım önerilir:
 
@@ -344,7 +344,7 @@ Bir belediyenin spor tesisleri bütçesini düşünelim:
 - **KEEDB ile:** Kadınların kullandığı spor alanları da planlanır, kadın-erkek kullanım oranı analiz edilir, hizmetler herkes için erişilebilir olur.
 
 ✅ **Özet:** KEEDB kadınlara ayrı bir bütçe oluşturmaz. Ama bütçenin kadınlar ve erkekler için eşit ve adil sonuçlar üretmesini sağlamaya çalışır.`,
-    "keedb'nin temel araçları nelerdir?": `## Kısa Özet
+    "keedb'nin temel araçları nelerdir?": `##
 
 Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu politikası ve bütçe süreçlerinde kadın ve erkeklerin farklı ihtiyaç ve etkilerini dikkate almak için çeşitli analiz, planlama, izleme ve raporlama araçları kullanır.
 
@@ -371,7 +371,7 @@ Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu politikası ve büt
 - **İzleme:** İzleme ve değerlendirme
 
 ✅ Bu araçlar birlikte kullanıldığında bütçe sürecinin tamamına eşitlik perspektifi yerleştirilmiş olur.`,
-    "keedb hangi politika döngüsü aşamalarında uygulanabilir?": `## Kısa Özet
+    "keedb hangi politika döngüsü aşamalarında uygulanabilir?": `##
 
 Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) yalnızca bütçe hazırlama aşamasında değil, kamu politika döngüsünün tüm aşamalarında uygulanabilir.
 
@@ -388,7 +388,7 @@ Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) yalnızca bütçe hazırl
 5️⃣ **İzleme ve Değerlendirme** — Eşitliğe duyarlı performans göstergeleri, bütçe etkisinin değerlendirilmesi, politika sonuçlarının kadınlar ve erkekler üzerindeki etkisinin analizi.
 
 ✅ **Sonuç:** KEEDB, bütçenin yalnızca hazırlanmasında değil; politika geliştirme, planlama, uygulama ve değerlendirme süreçlerinin tamamında uygulanabilen bir yaklaşımdır.`,
-    "dünya'dan başarılı örnekler paylaşır mısın?": `## Kısa Özet
+    "dünya'dan başarılı örnekler paylaşır mısın?": `##
 
 Dünyada KEEDB uygulamasında öne çıkan birçok başarılı örnek vardır. Özellikle Avusturya, İsveç ve Güney Kore KEEDB'yi bütçe sistemine kurumsal olarak entegre etmiş ülkeler arasında gösterilir.
 
