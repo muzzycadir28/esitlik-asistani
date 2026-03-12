@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
+import bgImage from "../lib/background.webp";
 
 
 // ─── LANGUAGE STRINGS ────────────────────────────────────────────────────────
@@ -1399,7 +1400,7 @@ export default function EsitlikAsistani() {
               <div className="advisor-quick-list">{L.chat.quick.map((q, i) => <button key={i} className="chip" onClick={() => sendChat(q, true)} style={{ background: activeQuick === q ? 'var(--accent)' : 'var(--surface)', color: activeQuick === q ? '#ffffff' : 'var(--text-secondary)', border: `1px solid ${activeQuick === q ? 'var(--accent)' : 'var(--border)'}`, fontWeight: activeQuick === q ? 600 : 400 }}>{q}</button>)}</div>
             </div>
             <div className="advisor-chat-panel">
-            <div className="advisor-chat-messages">
+            <div className="advisor-chat-messages" style={{ backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}>
               {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : m.role === "user" && i === lastUserIndex ? lastUserMsgRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
               {chatLoading && <div ref={endRef} className="muted pulse">{L.chat.thinking}</div>}
             </div>
