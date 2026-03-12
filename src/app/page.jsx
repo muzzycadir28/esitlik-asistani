@@ -748,6 +748,17 @@ export default function EsitlikAsistani() {
     .md-content p,.md-content li{font-size:.95rem;line-height:1.75}
     .md-content strong{color:var(--primary);font-weight:600}
     .md-content ul,.md-content ol{padding-left:1.2rem;margin:.35rem 0}
+    .advisor-layout{padding:0;display:flex;flex-direction:row;min-height:560px}
+    .advisor-quick-panel{width:300px;flex-shrink:0;border-right:1px solid var(--border);padding:1rem;position:sticky;top:0;align-self:flex-start}
+    .advisor-quick-list{display:grid;grid-template-columns:1fr;gap:.5rem}
+    .advisor-chat-panel{flex:1;padding:1rem;display:flex;flex-direction:column;gap:1rem;min-width:0}
+    .advisor-chat-messages{flex:1;min-height:260px;max-height:520px;overflow-y:auto;display:grid;gap:.75rem}
+    .advisor-input-row{display:flex;gap:.5rem}
+    @media (max-width: 767px){
+      .advisor-layout{flex-direction:column}
+      .advisor-quick-panel{width:100%;position:static;border-right:none;border-bottom:1px solid var(--border)}
+      .advisor-chat-messages{max-height:440px}
+    }
   `;
 
   const resultCard = (content) => content && <div className="surface fade" style={{ padding: "1rem 1.2rem" }}><MD text={content} /></div>;
@@ -799,16 +810,21 @@ export default function EsitlikAsistani() {
 
       <div style={{ maxWidth: 900, margin: "1.2rem auto", padding: "0 1rem 1.5rem" }}>
         {activeTab === 0 && (
-          <div className="surface" style={{ padding: "1rem", display: "grid", gap: "1rem" }}>
-            <div><div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.chat.quickTitle}</div><div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: ".5rem" }}>{L.chat.quick.map((q, i) => <button key={i} className="chip" onClick={() => sendChat(q)}>{q}</button>)}</div></div>
-            <div style={{ minHeight: 260, maxHeight: 440, overflowY: "auto", display: "grid", gap: ".75rem" }}>
+          <div className="surface advisor-layout">
+            <div className="advisor-quick-panel">
+              <div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.chat.quickTitle}</div>
+              <div className="advisor-quick-list">{L.chat.quick.map((q, i) => <button key={i} className="chip" onClick={() => sendChat(q)}>{q}</button>)}</div>
+            </div>
+            <div className="advisor-chat-panel">
+            <div className="advisor-chat-messages">
               {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
               {chatLoading && <div className="muted pulse">{L.chat.thinking}</div>}
               <div ref={endRef} />
             </div>
-            <div style={{ display: "flex", gap: ".5rem" }}>
+            <div className="advisor-input-row">
               <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
               <button className="btn btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>{L.chat.send}</button>
+            </div>
             </div>
           </div>
         )}
