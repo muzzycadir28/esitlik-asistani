@@ -1,5 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
+import * as pdfjsLib from "pdfjs-dist";
+import mammoth from "mammoth";
 import bgImage from "../lib/background.webp";
 
 
@@ -43,7 +45,13 @@ const LANG = {
       title: "Belge Analizi",
       subtitle: "Strateji planı, proje taslağı veya bütçe dokümanınızı yükleyin",
       upload: "Dosya seçin veya buraya sürükleyin",
-      uploadHint: ".txt dosyaları desteklenir — veya metni aşağıya yapıştırın",
+      uploadHint: "Desteklenen formatlar: .txt, .pdf, .doc, .docx",
+      uploadSection: "Dosya yükleme",
+      pasteSection: "Veya metin yapıştırın",
+      clear: "Temizle",
+      selectedFile: "Yüklenen dosya",
+      charCount: "Karakter",
+      wordCount: "Analiz edilecek kelime",
       pasteLabel: "Ya da metni buraya yapıştırın",
       pastePlaceholder: "Analiz edilecek belge metnini buraya yapıştırın…",
       analyze: "KEEDB Analizi Yap",
@@ -109,7 +117,13 @@ const LANG = {
       title: "Document Analysis",
       subtitle: "Upload your strategic plan, project draft or budget document",
       upload: "Choose file or drag here",
-      uploadHint: ".txt files supported — or paste text below",
+      uploadHint: "Supported formats: .txt, .pdf, .doc, .docx",
+      uploadSection: "File upload",
+      pasteSection: "Or paste text",
+      clear: "Clear",
+      selectedFile: "Uploaded file",
+      charCount: "Characters",
+      wordCount: "Words to analyze",
       pasteLabel: "Or paste text here",
       pastePlaceholder: "Paste the document text to be analyzed here…",
       analyze: "Run GRB Analysis",
@@ -486,49 +500,26 @@ Rules:
 - Give a brief summary first, use bullet points, suggest actionable steps.`;
 };
 
-const buildDocPrompt = (lang, text) => lang === "tr"
-  ? `Aşağıdaki kamu belgesi metnini Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) perspektifinden analiz et.
+const buildDocPrompt = (lang, text) => {
+  const truncated = text.slice(0, 3000);
+  if (lang === "tr") return `Aşağıdaki belgeyi KEEDB perspektifinden analiz et (maks 400 kelime):
 
-BELGE:
-${text}
+${truncated}
 
-## 1. Genel KEEDB Değerlendirmesi
-Belgenin mevcut KEEDB seviyesini kısaca değerlendir (Başlangıç / Gelişmekte / İleri).
+Şunları yaz:
+1. KEEDB seviyesi (Başlangıç/Gelişmekte/İleri)
+2. Tespit edilen 3 ana sorun
+3. En önemli 5 öneri (uygulanabilir adımlar olarak)`;
 
-## 2. Tespit Edilen Sorunlar
-Cinsiyet körü ifadeler, eksik veri noktaları ve KEEDB açıklarını listele.
+  return `Analyse the following document from a GRB perspective (max 400 words):
 
-## 3. Güçlü Yanlar
-Varsa mevcut olumlu KEEDB unsurlarını belirt.
+${truncated}
 
-## 4. Öncelikli Öneriler
-En kritik 5 iyileştirme önerisini uygulanabilir adımlar olarak sırala.
-
-## 5. Örnek Yeniden Yazımlar
-2-3 somut paragraf/madde için KEEDB uyumlu alternatif ifadeler öner.
-
-Cevabın sonunda kullandığın kaynakları APA 7 formatında listele.`
-  : `Analyze the following public document text from a Gender Responsive Budgeting (GRB) perspective.
-
-DOCUMENT:
-${text}
-
-## 1. Overall GRB Assessment
-Briefly assess the document's current GRB level (Beginner / Developing / Advanced).
-
-## 2. Issues Identified
-List gender-blind language, missing data points and GRB gaps.
-
-## 3. Strengths
-Note any existing positive GRB elements if present.
-
-## 4. Priority Recommendations
-List the 5 most critical improvement recommendations as actionable steps.
-
-## 5. Sample Rewrites
-Suggest GRB-compliant alternative language for 2-3 specific paragraphs/items.
-
-Add an APA 7 reference list at the end.`;
+Include:
+1. GRB level (Beginner/Developing/Advanced)
+2. Top 3 issues identified
+3. Top 5 priority recommendations (as actionable steps)`;
+};
 
 const buildChecklistPrompt = (lang, phase, sector) => lang === "tr"
   ? `"${phase}" aşaması ve "${sector}" sektörü için Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) kontrol listesi oluştur.
@@ -1217,8 +1208,77 @@ export default function EsitlikAsistani() {
   const lastUserMsgRef = useRef(null);
 
   const [docText, setDocText] = useState("");
+  const [pastedDocText, setPastedDocText] = useState("");
+  const [docFileName, setDocFileName] = useState("");
+  const [docFileChars, setDocFileChars] = useState(0);
+  const [docDragActive, setDocDragActive] = useState(false);
   const [docResult, setDocResult] = useState("");
   const [docLoading, setDocLoading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const getExtension = (name = "") => {
+    const parts = name.toLowerCase().split(".");
+    return parts.length > 1 ? `.${parts.pop()}` : "";
+  };
+
+  const readTxtFile = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => resolve(String(ev.target?.result || ""));
+    reader.onerror = () => reject(new Error("Failed to read text file."));
+    reader.readAsText(file);
+  });
+
+  const extractPdfText = async (file) => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      pages.push(content.items.map((item) => item.str).join(" "));
+    }
+    return pages.join("\n");
+  };
+
+  const extractDocText = async (file) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value;
+  };
+
+  const handleDocFile = async (file) => {
+    if (!file) return;
+    const extension = getExtension(file.name);
+    const supported = [".txt", ".pdf", ".doc", ".docx"];
+    if (!supported.includes(extension)) return;
+
+    setDocLoading(true);
+    setDocResult("");
+    try {
+      let extracted = "";
+      if (extension === ".txt") extracted = await readTxtFile(file);
+      if (extension === ".pdf") extracted = await extractPdfText(file);
+      if (extension === ".doc" || extension === ".docx") extracted = await extractDocText(file);
+      setDocText(extracted);
+      setDocFileName(file.name);
+      setDocFileChars(extracted.length);
+    } finally {
+      setDocLoading(false);
+    }
+  };
+
+  const clearDocInputs = () => {
+    setDocText("");
+    setPastedDocText("");
+    setDocFileName("");
+    setDocFileChars(0);
+    setDocResult("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const analysisText = docText.trim() ? docText : pastedDocText;
+  const analysisWordCount = analysisText.trim() ? analysisText.trim().split(/\s+/).length : 0;
 
   const [phase, setPhase] = useState(0);
   const [sector, setSector] = useState(0);
@@ -1415,11 +1475,65 @@ export default function EsitlikAsistani() {
         {activeTab === 1 && (
           <div className="surface" style={{ padding: "1rem", display: "grid", gap: "1rem" }}>
             <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.docAnalysis.title}</div><div className="muted">{L.docAnalysis.subtitle}</div></div>
-            <div style={{ border: "2px dashed var(--border)", borderRadius: 10, padding: "1.2rem", textAlign: "center" }} onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) { const r = new FileReader(); r.onload = ev => setDocText(ev.target.result); r.readAsText(f); } }}>
-              <div style={{ fontSize: "1.6rem" }}>📄</div><div>{L.docAnalysis.upload}</div><div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.uploadHint}</div>
+            <div>
+              <div className="muted" style={{ fontWeight: 500, marginBottom: ".4rem" }}>{L.docAnalysis.uploadSection}</div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".txt,.pdf,.doc,.docx"
+                style={{ display: "none" }}
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (f) await handleDocFile(f);
+                }}
+              />
+              <div
+                role="button"
+                tabIndex={0}
+                style={{
+                  border: `2px dashed ${docDragActive ? "var(--primary)" : "var(--border)"}`,
+                  borderRadius: 10,
+                  padding: "1.2rem",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  background: docDragActive ? "rgba(37,99,235,.06)" : "transparent",
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDocDragActive(true);
+                }}
+                onDragLeave={() => setDocDragActive(false)}
+                onDrop={async (e) => {
+                  e.preventDefault();
+                  setDocDragActive(false);
+                  const f = e.dataTransfer.files?.[0];
+                  if (f) await handleDocFile(f);
+                }}
+              >
+                <div style={{ fontSize: "1.6rem" }}>📄</div><div>{L.docAnalysis.upload}</div><div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.uploadHint}</div>
+                {docFileName && (
+                  <div className="muted" style={{ marginTop: ".5rem", fontSize: ".85rem" }}>
+                    {L.docAnalysis.selectedFile}: <strong>{docFileName}</strong> • {docFileChars} {L.docAnalysis.charCount}
+                  </div>
+                )}
+              </div>
             </div>
-            <div><div className="muted" style={{ fontWeight: 500 }}>{L.docAnalysis.pasteLabel}</div><textarea value={docText} onChange={e => setDocText(e.target.value)} placeholder={L.docAnalysis.pastePlaceholder} style={{ minHeight: 150 }} /></div>
-              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, docText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }} disabled={docLoading || !docText.trim()}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
+            <div>
+              <div className="muted" style={{ fontWeight: 500 }}>{L.docAnalysis.pasteSection}</div>
+              <textarea value={pastedDocText} onChange={e => setPastedDocText(e.target.value)} placeholder={L.docAnalysis.pastePlaceholder} style={{ minHeight: 150 }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: ".75rem", flexWrap: "wrap" }}>
+              <div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.wordCount}: {analysisWordCount}</div>
+              <button className="btn" onClick={clearDocInputs}>{L.docAnalysis.clear}</button>
+            </div>
+              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, analysisText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }} disabled={docLoading || !analysisText.trim()}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
             {docLoading && <span className="muted pulse">{L.docAnalysis.analyzing}</span>}
             {resultCard(docResult)}
           </div>
