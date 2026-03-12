@@ -70,16 +70,7 @@ const LANG = {
       generate: "Rapor Taslağı Oluştur",
       generating: "Oluşturuluyor…",
     },
-      resources: {
-      title: "Referans Kurumlar ve Önemli Web Siteleri",
-      subtitle: "KEEDB çalışmalarında sık başvurulan ulusal ve uluslararası kaynaklar",
-      links: [
-        { label: "T.C. Strateji ve Bütçe Başkanlığı", url: "https://www.sbb.gov.tr" },
-        { label: "T.C. Aile ve Sosyal Hizmetler Bakanlığı", url: "https://www.aile.gov.tr" },
-        { label: "UN Women", url: "https://www.unwomen.org" },
-        { label: "OECD Gender Data Portal", url: "https://www.oecd.org/en/data/datasets/oecd-gender-data-portal.html" },
-      ],
-    },},
+  },
   en: {
     appTitle: "Equality Assistant",
     appSubtitle: "Gender Responsive Budgeting Advisory System",
@@ -146,17 +137,7 @@ const LANG = {
       generate: "Generate Report Draft",
       generating: "Generating…",
     },
-  },    resources: {
-      title: "Reference Institutions and Key Websites",
-      subtitle: "Frequently used national and international resources for GRB work",
-      links: [
-        { label: "Presidency of Strategy and Budget (TR)", url: "https://www.sbb.gov.tr" },
-        { label: "Ministry of Family and Social Services (TR)", url: "https://www.aile.gov.tr" },
-        { label: "UN Women", url: "https://www.unwomen.org" },
-        { label: "UNDP Türkiye", url: "https://www.undp.org/tr/turkiye" },
-        { label: "OECD Gender Data Portal", url: "https://www.oecd.org/en/data/datasets/oecd-gender-data-portal.html" },
-      ],
-    },
+  },
 };
 
 const QUICK_PRESET_RESPONSES = {
