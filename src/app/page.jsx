@@ -960,8 +960,10 @@ export default function EsitlikAsistani() {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [activeQuick, setActiveQuick] = useState(null);
   const endRef = useRef(null);
   const lastAssistantRef = useRef(null);
+  const lastUserMsgRef = useRef(null);
 
   const [docText, setDocText] = useState("");
   const [docResult, setDocResult] = useState("");
@@ -976,14 +978,16 @@ export default function EsitlikAsistani() {
   const [rpResult, setRpResult] = useState("");
   const [rpLoading, setRpLoading] = useState(false);
 
-  const sendChat = async (override) => {
+  const sendChat = async (override, fromQuick = false) => {
     const text = override ?? chatInput;
     if (!text.trim() || chatLoading) return;
+    if (fromQuick) setActiveQuick(text);
+    else setActiveQuick(null);
     setChatInput("");
     const newHistory = [...messages, { role: "user", content: text }];
     setMessages(newHistory);
     requestAnimationFrame(() => {
-      endRef.current?.scrollIntoView({ behavior: "smooth" });
+      lastUserMsgRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
     const presetReply = getQuickPresetResponse(lang, text);
@@ -1017,11 +1021,12 @@ export default function EsitlikAsistani() {
   };
 
   const lastAssistantIndex = [...messages].map((m) => m.role).lastIndexOf("assistant");
+  const lastUserIndex = [...messages].map((m) => m.role).lastIndexOf("user");
 
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    :root{--bg:#F8F9FA;--surface:#FFFFFF;--primary:#2563EB;--text:#111827;--text-secondary:#6B7280;--border:#E5E7EB;--shadow:0 8px 24px rgba(15,23,42,.06);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)}
-    @media (prefers-color-scheme: dark){:root{--bg:#0F172A;--surface:#1E293B;--primary:#3B82F6;--text:#F1F5F9;--text-secondary:#94A3B8;--border:#334155;--shadow:0 8px 24px rgba(2,6,23,.45);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1e40af 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%)}}
+    :root{--bg:#F8F9FA;--surface:#FFFFFF;--primary:#2563EB;--accent:#2563EB;--text:#111827;--text-secondary:#6B7280;--border:#E5E7EB;--shadow:0 8px 24px rgba(15,23,42,.06);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)}
+    @media (prefers-color-scheme: dark){:root{--bg:#0F172A;--surface:#1E293B;--primary:#3B82F6;--accent:#3B82F6;--text:#F1F5F9;--text-secondary:#94A3B8;--border:#334155;--shadow:0 8px 24px rgba(2,6,23,.45);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1e40af 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%)}}
     *{box-sizing:border-box}
     body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
     .app{min-height:100vh;background:var(--bg);color:var(--text)}
@@ -1141,13 +1146,12 @@ export default function EsitlikAsistani() {
           <div className="surface advisor-layout">
             <div className="advisor-quick-panel">
               <div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.chat.quickTitle}</div>
-              <div className="advisor-quick-list">{L.chat.quick.map((q, i) => <button key={i} className="chip" onClick={() => sendChat(q)}>{q}</button>)}</div>
+              <div className="advisor-quick-list">{L.chat.quick.map((q, i) => <button key={i} className="chip" onClick={() => sendChat(q, true)} style={{ background: activeQuick === q ? 'var(--accent)' : 'var(--surface)', color: activeQuick === q ? '#ffffff' : 'var(--text-secondary)', border: `1px solid ${activeQuick === q ? 'var(--accent)' : 'var(--border)'}`, fontWeight: activeQuick === q ? 600 : 400 }}>{q}</button>)}</div>
             </div>
             <div className="advisor-chat-panel">
             <div className="advisor-chat-messages">
-              {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
-              {chatLoading && <div className="muted pulse">{L.chat.thinking}</div>}
-              <div ref={endRef} />
+              {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : m.role === "user" && i === lastUserIndex ? lastUserMsgRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
+              {chatLoading && <div ref={endRef} className="muted pulse">{L.chat.thinking}</div>}
             </div>
             <div className="advisor-input-row">
               <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
