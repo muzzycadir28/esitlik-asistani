@@ -1,5 +1,8 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
+import * as pdfjsLib from "pdfjs-dist";
+import mammoth from "mammoth";
+import bgImage from "../lib/background.webp";
 
 
 // ─── LANGUAGE STRINGS ────────────────────────────────────────────────────────
@@ -19,7 +22,6 @@ const LANG = {
         { id: "academic", label: "Akademisyen", icon: "🎓", desc: "Araştırmacı, öğretim üyesi" },
         { id: "ngo", label: "Sivil Toplum", icon: "🤝", desc: "STK, vakıf, savunuculuk kuruluşu" },
       ],
-      confirm: "Devam Et",
     },
     chat: {
       quickTitle: "Hızlı Sorular",
@@ -43,7 +45,13 @@ const LANG = {
       title: "Belge Analizi",
       subtitle: "Strateji planı, proje taslağı veya bütçe dokümanınızı yükleyin",
       upload: "Dosya seçin veya buraya sürükleyin",
-      uploadHint: ".txt dosyaları desteklenir — veya metni aşağıya yapıştırın",
+      uploadHint: "Desteklenen formatlar: .txt, .pdf, .doc, .docx",
+      uploadSection: "Dosya yükleme",
+      pasteSection: "Veya metin yapıştırın",
+      clear: "Temizle",
+      selectedFile: "Yüklenen dosya",
+      charCount: "Karakter",
+      wordCount: "Analiz edilecek kelime",
       pasteLabel: "Ya da metni buraya yapıştırın",
       pastePlaceholder: "Analiz edilecek belge metnini buraya yapıştırın…",
       analyze: "KEEDB Analizi Yap",
@@ -70,16 +78,7 @@ const LANG = {
       generate: "Rapor Taslağı Oluştur",
       generating: "Oluşturuluyor…",
     },
-      resources: {
-      title: "Referans Kurumlar ve Önemli Web Siteleri",
-      subtitle: "KEEDB çalışmalarında sık başvurulan ulusal ve uluslararası kaynaklar",
-      links: [
-        { label: "T.C. Strateji ve Bütçe Başkanlığı", url: "https://www.sbb.gov.tr" },
-        { label: "T.C. Aile ve Sosyal Hizmetler Bakanlığı", url: "https://www.aile.gov.tr" },
-        { label: "UN Women", url: "https://www.unwomen.org" },
-        { label: "OECD Gender Data Portal", url: "https://www.oecd.org/en/data/datasets/oecd-gender-data-portal.html" },
-      ],
-    },},
+  },
   en: {
     appTitle: "Equality Assistant",
     appSubtitle: "Gender Responsive Budgeting Advisory System",
@@ -95,7 +94,6 @@ const LANG = {
         { id: "academic", label: "Academic", icon: "🎓", desc: "Researcher or faculty member" },
         { id: "ngo", label: "Civil Society", icon: "🤝", desc: "NGO, foundation or advocacy organization" },
       ],
-      confirm: "Continue",
     },
     chat: {
       quickTitle: "Quick Questions",
@@ -119,7 +117,13 @@ const LANG = {
       title: "Document Analysis",
       subtitle: "Upload your strategic plan, project draft or budget document",
       upload: "Choose file or drag here",
-      uploadHint: ".txt files supported — or paste text below",
+      uploadHint: "Supported formats: .txt, .pdf, .doc, .docx",
+      uploadSection: "File upload",
+      pasteSection: "Or paste text",
+      clear: "Clear",
+      selectedFile: "Uploaded file",
+      charCount: "Characters",
+      wordCount: "Words to analyze",
       pasteLabel: "Or paste text here",
       pastePlaceholder: "Paste the document text to be analyzed here…",
       analyze: "Run GRB Analysis",
@@ -146,17 +150,7 @@ const LANG = {
       generate: "Generate Report Draft",
       generating: "Generating…",
     },
-  },    resources: {
-      title: "Reference Institutions and Key Websites",
-      subtitle: "Frequently used national and international resources for GRB work",
-      links: [
-        { label: "Presidency of Strategy and Budget (TR)", url: "https://www.sbb.gov.tr" },
-        { label: "Ministry of Family and Social Services (TR)", url: "https://www.aile.gov.tr" },
-        { label: "UN Women", url: "https://www.unwomen.org" },
-        { label: "UNDP Türkiye", url: "https://www.undp.org/tr/turkiye" },
-        { label: "OECD Gender Data Portal", url: "https://www.oecd.org/en/data/datasets/oecd-gender-data-portal.html" },
-      ],
-    },
+  },
 };
 
 const QUICK_PRESET_RESPONSES = {
@@ -318,6 +312,112 @@ Sorulabilecek sorular:
 - programları bu hedeflere göre tasarla
 - bütçeyi bu faaliyetlere yönlendir
 - sonuçları düzenli olarak izle`,
+    "keedb sadece kadınlara yönelik bir bütçe midir?": `## Kısa Cevap
+
+Hayır. Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) sadece kadınlara yönelik ayrı bir bütçe değildir. Amaç, kamu bütçesinin kadınlar ve erkekler üzerindeki farklı etkilerini analiz ederek daha adil ve eşit bir kaynak dağılımı sağlamaktır.
+
+## KEEDB Ne Değildir?
+
+KEEDB çoğu zaman yanlış anlaşılır. Şunlar KEEDB değildir:
+
+- ❌ Sadece kadınlara ayrılmış ayrı bir bütçe
+- ❌ Kadın projeleri için ekstra bir fon
+- ❌ Sadece sosyal politikalarla sınırlı bir yaklaşım
+
+Aslında KEEDB, tüm kamu bütçesine eşitlik perspektifi ekleyen bir yöntemdir.
+
+## KEEDB Aslında Nedir?
+
+KEEDB, bütçe süreçlerinde şu soruların sorulmasını sağlar:
+
+- Bu politika kadınları ve erkekleri nasıl etkiliyor?
+- Kamu hizmetlerinden kim daha fazla yararlanıyor?
+- Kaynak dağılımı eşitsizlikleri azaltıyor mu yoksa artırıyor mu?
+
+Bu nedenle KEEDB; planlama, bütçe hazırlama, uygulama ve izleme & değerlendirme aşamalarının tamamına eşitlik perspektifini entegre eder.
+
+## Basit Bir Örnek
+
+Bir belediyenin spor tesisleri bütçesini düşünelim:
+
+- **KEEDB olmadan:** Futbol sahalarına ağırlık verilir, kim kullandığı analiz edilmez, kaynaklar eşit kullanılmayabilir.
+- **KEEDB ile:** Kadınların kullandığı spor alanları da planlanır, kadın-erkek kullanım oranı analiz edilir, hizmetler herkes için erişilebilir olur.
+
+✅ **Özet:** KEEDB kadınlara ayrı bir bütçe oluşturmaz. Ama bütçenin kadınlar ve erkekler için eşit ve adil sonuçlar üretmesini sağlamaya çalışır.`,
+    "keedb'nin temel araçları nelerdir?": `## Kısa Özet
+
+Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu politikası ve bütçe süreçlerinde kadın ve erkeklerin farklı ihtiyaç ve etkilerini dikkate almak için çeşitli analiz, planlama, izleme ve raporlama araçları kullanır.
+
+## KEEDB'nin Temel Araçları
+
+1️⃣ **Kadın Erkek Eşitliği Analizi** — Politika, program veya bütçelerin kadınlar ve erkekler üzerindeki etkisini inceler. Kadın ve erkeklerin farklı ihtiyaçlarını, hizmetlere erişimi, kaynak dağılımını ve mevcut eşitsizlikleri analiz eder.
+
+2️⃣ **Cinsiyete Göre Ayrıştırılmış Veri ve Göstergeler** — Kadın/erkek istihdam oranı, eğitimde kız/erkek öğrenci sayısı, kamu hizmetlerinden yararlanan kadın ve erkek sayısı gibi veriler eşitlik sorunlarının tespitini sağlar.
+
+3️⃣ **Kadın Erkek Eşitliğine Duyarlı Bütçe Analizi** — Mevcut bütçenin eşitlik açısından değerlendirilmesidir. Bütçe kimlere fayda sağlıyor? Kaynak dağılımı eşitsizlikleri azaltıyor mu?
+
+4️⃣ **Kadın Erkek Eşitliğine Duyarlı Planlama** — Stratejik plan, program ve faaliyetlerin eşitlik perspektifiyle tasarlanmasıdır. Eşitliğin politika hedeflerine entegre edilmesini sağlar.
+
+5️⃣ **Bütçe Takibi (Expenditure Tracking)** — Kamu harcamalarının gerçekten eşitlik hedeflerine gidip gitmediğini izler. Hesap verebilirliği artırır.
+
+6️⃣ **Kadın Erkek Eşitliğine Duyarlı İzleme ve Değerlendirme** — Program ve bütçelerin sonuçlarını değerlendirir. Kadın istihdamındaki artış, kamu hizmetlerine erişim ve karar alma süreçlerine katılım gibi göstergeler kullanılır.
+
+## KEEDB Araçlarının Bütçe Döngüsündeki Yeri
+
+- **Sorun analizi:** Eşitlik analizi, veri ve göstergeler
+- **Planlama:** KEEDB planlama ve hedef belirleme
+- **Bütçe hazırlama:** Bütçe analizi
+- **Uygulama:** Harcama takibi
+- **İzleme:** İzleme ve değerlendirme
+
+✅ Bu araçlar birlikte kullanıldığında bütçe sürecinin tamamına eşitlik perspektifi yerleştirilmiş olur.`,
+    "keedb hangi politika döngüsü aşamalarında uygulanabilir?": `## Kısa Özet
+
+Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) yalnızca bütçe hazırlama aşamasında değil, kamu politika döngüsünün tüm aşamalarında uygulanabilir.
+
+## KEEDB'nin Uygulanabildiği Aşamalar
+
+1️⃣ **Sorun Analizi / Gündem Belirleme** — Kadın ve erkeklerin farklı ihtiyaçlarının belirlenmesi, cinsiyete göre ayrıştırılmış verilerin kullanılması ve eşitsizliklerin tespiti. Örnek: Ulaşım politikası hazırlanırken kadınların gece ulaşım güvenliği sorunlarının analiz edilmesi.
+
+2️⃣ **Politika ve Program Tasarımı** — Eşitliğe duyarlı hedef ve göstergeler belirleme, kadın ve erkeklerin ihtiyaçlarına uygun politika araçları geliştirme. Örnek: Kadın istihdamını artırmaya yönelik eğitim programlarının tasarlanması.
+
+3️⃣ **Bütçe Hazırlama** — Kadın erkek eşitliğine duyarlı bütçe analizi, eşitlik hedeflerine uygun kaynak dağılımı. Bu aşamada bütçenin kimlere fayda sağladığı analiz edilir.
+
+4️⃣ **Uygulama** — Kadın ve erkeklerin hizmetlere erişiminin izlenmesi, harcamaların eşitlik hedeflerine uygun kullanılması.
+
+5️⃣ **İzleme ve Değerlendirme** — Eşitliğe duyarlı performans göstergeleri, bütçe etkisinin değerlendirilmesi, politika sonuçlarının kadınlar ve erkekler üzerindeki etkisinin analizi.
+
+✅ **Sonuç:** KEEDB, bütçenin yalnızca hazırlanmasında değil; politika geliştirme, planlama, uygulama ve değerlendirme süreçlerinin tamamında uygulanabilen bir yaklaşımdır.`,
+    "dünya'dan başarılı örnekler paylaşır mısın?": `## Kısa Özet
+
+Dünyada KEEDB uygulamasında öne çıkan birçok başarılı örnek vardır. Özellikle Avusturya, İsveç ve Güney Kore KEEDB'yi bütçe sistemine kurumsal olarak entegre etmiş ülkeler arasında gösterilir.
+
+## Dünyadan Başarılı KEEDB Örnekleri
+
+🇦🇹 **Avusturya – Anayasal Düzeyde KEEDB**
+2009'da bütçe reformu ile eşitlik hedefleri bütçe sistemine dahil edildi. Tüm kamu kurumları eşitliğe duyarlı performans hedefleri belirlemek zorundadır. Bütçe belgelerinde Gender Budget Statement yer alır.
+
+🇸🇪 **İsveç – Politika Anaakımlaştırması**
+Tüm politika alanlarında eşitlik etkisi analizi yapılır. Bakanlıklar bütçe tekliflerinde kadın ve erkek üzerindeki etkileri analiz eder. Eğitim, istihdam ve bakım ekonomisi politikalarında eşitsizlikleri azaltan reformlar yapılmıştır.
+
+🇰🇷 **Güney Kore – Bütçe Belgelerinde KEEDB**
+Her yıl Gender Budget Statement hazırlanır, uygulamadan sonra Gender Budget Report yayımlanır. 30'dan fazla kamu kurumu eşitlik etkisi analizleri yapar.
+
+🇪🇸 **İspanya – Bölgesel KEEDB Uygulamaları**
+Endülüs Bölgesi öncü örneklerden biridir. Bütçe tekliflerinde eşitlik etki raporu hazırlanır, kadın girişimciliği ve sosyal hizmetlere ayrılan bütçe artırılmıştır.
+
+🇷🇼 **Ruanda – Afrika'nın En İyi Örneklerinden Biri**
+Tüm bakanlıklar Gender Budget Statement hazırlar. Eğitim ve sağlık hizmetlerine kadınların erişimi önemli ölçüde artmıştır.
+
+## Başarılı Uygulamaların Ortak Özellikleri
+
+- **Yasal çerçeve:** KEEDB'nin mevzuat veya anayasa ile desteklenmesi
+- **Veri sistemi:** Cinsiyete göre ayrıştırılmış veri kullanımı
+- **Kurumsal sorumluluk:** Bakanlıkların eşitlik hedefleri belirlemesi
+- **Bütçe belgeleri:** Gender Budget Statement gibi resmi belgeler
+- **İzleme:** Bütçe etkisinin düzenli olarak değerlendirilmesi
+
+💡 Dünya genelinde KEEDB 80'den fazla ülkede çeşitli düzeylerde uygulanmaktadır.`,
     "türkiye'den başarılı bir örnek paylaşır mısın?": `## 🇹🇷 Türkiye'den KEEDB Başarılı Uygulama Örneği
 
 ### Yerel Yönetimlerde Pilot KEEDB Uygulamaları
@@ -365,152 +465,61 @@ const ROLE_LABELS = {
 
 // ─── SYSTEM PROMPTS ───────────────────────────────────────────────────────────
 const buildSystemPrompt = (lang, role) => {
-  const rolCtx = {
+  const roleCtx = {
     tr: {
-      official: "Kullanıcı merkezi kamu idaresinde çalışan bir kamu görevlisidir. Bakanlık düzeyinde bütçe süreçleri, performans programları, stratejik planlar ve faaliyet raporları bağlamında öneriler geliştir.",
-      local: "Kullanıcı bir belediye veya il özel idaresinde çalışmaktadır. Yerel bütçe süreçleri, meclis kararları, mahalle düzeyinde hizmet planlaması ve yerel eşitlik planları bağlamında yanıt ver.",
-      academic: "Kullanıcı bir akademisyen veya araştırmacıdır. Akademik kaynaklar, metodoloji, ders entegrasyonu ve araştırma tasarımı konularında kapsamlı bilgi sun.",
-      ngo: "Kullanıcı bir STK veya sivil toplum kuruluşu temsilcisidir. Savunuculuk stratejileri, izleme araçları, paydaş katılımı ve kapasite geliştirme konularına odaklan.",
+      official: "Merkezi kamu idaresi çalışanı — bakanlık düzeyinde bütçe ve stratejik plan odaklı yanıt ver.",
+      local: "Belediye veya il özel idaresi çalışanı — yerel bütçe ve hizmet planlaması odaklı yanıt ver.",
+      academic: "Akademisyen veya araştırmacı — metodoloji ve akademik kaynak odaklı yanıt ver.",
+      ngo: "STK temsilcisi — savunuculuk, izleme ve kapasite geliştirme odaklı yanıt ver.",
     },
     en: {
-      official: "The user is a public official working in central government. Provide recommendations in the context of ministry-level budget processes, performance programs, strategic plans and activity reports.",
-      local: "The user works in a municipality or provincial administration. Respond in the context of local budget processes, council decisions, neighbourhood-level service planning and local equality plans.",
-      academic: "The user is an academic or researcher. Provide comprehensive information on academic sources, methodology, course integration and research design.",
-      ngo: "The user is a representative of an NGO or civil society organization. Focus on advocacy strategies, monitoring tools, stakeholder engagement and capacity building.",
+      official: "Central government staff — focus on ministry-level budget and strategic planning.",
+      local: "Municipality staff — focus on local budget and service planning.",
+      academic: "Researcher — focus on methodology and academic sources.",
+      ngo: "NGO representative — focus on advocacy, monitoring and capacity building.",
     },
   };
 
-  if (lang === "tr") return `Sen "Eşitlik Asistanı" adlı, Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) konusunda uzmanlaşmış bir yapay zeka danışmanısın.
+  if (lang === "tr") return `Sen Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uzmanı bir yapay zeka danışmanısın.
+Kullanıcı profili: ${roleCtx.tr[role] || roleCtx.tr.official}
+Görevin: KEEDB konusunda bilgi, rehberlik ve pratik öneriler sun.
+Kurallar:
+- "Kadın erkek eşitliği" ifadesini kullan, "toplumsal cinsiyet" yerine.
+- Emin olmadığın bilgiyi uydurma.
+- Siyasi yorum yapma, tarafsız ol.
+- Konu dışı sorularda kibarca yönlendir: "Ben Eşitlik Asistanıyım 😊 KEEDB konusuna dönelim."
+- Önce kısa özet ver, madde işaretleri kullan, uygulanabilir adımlar öner.`;
 
-## KİMLİĞİN VE MİSYONUN
-Temel görevin; yöneticilere, kamu görevlilerine, yerel yönetim çalışanlarına, akademisyenlere ve sivil toplum temsilcilerine KEEDB konusunda bilgi, rehberlik ve pratik öneriler sunmaktır.
-
-## TERMİNOLOJİ KURALLARI
-- Türkçe yanıtlarda DAIMA "Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB)" ifadesini kullan.
-- "Toplumsal cinsiyet" yerine "kadın erkek eşitliği" ifadesini tercih et.
-- Teknik terimleri ilk kullanımda parantez içinde açıkla.
-
-## KULLANICI PROFİLİ
-${rolCtx.tr[role] || rolCtx.tr.official}
-
-## GÖREVLERIN
-1. **Temel Bilgi:** KEEDB'nin ne olduğunu, neden önemli olduğunu, yasal ve politik çerçeveyi açıkla.
-2. **Yol Göster:** Planlama ve bütçeleme süreçlerinde eşitlikçi adımlar için rehberlik et. Şablonlar, kontrol listeleri ve örnekler sun.
-3. **Politika Tavsiyeleri:** Kullanıcının bağlamına uygun pratik ve stratejik öneriler geliştir.
-4. **Örnekler:** Türkiye'den iyi uygulamalar ve uluslararası literatürden kısa örnekler sun.
-
-## DAVRANIŞ KURALLARI
-- Emin olmadığın bilgiyi ASLA uydurma; "Bu konuda güncel veri gerekmektedir" veya "Kurumun resmi belgelerini inceleyiniz" de.
-- Siyasi yorum yapma, kanıta dayalı ve tarafsız ol.
-- Hem kadınların hem erkeklerin eşitliği bağlamında öneriler geliştir; kapsayıcı bir dil kullan.
-- Saygılı, motive edici ve gerektiğinde hafif esprili bir ton benimse.
-- Konu dışı sorularda kibar ve espirili şekilde yanıtla, ardından kullanıcıyı KEEDB'ye yönlendir. Örnek: "Güzel bir soru! Ama ben Eşitlik Asistanıyım 😊. İstersen şimdi bütçende eşitlik yolculuğuna geri dönelim."
-
-## YANIT FORMATI
-- Önce kısa özet (2-3 cümle), sonra kullanıcı isterse detay.
-- Madde işaretleri, tablolar ve kontrol listeleri kullan.
-- Önerilerini uygulanabilir adımlar şeklinde ver.
-- Belgeye atıf yapıyorsan cevabın sonunda APA 7 formatında kaynakça ekle.
-
-## REFERANS DOKÜMAN
-Sana "Kadın Erkek Eşitliğine Duyarlı Planlama ve Bütçeleme Eğitici Rehberi" (UN Women / AB, Mayıs 2024) dokümanı verilmiştir. Bu doküman 10 modülden oluşmakta olup KEEDB'nin kavramsal çerçevesi, uygulama araçları, analiz yöntemleri, istatistikler, izleme ve kurumsallaşma konularını kapsamaktadır. Yanıtlarında ÖNCE bu dokümanı kullan; içeriğe atıf yaparken "Eğitici Rehberi (2024), Modül X" gibi belirt.
-
-## KAYNAK ÖNCELİĞİ
-1. Sana verilen KEEDB Eğitici Rehberi (önce bunu kontrol et)
-2. Kullanıcının yüklediği belgeler
-3. Resmi Türk kaynakları: sp.gov.tr, ilgili bakanlık web siteleri
-4. Uluslararası kaynaklar: OECD, UN Women, UNDP, Dünya Bankası, IMF
-5. Genel bilgi (yalnızca yukarıdakilerde bulunamazsa)
-
-Kullanıcı link paylaşırsa: "Paylaştığınız bağlantı için teşekkürler. Şu an dış kaynaklı belgeleri doğrudan açamıyorum. Eğer dosyayı buraya yükleyebilirseniz memnuniyetle yardımcı olurum." de.`;
-
-  return `You are "Equality Assistant", an AI advisor specializing in Gender Responsive Budgeting (GRB).
-
-## YOUR IDENTITY AND MISSION
-Your core mission is to provide information, guidance and practical recommendations on GRB to policymakers, public officials, local government staff, academics and civil society representatives.
-
-## TERMINOLOGY RULES
-- In English responses, ALWAYS use "Gender Responsive Budgeting (GRB)".
-- Explain technical terms in parentheses on first use.
-
-## USER PROFILE
-${rolCtx.en[role] || rolCtx.en.official}
-
-## YOUR TASKS
-1. **Core Knowledge:** Explain what GRB is, why it matters, and its legal and policy framework.
-2. **Guidance:** Guide users through equality-focused steps in planning and budgeting. Provide templates, checklists and examples.
-3. **Policy Advice:** Develop practical and strategic recommendations tailored to the user's context.
-4. **Examples:** Share good practices from Turkey and brief examples from international literature.
-
-## BEHAVIOURAL RULES
-- NEVER fabricate uncertain information; say "Current data is needed on this" or "Please consult the institution's official documents."
-- Do not make political commentary; be evidence-based and impartial.
-- Develop recommendations in the context of equality for both women and men; use inclusive language.
-- Adopt a respectful, motivating and occasionally lightly humorous tone.
-- For off-topic questions, respond politely and humorously, then redirect to GRB. Example: "Great question! But I'm the Equality Assistant 😊. Shall we get back to your budgeting journey?"
-
-## RESPONSE FORMAT
-- Brief summary first (2-3 sentences), then detail if the user requests it.
-- Use bullet points, tables and checklists.
-- Present recommendations as actionable steps.
-- If citing a document, add an APA 7 reference list at the end of your response.
-
-## REFERENCE DOCUMENT
-You have been provided with the "Gender Responsive Planning and Budgeting Trainer's Guide" (UN Women / EU, May 2024). This document consists of 10 modules covering GRB conceptual framework, implementation tools, analysis methods, statistics, monitoring and institutionalisation. In your responses, USE THIS DOCUMENT FIRST; when citing content, indicate "Trainer's Guide (2024), Module X".
-
-## SOURCE PRIORITY
-1. The GRB Trainer's Guide provided to you (check this first)
-2. User-uploaded documents
-3. Official Turkish sources: sp.gov.tr, relevant ministry websites
-4. International sources: OECD, UN Women, UNDP, World Bank, IMF
-5. General knowledge (only if not found in the above)
-
-If the user shares a link: "Thank you for the link. I can't open external documents directly right now. If you can upload the file here, I'd be happy to help."`;
+  return `You are an AI advisor specializing in Gender Responsive Budgeting (GRB).
+User profile: ${roleCtx.en[role] || roleCtx.en.official}
+Your task: Provide information, guidance and practical recommendations on GRB.
+Rules:
+- Never fabricate uncertain information.
+- Be evidence-based and impartial.
+- For off-topic questions, redirect: "I'm the Equality Assistant 😊 Let's get back to GRB."
+- Give a brief summary first, use bullet points, suggest actionable steps.`;
 };
 
-const buildDocPrompt = (lang, text) => lang === "tr"
-  ? `Aşağıdaki kamu belgesi metnini Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) perspektifinden analiz et.
+const buildDocPrompt = (lang, text) => {
+  const truncated = text.slice(0, 3000);
+  if (lang === "tr") return `Aşağıdaki belgeyi KEEDB perspektifinden analiz et (maks 400 kelime):
 
-BELGE:
-${text}
+${truncated}
 
-## 1. Genel KEEDB Değerlendirmesi
-Belgenin mevcut KEEDB seviyesini kısaca değerlendir (Başlangıç / Gelişmekte / İleri).
+Şunları yaz:
+1. KEEDB seviyesi (Başlangıç/Gelişmekte/İleri)
+2. Tespit edilen 3 ana sorun
+3. En önemli 5 öneri (uygulanabilir adımlar olarak)`;
 
-## 2. Tespit Edilen Sorunlar
-Cinsiyet körü ifadeler, eksik veri noktaları ve KEEDB açıklarını listele.
+  return `Analyse the following document from a GRB perspective (max 400 words):
 
-## 3. Güçlü Yanlar
-Varsa mevcut olumlu KEEDB unsurlarını belirt.
+${truncated}
 
-## 4. Öncelikli Öneriler
-En kritik 5 iyileştirme önerisini uygulanabilir adımlar olarak sırala.
-
-## 5. Örnek Yeniden Yazımlar
-2-3 somut paragraf/madde için KEEDB uyumlu alternatif ifadeler öner.
-
-Cevabın sonunda kullandığın kaynakları APA 7 formatında listele.`
-  : `Analyze the following public document text from a Gender Responsive Budgeting (GRB) perspective.
-
-DOCUMENT:
-${text}
-
-## 1. Overall GRB Assessment
-Briefly assess the document's current GRB level (Beginner / Developing / Advanced).
-
-## 2. Issues Identified
-List gender-blind language, missing data points and GRB gaps.
-
-## 3. Strengths
-Note any existing positive GRB elements if present.
-
-## 4. Priority Recommendations
-List the 5 most critical improvement recommendations as actionable steps.
-
-## 5. Sample Rewrites
-Suggest GRB-compliant alternative language for 2-3 specific paragraphs/items.
-
-Add an APA 7 reference list at the end.`;
+Include:
+1. GRB level (Beginner/Developing/Advanced)
+2. Top 3 issues identified
+3. Top 5 priority recommendations (as actionable steps)`;
+};
 
 const buildChecklistPrompt = (lang, phase, sector) => lang === "tr"
   ? `"${phase}" aşaması ve "${sector}" sektörü için Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) kontrol listesi oluştur.
@@ -564,6 +573,506 @@ Additional context: ${context || "Not provided"}
 
 Include concrete recommendations, sample indicators and references to international good practices in each section.`;
 
+const CHECKLIST_PRESETS = {
+  "Politika Tasarımı": {
+    "Genel": `## Politika Tasarımı — Genel Kontrol Listesi
+
+☐ Bu politika alanında kadınlar ve erkekler arasında erişim, kullanım veya sonuç açısından fark var mı ve bu fark hangi verilerle ortaya konmuştur?
+
+☐ Politika hazırlanırken cinsiyete göre ayrıştırılmış veri kullanıldı mı ve veri kaynağı nedir?
+
+☐ Politika hedefleri kadın ve erkeklerin farklı ihtiyaçlarını dikkate alacak şekilde tasarlandı mı?
+
+☐ Politikanın uygulanması sonucunda eşitsizliklerin azalmasına yönelik ölçülebilir hedefler belirlendi mi?`,
+
+    "Sağlık": `## Politika Tasarımı — Sağlık Kontrol Listesi
+
+☐ Kadın ve erkeklerin sağlık hizmetlerine erişiminde coğrafi veya sosyoekonomik farklılıklar analiz edildi mi?
+
+☐ Anne sağlığı, üreme sağlığı veya erkeklere özgü sağlık riskleri gibi cinsiyete özgü sağlık ihtiyaçları politika tasarımında dikkate alındı mı?
+
+☐ Sağlık hizmetlerinin kullanım oranları cinsiyete göre analiz edilerek politika hedeflerine yansıtıldı mı?
+
+☐ Politika kadınların veya erkeklerin sağlık hizmetlerine erişimini artırmak için özel program veya hizmetler içeriyor mu?`,
+
+    "Eğitim": `## Politika Tasarımı — Eğitim Kontrol Listesi
+
+☐ Kız ve erkek çocukların eğitime erişim ve devam durumları cinsiyete göre analiz edildi mi?
+
+☐ Eğitim politikası kız ve erkek öğrencilerin farklı öğrenme ve fırsat ihtiyaçlarını dikkate alıyor mu?
+
+☐ Okul terk oranları veya başarı düzeyleri cinsiyete göre değerlendirilerek politika hedeflerine yansıtıldı mı?
+
+☐ Politika kız çocuklarının eğitimde karşılaştığı yapısal engelleri azaltacak önlemler içeriyor mu?`,
+
+    "Ulaşım": `## Politika Tasarımı — Ulaşım Kontrol Listesi
+
+☐ Kadın ve erkeklerin ulaşım kullanım alışkanlıkları veri temelli olarak analiz edildi mi?
+
+☐ Ulaşım güvenliği (aydınlatma, durak güvenliği vb.) açısından kadınların deneyimleri politika tasarımına dahil edildi mi?
+
+☐ Ulaşım politikası bakım sorumluluğu olan bireylerin çoklu yolculuk ihtiyaçlarını dikkate alıyor mu?
+
+☐ Engelli kadın ve erkeklerin ulaşım hizmetlerine erişimi politika tasarımında değerlendirildi mi?`,
+
+    "Tarım": `## Politika Tasarımı — Tarım Kontrol Listesi
+
+☐ Tarım politikası hazırlanırken kadın ve erkek çiftçilerin üretim kaynaklarına erişimi analiz edildi mi?
+
+☐ Tarımsal destek programlarından yararlananların cinsiyet dağılımı incelendi mi?
+
+☐ Kadın çiftçilerin eğitim, kredi ve kooperatiflere erişim durumları politika analizine dahil edildi mi?
+
+☐ Politika kadınların tarımsal üretimdeki rolünü güçlendirecek hedefler içeriyor mu?`,
+
+    "Sosyal Koruma": `## Politika Tasarımı — Sosyal Koruma Kontrol Listesi
+
+☐ Sosyal yardım ve hizmet programlarının kadın ve erkeklere etkisi analiz edildi mi?
+
+☐ Bakım sorumluluğunun kadınlar üzerindeki etkisi politika tasarımında dikkate alındı mı?
+
+☐ Sosyal koruma politikaları kadınların ekonomik güçlenmesini destekleyecek şekilde tasarlandı mı?
+
+☐ Politika dezavantajlı gruplardaki kadın ve erkekler için özel destek mekanizmaları içeriyor mu?`,
+  },
+
+  "Bütçe Hazırlığı": {
+    "Genel": `## Bütçe Hazırlığı — Genel Kontrol Listesi
+
+☐ Politika hedefleri bütçe programlarına eşitlik perspektifi ile yansıtıldı mı?
+
+☐ Bütçe hazırlanırken kamu harcamalarının kadın ve erkekler üzerindeki farklı etkileri analiz edildi mi?
+
+☐ Eşitlik hedeflerini destekleyen faaliyetler için ayrı bütçe kalemleri oluşturuldu mu?
+
+☐ Performans göstergeleri kadın ve erkekler için ayrı ayrı ölçülebilecek şekilde tanımlandı mı?`,
+
+    "Sağlık": `## Bütçe Hazırlığı — Sağlık Kontrol Listesi
+
+☐ Kadınların sağlık hizmetlerine erişimini artıracak programlar için yeterli bütçe ayrıldı mı?
+
+☐ Anne sağlığı veya kadın sağlığı hizmetlerine yönelik harcamalar bütçede görünür mü?
+
+☐ Erkeklerin yüksek riskli sağlık sorunlarına yönelik önleyici programlar bütçede yer alıyor mu?
+
+☐ Kırsal veya dezavantajlı bölgelerde sağlık hizmetlerini güçlendirmek için kaynak ayrıldı mı?`,
+
+    "Eğitim": `## Bütçe Hazırlığı — Eğitim Kontrol Listesi
+
+☐ Kız çocuklarının eğitime erişimini artıran programlar bütçede yer alıyor mu?
+
+☐ STEM alanlarında kız öğrencilerin katılımını artırmaya yönelik faaliyetler finanse ediliyor mu?
+
+☐ Okul terk oranlarını azaltmaya yönelik programlar için bütçe tahsisi yapılmış mı?
+
+☐ Eğitim materyalleri ve programları eşitlik perspektifini destekleyecek şekilde finanse ediliyor mu?`,
+
+    "Ulaşım": `## Bütçe Hazırlığı — Ulaşım Kontrol Listesi
+
+☐ Ulaşım güvenliğini artırmaya yönelik altyapı yatırımları için bütçe ayrıldı mı?
+
+☐ Toplu taşıma sistemlerinde güvenlik önlemleri için kaynak tahsis edildi mi?
+
+☐ Engelli bireylerin ulaşım erişimini artıracak yatırımlar bütçede yer alıyor mu?
+
+☐ Kadınların yoğun kullandığı ulaşım güzergahlarında hizmet kalitesini artıracak yatırımlar planlandı mı?`,
+
+    "Tarım": `## Bütçe Hazırlığı — Tarım Kontrol Listesi
+
+☐ Kadın çiftçilere yönelik destek programları için özel bütçe kalemleri var mı?
+
+☐ Tarımsal eğitim ve danışmanlık hizmetlerinden kadınların yararlanmasını artıracak kaynak ayrıldı mı?
+
+☐ Kadın girişimciliğini destekleyen kırsal kalkınma programları bütçede yer alıyor mu?
+
+☐ Tarımsal desteklerin dağılımı kadın ve erkek çiftçiler açısından eşitlik perspektifiyle analiz edildi mi?`,
+
+    "Sosyal Koruma": `## Bütçe Hazırlığı — Sosyal Koruma Kontrol Listesi
+
+☐ Kreş, bakım hizmetleri veya sosyal destek programları için yeterli kaynak ayrıldı mı?
+
+☐ Kadınların işgücüne katılımını destekleyen sosyal programlar bütçede yer alıyor mu?
+
+☐ Sosyal yardımların dağılımı kadın ve erkek yararlanıcılar açısından analiz edildi mi?
+
+☐ Yoksullukla mücadele programları kadınların ekonomik bağımsızlığını destekleyecek şekilde finanse edildi mi?`,
+  },
+
+  "Uygulama": {
+    "Genel": `## Uygulama — Genel Kontrol Listesi
+
+☐ Program ve hizmetlerden yararlananların cinsiyete göre dağılımı düzenli olarak izleniyor mu?
+
+☐ Uygulama sürecinde kadın ve erkeklerin hizmetlere erişiminde engeller tespit edildi mi?
+
+☐ Program uygulamasında eşitlik hedeflerine ulaşmayı destekleyen uygulama mekanizmaları var mı?
+
+☐ Hizmet sunumunda kadın ve erkeklerin geri bildirimleri sistematik olarak toplanıyor mu?`,
+
+    "Sağlık": `## Uygulama — Sağlık Kontrol Listesi
+
+☐ Sağlık hizmetlerinden yararlananların cinsiyet dağılımı izleniyor mu?
+
+☐ Sağlık hizmetleri kırsal veya dezavantajlı bölgelerde kadınlar için erişilebilir mi?
+
+☐ Kadınlara yönelik sağlık hizmetleri uygulamada etkin şekilde sunuluyor mu?
+
+☐ Sağlık hizmetlerinden memnuniyet kadın ve erkekler için ayrı ayrı değerlendiriliyor mu?`,
+
+    "Eğitim": `## Uygulama — Eğitim Kontrol Listesi
+
+☐ Eğitim programlarına katılım oranları cinsiyete göre izleniyor mu?
+
+☐ Okul terk oranları uygulama sürecinde cinsiyete göre takip ediliyor mu?
+
+☐ Eğitim programları kız ve erkek öğrencilerin ihtiyaçlarına uygun şekilde uygulanıyor mu?
+
+☐ Öğrenci başarıları ve fırsat eşitliği göstergeleri düzenli olarak analiz ediliyor mu?`,
+
+    "Ulaşım": `## Uygulama — Ulaşım Kontrol Listesi
+
+☐ Kadınların ulaşım hizmetlerinden yararlanma oranı izleniyor mu?
+
+☐ Ulaşım hizmetlerinde güvenlik sorunları düzenli olarak değerlendiriliyor mu?
+
+☐ Toplu taşıma hizmetleri bakım sorumluluğu olan bireyler için uygun mu?
+
+☐ Ulaşım altyapısı engelli kadın ve erkeklerin kullanımına uygun şekilde uygulanıyor mu?`,
+
+    "Tarım": `## Uygulama — Tarım Kontrol Listesi
+
+☐ Tarım desteklerinden yararlanan kadın çiftçilerin oranı izleniyor mu?
+
+☐ Tarımsal eğitim programlarına kadınların katılımı takip ediliyor mu?
+
+☐ Kadın çiftçilere yönelik destek programları sahada etkin şekilde uygulanıyor mu?
+
+☐ Tarımsal desteklerin dağılımı kadın ve erkekler arasında dengeli mi?`,
+
+    "Sosyal Koruma": `## Uygulama — Sosyal Koruma Kontrol Listesi
+
+☐ Sosyal hizmetlerden yararlananların cinsiyet dağılımı izleniyor mu?
+
+☐ Sosyal programlar kadınların ekonomik güçlenmesine katkı sağlıyor mu?
+
+☐ Bakım hizmetleri kadınların işgücüne katılımını destekliyor mu?
+
+☐ Sosyal hizmetlere erişimde kadın ve erkekler arasında fark var mı?`,
+  },
+
+  "İzleme & Değerlendirme": {
+    "Genel": `## İzleme & Değerlendirme — Genel Kontrol Listesi
+
+☐ Program sonuçları kadın ve erkekler için ayrı ayrı analiz ediliyor mu?
+
+☐ Politika hedeflerine ulaşma düzeyi eşitlik göstergeleri ile ölçülüyor mu?
+
+☐ Program sonuçları eşitsizliklerin azalmasına katkı sağladı mı?
+
+☐ İzleme sonuçları politika ve bütçe süreçlerine geri bildirim olarak kullanılıyor mu?`,
+
+    "Sağlık": `## İzleme & Değerlendirme — Sağlık Kontrol Listesi
+
+☐ Sağlık hizmetlerine erişimde kadın ve erkekler arasındaki fark azaldı mı?
+
+☐ Anne sağlığı ve genel sağlık göstergeleri cinsiyete göre değerlendiriliyor mu?
+
+☐ Sağlık programlarının kadın ve erkekler üzerindeki etkisi ölçülüyor mu?
+
+☐ Sağlık politikası sonuçları eşitlik açısından raporlanıyor mu?`,
+
+    "Eğitim": `## İzleme & Değerlendirme — Eğitim Kontrol Listesi
+
+☐ Eğitimde fırsat eşitliği göstergeleri cinsiyete göre izleniyor mu?
+
+☐ Okul terk oranları ve başarı göstergeleri düzenli olarak analiz ediliyor mu?
+
+☐ Eğitim politikalarının kız ve erkek öğrenciler üzerindeki etkisi ölçülüyor mu?
+
+☐ Eğitim politikası sonuçları eşitlik perspektifi ile raporlanıyor mu?`,
+
+    "Ulaşım": `## İzleme & Değerlendirme — Ulaşım Kontrol Listesi
+
+☐ Kadınların ulaşım güvenliği algısı ölçülüyor mu?
+
+☐ Ulaşım hizmetlerinin kullanım oranları cinsiyete göre analiz ediliyor mu?
+
+☐ Ulaşım yatırımlarının kadın ve erkekler üzerindeki etkisi değerlendiriliyor mu?
+
+☐ Ulaşım politikalarının eşitlik üzerindeki etkisi raporlanıyor mu?`,
+
+    "Tarım": `## İzleme & Değerlendirme — Tarım Kontrol Listesi
+
+☐ Tarım desteklerinden yararlanan kadın çiftçi oranı arttı mı?
+
+☐ Tarımsal programların kadınların gelirine etkisi ölçülüyor mu?
+
+☐ Tarım politikalarının kadın ve erkek çiftçiler üzerindeki etkisi değerlendiriliyor mu?
+
+☐ Tarım desteklerinin dağılımı eşitlik perspektifiyle raporlanıyor mu?`,
+
+    "Sosyal Koruma": `## İzleme & Değerlendirme — Sosyal Koruma Kontrol Listesi
+
+☐ Sosyal programlar kadınların yoksulluk riskini azalttı mı?
+
+☐ Sosyal yardımların dağılımı kadın ve erkekler açısından eşit mi?
+
+☐ Sosyal koruma programlarının kadınların ekonomik bağımsızlığına etkisi ölçülüyor mu?
+
+☐ Sosyal koruma politikalarının eşitlik üzerindeki etkisi düzenli olarak raporlanıyor mu?`,
+  },
+};
+
+const CHECKLIST_PRESETS_EN = {
+  "Policy Design": {
+    "General": `## Policy Design — General Checklist
+
+☐ Are there differences between women and men in terms of access, use, or outcomes in this policy area, and what data sources demonstrate these differences?
+
+☐ Were sex-disaggregated data used during policy design, and what are the sources of these data?
+
+☐ Are the policy objectives designed to address the different needs and priorities of women and men?
+
+☐ Have measurable targets been established to reduce gender inequalities as a result of the policy implementation?`,
+
+    "Health": `## Policy Design — Health Checklist
+
+☐ Have geographical or socioeconomic disparities between women and men in accessing health services been analysed?
+
+☐ Are gender-specific health needs, such as maternal health, reproductive health, or male-specific health risks, considered in the policy design?
+
+☐ Have the utilization rates of health services been analysed by sex and integrated into policy objectives?
+
+☐ Does the policy include specific programmes or services aimed at improving access to healthcare for women or men?`,
+
+    "Education": `## Policy Design — Education Checklist
+
+☐ Have access to and retention in education for girls and boys been analysed using sex-disaggregated data?
+
+☐ Does the education policy address the different learning needs and opportunities of female and male students?
+
+☐ Have school dropout rates and academic achievement been analysed by sex and reflected in policy targets?
+
+☐ Does the policy include measures to address structural barriers faced by girls in education?`,
+
+    "Transport": `## Policy Design — Transport Checklist
+
+☐ Have travel patterns and mobility needs of women and men been analysed using evidence-based data?
+
+☐ Are women's safety experiences in transport systems (e.g., lighting, safety at stops and stations) considered in policy design?
+
+☐ Does the transport policy address the multi-stop travel patterns often associated with care responsibilities?
+
+☐ Has the accessibility of transport services for women and men with disabilities been considered?`,
+
+    "Agriculture": `## Policy Design — Agriculture Checklist
+
+☐ Have differences between women and men in access to productive resources (land, credit, inputs) been analysed?
+
+☐ Has the gender distribution of beneficiaries of agricultural support programmes been examined?
+
+☐ Are women farmers' access to training, finance, and cooperatives considered in the policy analysis?
+
+☐ Does the policy include objectives to strengthen women's participation and empowerment in agricultural production?`,
+
+    "Social Protection": `## Policy Design — Social Protection Checklist
+
+☐ Have the impacts of social assistance and services on women and men been analysed?
+
+☐ Has the burden of unpaid care work, particularly on women, been considered in policy design?
+
+☐ Are social protection policies designed to support women's economic empowerment and labour market participation?
+
+☐ Does the policy include targeted support mechanisms for disadvantaged groups of women and men?`,
+  },
+
+  "Budget Preparation": {
+    "General": `## Budget Preparation — General Checklist
+
+☐ Are policy objectives integrated into budget programmes from a gender equality perspective?
+
+☐ During budget preparation, have the different impacts of public expenditure on women and men been analysed?
+
+☐ Have specific budget allocations been established to support gender equality objectives?
+
+☐ Are performance indicators defined in a way that allows results to be measured separately for women and men?`,
+
+    "Health": `## Budget Preparation — Health Checklist
+
+☐ Is sufficient funding allocated to programmes aimed at improving women's access to healthcare services?
+
+☐ Are expenditures related to maternal health and women's health services clearly visible in the budget?
+
+☐ Do budget allocations include preventive programmes addressing major health risks affecting men?
+
+☐ Are resources allocated to strengthen healthcare services in rural or disadvantaged areas?`,
+
+    "Education": `## Budget Preparation — Education Checklist
+
+☐ Does the budget include programmes aimed at increasing girls' access to education?
+
+☐ Are initiatives promoting girls' participation in STEM fields adequately financed?
+
+☐ Are there budget allocations for programmes aimed at reducing school dropout rates?
+
+☐ Are educational materials and programmes financed in ways that promote gender equality in education?`,
+
+    "Transport": `## Budget Preparation — Transport Checklist
+
+☐ Are funds allocated for infrastructure improvements that enhance transport safety?
+
+☐ Are resources dedicated to safety measures in public transport systems?
+
+☐ Does the budget include investments that improve accessibility for persons with disabilities?
+
+☐ Are investments planned to improve service quality on transport routes frequently used by women?`,
+
+    "Agriculture": `## Budget Preparation — Agriculture Checklist
+
+☐ Are there dedicated budget allocations for programmes supporting women farmers?
+
+☐ Are resources allocated to increase women's participation in agricultural training and advisory services?
+
+☐ Are rural development programmes supporting women's entrepreneurship in agriculture included in the budget?
+
+☐ Has the distribution of agricultural subsidies been analysed from a gender equality perspective?`,
+
+    "Social Protection": `## Budget Preparation — Social Protection Checklist
+
+☐ Are sufficient resources allocated for childcare, care services, or social support programmes?
+
+☐ Does the budget include programmes aimed at supporting women's labour force participation?
+
+☐ Has the distribution of social benefits been analysed by sex of beneficiaries?
+
+☐ Are poverty reduction programmes financed in ways that support women's economic independence?`,
+  },
+
+  "Implementation": {
+    "General": `## Implementation — General Checklist
+
+☐ Is the distribution of beneficiaries by sex regularly monitored during programme implementation?
+
+☐ Have barriers affecting women's and men's access to services been identified during implementation?
+
+☐ Are there implementation mechanisms supporting the achievement of gender equality objectives?
+
+☐ Are feedback and experiences from women and men users systematically collected?`,
+
+    "Health": `## Implementation — Health Checklist
+
+☐ Is the sex distribution of healthcare service users regularly monitored?
+
+☐ Are healthcare services accessible to women in rural or disadvantaged areas?
+
+☐ Are programmes targeting women's health effectively delivered in practice?
+
+☐ Is user satisfaction with healthcare services assessed separately for women and men?`,
+
+    "Education": `## Implementation — Education Checklist
+
+☐ Are participation rates in education programmes monitored by sex?
+
+☐ Are school dropout rates tracked separately for girls and boys?
+
+☐ Are education programmes implemented in ways that address the needs of both girls and boys?
+
+☐ Are student achievement indicators regularly analysed to assess equality of opportunity?`,
+
+    "Transport": `## Implementation — Transport Checklist
+
+☐ Is the rate of women's use of transport services monitored?
+
+☐ Are safety concerns in transport systems regularly assessed?
+
+☐ Are public transport services designed to accommodate users with care responsibilities?
+
+☐ Is transport infrastructure implemented in a way that ensures accessibility for women and men with disabilities?`,
+
+    "Agriculture": `## Implementation — Agriculture Checklist
+
+☐ Is the share of women farmers benefiting from agricultural subsidies monitored?
+
+☐ Is women's participation in agricultural training programmes tracked?
+
+☐ Are programmes supporting women farmers effectively implemented in practice?
+
+☐ Is the distribution of agricultural support balanced between women and men farmers?`,
+
+    "Social Protection": `## Implementation — Social Protection Checklist
+
+☐ Is the sex distribution of beneficiaries of social services monitored?
+
+☐ Do social programmes contribute to women's economic empowerment?
+
+☐ Do care services support women's participation in the labour market?
+
+☐ Are there differences between women and men in access to social services?`,
+  },
+
+  "Monitoring & Evaluation": {
+    "General": `## Monitoring & Evaluation — General Checklist
+
+☐ Are programme results analysed separately for women and men?
+
+☐ Is progress towards policy objectives measured using gender equality indicators?
+
+☐ Have programme results contributed to reducing gender inequalities?
+
+☐ Are monitoring results used as feedback for future policy and budgeting processes?`,
+
+    "Health": `## Monitoring & Evaluation — Health Checklist
+
+☐ Has the gap between women and men in access to healthcare services decreased?
+
+☐ Are maternal health and other health indicators evaluated using sex-disaggregated data?
+
+☐ Are the impacts of health programmes measured separately for women and men?
+
+☐ Are health policy outcomes reported from a gender equality perspective?`,
+
+    "Education": `## Monitoring & Evaluation — Education Checklist
+
+☐ Are indicators of equal opportunities in education monitored by sex?
+
+☐ Are school dropout rates and academic achievement regularly analysed by sex?
+
+☐ Are the impacts of education policies on girls and boys assessed?
+
+☐ Are education policy outcomes reported using a gender equality perspective?`,
+
+    "Transport": `## Monitoring & Evaluation — Transport Checklist
+
+☐ Is women's perception of safety in transport systems measured?
+
+☐ Are transport usage rates analysed using sex-disaggregated data?
+
+☐ Are the impacts of transport investments on women and men evaluated?
+
+☐ Are the gender equality impacts of transport policies reported?`,
+
+    "Agriculture": `## Monitoring & Evaluation — Agriculture Checklist
+
+☐ Has the share of women farmers benefiting from subsidies increased?
+
+☐ Is the impact of agricultural programmes on women's income and livelihoods measured?
+
+☐ Are the impacts of agricultural policies on women and men farmers assessed?
+
+☐ Is the distribution of agricultural support reported from a gender equality perspective?`,
+
+    "Social Protection": `## Monitoring & Evaluation — Social Protection Checklist
+
+☐ Have social programmes reduced the poverty risk among women?
+
+☐ Is the distribution of social benefits equitable between women and men?
+
+☐ Is the impact of social protection programmes on women's economic independence measured?
+
+☐ Are the gender equality impacts of social protection policies regularly reported?`,
+  },
+};
+
 // ─── API CALL ─────────────────────────────────────────────────────────────────
 async function callClaude(userContent, systemPrompt, history = [], lang, role) {
   const controller = new AbortController();
@@ -582,8 +1091,52 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
       signal: controller.signal,
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || "Sunucu hatası oluştu.");
+    const rawBody = await res.text();
+    let data = null;
+
+    if (rawBody?.trim()) {
+      try {
+        data = JSON.parse(rawBody);
+      } catch {
+        const sseChunks = rawBody
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line.startsWith("data:"))
+          .map((line) => line.replace(/^data:\s*/, ""))
+          .filter((line) => line && line !== "[DONE]");
+
+        if (sseChunks.length) {
+          const sseText = sseChunks
+            .map((chunk) => {
+              try {
+                const parsed = JSON.parse(chunk);
+                return parsed?.text || parsed?.delta || "";
+              } catch {
+                return "";
+              }
+            })
+            .join("")
+            .trim();
+
+          if (sseText) return sseText;
+        }
+
+        throw new Error(
+          lang === "tr"
+            ? "Sunucu yanıtı okunamadı. Lütfen tekrar deneyin."
+            : "Could not read the server response. Please try again."
+        );
+      }
+    }
+
+    if (!res.ok) {
+      throw new Error(data?.error || (lang === "tr" ? "Sunucu hatası oluştu." : "A server error occurred."));
+    }
+
+    if (!data) {
+      throw new Error(lang === "tr" ? "Sunucudan boş yanıt alındı. Lütfen tekrar deneyin." : "Received an empty response from the server. Please try again.");
+    }
+
     if (data.error) throw new Error(data.error);
     return data.text || "—";
   } catch (error) {
@@ -601,39 +1154,42 @@ function MD({ text }) {
   const lines = text.split("\n");
   const elements = [];
   let i = 0;
+
+  const formatInline = (value) => value
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>");
+
   while (i < lines.length) {
     const l = lines[i];
-    if (l.startsWith("# ")) { elements.push(<h1 key={i} style={{ fontSize: "1.35em", fontWeight: 700, color: "#f0a847", margin: "1em 0 0.4em", borderBottom: "1px solid #1e3448", paddingBottom: "0.3em" }}>{l.slice(2)}</h1>); }
-    else if (l.startsWith("## ")) { elements.push(<h2 key={i} style={{ fontSize: "1.1em", fontWeight: 700, color: "#e8c87a", margin: "0.9em 0 0.3em" }}>{l.slice(3)}</h2>); }
-    else if (l.startsWith("### ")) { elements.push(<h3 key={i} style={{ fontSize: "1em", fontWeight: 600, color: "#d4b870", margin: "0.7em 0 0.25em" }}>{l.slice(4)}</h3>); }
+    if (l.startsWith("# ")) { elements.push(<h1 key={i}>{l.slice(2)}</h1>); }
+    else if (l.startsWith("## ")) { elements.push(<h2 key={i}>{l.slice(3)}</h2>); }
+    else if (l.startsWith("### ")) { elements.push(<h3 key={i}>{l.slice(4)}</h3>); }
     else if (l.startsWith("- ") || l.startsWith("☐ ") || l.startsWith("* ")) {
       const items = [];
       while (i < lines.length && (lines[i].startsWith("- ") || lines[i].startsWith("☐ ") || lines[i].startsWith("* "))) {
         const raw = lines[i].replace(/^[-*☐] /, "");
-        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#f0c060'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>") }} />);
+        items.push(<li key={i} dangerouslySetInnerHTML={{ __html: formatInline(raw) }} />);
         i++;
       }
-      elements.push(<ul key={`ul-${i}`} style={{ paddingLeft: "1.4em", margin: "0.4em 0" }}>{items}</ul>);
+      elements.push(<ul key={`ul-${i}`}>{items}</ul>);
       continue;
     }
     else if (/^\d+\. /.test(l)) {
       const items = [];
       while (i < lines.length && /^\d+\. /.test(lines[i])) {
         const raw = lines[i].replace(/^\d+\. /, "");
-        items.push(<li key={i} style={{ margin: "0.3em 0", lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: raw.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#f0c060'>$1</strong>") }} />);
+        items.push(<li key={i} dangerouslySetInnerHTML={{ __html: formatInline(raw) }} />);
         i++;
       }
-      elements.push(<ol key={`ol-${i}`} style={{ paddingLeft: "1.4em", margin: "0.4em 0" }}>{items}</ol>);
+      elements.push(<ol key={`ol-${i}`}>{items}</ol>);
       continue;
     }
-    else if (l.trim() === "") { elements.push(<div key={i} style={{ height: "0.5em" }} />); }
-    else {
-      const html = l.replace(/\*\*(.+?)\*\*/g, "<strong style='color:#f0c060'>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
-      elements.push(<p key={i} style={{ lineHeight: 1.7, margin: "0.2em 0" }} dangerouslySetInnerHTML={{ __html: html }} />);
-    }
+    else if (l.trim() === "") { elements.push(<div key={i} style={{ height: "0.5rem" }} />); }
+    else { elements.push(<p key={i} dangerouslySetInnerHTML={{ __html: formatInline(l) }} />); }
     i++;
   }
-  return <div>{elements}</div>;
+
+  return <div className="md-content">{elements}</div>;
 }
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
@@ -643,40 +1199,115 @@ export default function EsitlikAsistani() {
   const [role, setRole] = useState(null);
   const L = LANG[lang];
 
-  // Chat
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [activeQuick, setActiveQuick] = useState(null);
+  const [openGroup, setOpenGroup] = useState(0);
   const endRef = useRef(null);
+  const lastAssistantRef = useRef(null);
+  const lastUserMsgRef = useRef(null);
 
-  // Doc
   const [docText, setDocText] = useState("");
+  const [pastedDocText, setPastedDocText] = useState("");
+  const [docFileName, setDocFileName] = useState("");
+  const [docFileChars, setDocFileChars] = useState(0);
+  const [docDragActive, setDocDragActive] = useState(false);
   const [docResult, setDocResult] = useState("");
   const [docLoading, setDocLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
-  // Checklist
+  const getExtension = (name = "") => {
+    const parts = name.toLowerCase().split(".");
+    return parts.length > 1 ? `.${parts.pop()}` : "";
+  };
+
+  const readTxtFile = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => resolve(String(ev.target?.result || ""));
+    reader.onerror = () => reject(new Error("Failed to read text file."));
+    reader.readAsText(file);
+  });
+
+  const extractPdfText = async (file) => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      pages.push(content.items.map((item) => item.str).join(" "));
+    }
+    return pages.join("\n");
+  };
+
+  const extractDocText = async (file) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value;
+  };
+
+  const handleDocFile = async (file) => {
+    if (!file) return;
+    const extension = getExtension(file.name);
+    const supported = [".txt", ".pdf", ".doc", ".docx"];
+    if (!supported.includes(extension)) return;
+
+    setDocLoading(true);
+    setDocResult("");
+    try {
+      let extracted = "";
+      if (extension === ".txt") extracted = await readTxtFile(file);
+      if (extension === ".pdf") extracted = await extractPdfText(file);
+      if (extension === ".doc" || extension === ".docx") extracted = await extractDocText(file);
+      setDocText(extracted);
+      setDocFileName(file.name);
+      setDocFileChars(extracted.length);
+    } finally {
+      setDocLoading(false);
+    }
+  };
+
+  const clearDocInputs = () => {
+    setDocText("");
+    setPastedDocText("");
+    setDocFileName("");
+    setDocFileChars(0);
+    setDocResult("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const analysisText = docText.trim() ? docText : pastedDocText;
+  const analysisWordCount = analysisText.trim() ? analysisText.trim().split(/\s+/).length : 0;
+
   const [phase, setPhase] = useState(0);
   const [sector, setSector] = useState(0);
   const [clResult, setClResult] = useState("");
   const [clLoading, setClLoading] = useState(false);
 
-  // Report
   const [rpForm, setRpForm] = useState({ institution: "", year: String(new Date().getFullYear()), sector: "", context: "" });
   const [rpResult, setRpResult] = useState("");
   const [rpLoading, setRpLoading] = useState(false);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-
-  const sendChat = async (override) => {
+  const sendChat = async (override, fromQuick = false) => {
     const text = override ?? chatInput;
     if (!text.trim() || chatLoading) return;
+    if (fromQuick) setActiveQuick(text);
+    else setActiveQuick(null);
     setChatInput("");
     const newHistory = [...messages, { role: "user", content: text }];
     setMessages(newHistory);
+    requestAnimationFrame(() => {
+      lastUserMsgRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
 
     const presetReply = getQuickPresetResponse(lang, text);
     if (presetReply) {
       setMessages([...newHistory, { role: "assistant", content: presetReply }]);
+      requestAnimationFrame(() => {
+        lastAssistantRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
       return;
     }
 
@@ -685,81 +1316,147 @@ export default function EsitlikAsistani() {
       const history = messages.map(m => ({ role: m.role, content: m.content }));
       const reply = await callClaude(text, buildSystemPrompt(lang, role), history, lang, role);
       setMessages([...newHistory, { role: "assistant", content: reply }]);
+      requestAnimationFrame(() => {
+        lastAssistantRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } catch (error) {
       const msg = lang === "tr"
         ? `Üzgünüm, yanıt üretilirken bir hata oluştu: ${error.message}`
         : `Sorry, an error occurred while generating the response: ${error.message}`;
       setMessages([...newHistory, { role: "assistant", content: msg }]);
+      requestAnimationFrame(() => {
+        lastAssistantRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } finally {
       setChatLoading(false);
     }
   };
 
-  const C = { background: "#0d1b2a", surface: "#0a1520", border: "#1e3448", amber: "#f0a847", muted: "#5070a0", text: "#e8e0d0", dim: "#4a6070" };
+  const lastAssistantIndex = [...messages].map((m) => m.role).lastIndexOf("assistant");
+  const lastUserIndex = [...messages].map((m) => m.role).lastIndexOf("user");
+
+  const quickGroups = lang === "tr" ? [
+    {
+      title: "KEEDB Nedir?",
+      questions: ["KEEDB nedir ve neden önemlidir?", "KEEDB sadece kadınlara yönelik bir bütçe midir?"],
+    },
+    {
+      title: "Araçlar & Uygulama",
+      questions: ["KEEDB'nin temel araçları nelerdir?", "KEEDB hangi politika döngüsü aşamalarında uygulanabilir?", "KEEDB için hangi ilk adımları atabiliriz?", "Planları ve bütçeleri nasıl duyarlı hale getirebilirim?"],
+    },
+    {
+      title: "Örnekler",
+      questions: ["Dünya'dan başarılı örnekler paylaşır mısın?", "Türkiye'den başarılı bir örnek paylaşır mısın?"],
+    },
+  ] : [
+    {
+      title: "What is GRB?",
+      questions: ["What is GRB and why does it matter?", "Is GRB only a budget for women?"],
+    },
+    {
+      title: "Tools & Application",
+      questions: ["What are the core tools of GRB?", "At which policy cycle stages can GRB be applied?", "What are the first steps we can take for GRB?", "How can I make plans and budgets gender-responsive?"],
+    },
+    {
+      title: "Examples",
+      questions: ["Can you share successful examples from around the world?", "Can you share a successful example from Turkey?"],
+    },
+  ];
 
   const css = `
-    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:${C.background}}
-    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:${C.background}}::-webkit-scrollbar-thumb{background:#2a3d52;border-radius:3px}
-    input,textarea,select{background:${C.background};color:${C.text};border:1px solid #2a3d52;font-family:inherit;outline:none;transition:border .2s}
-    input:focus,textarea:focus,select:focus{border-color:${C.amber}}
-    input::placeholder,textarea::placeholder{color:${C.dim}}
-    option{background:#132230}
-    .fade{animation:fadeUp .35s ease}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-    .pulse{animation:pulse 1.4s infinite}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-    .tab:hover{color:${C.amber}}
-    .chip:hover{border-color:${C.amber};color:${C.text}}
-    .seg:hover{border-color:#3a5d7c;color:#d0c8b8}
-    .sel{background:#1a3a5c!important;border-color:${C.amber}!important;color:#f0c060!important}
-    .role-card:hover{border-color:${C.amber};transform:translateY(-2px)}
-    .role-card.chosen{border-color:${C.amber};background:#132230}
-    .btn-primary{background:${C.amber};color:#0d1b2a;border:none;cursor:pointer;font-family:inherit;font-weight:700;transition:all .2s}
-    .btn-primary:hover:not(:disabled){background:#f8bf60}
-    .btn-primary:disabled{opacity:.45;cursor:not-allowed}
-    .btn-ghost{background:#1a3a5c;color:${C.text};border:1px solid #2a4d6c;cursor:pointer;font-family:inherit;transition:all .2s}
-    .btn-ghost:hover:not(:disabled){border-color:${C.amber};color:${C.amber}}
-    .btn-ghost:disabled{opacity:.45;cursor:not-allowed}
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    :root{--bg:#F8F9FA;--surface:#FFFFFF;--primary:#2563EB;--accent:#2563EB;--accent-soft:color-mix(in oklab,var(--accent) 10%, var(--surface));--text:#111827;--text-secondary:#6B7280;--border:#E5E7EB;--shadow:0 8px 24px rgba(15,23,42,.06);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)}
+    @media (prefers-color-scheme: dark){:root{--bg:#0F172A;--surface:#1E293B;--primary:#3B82F6;--accent:#3B82F6;--accent-soft:color-mix(in oklab,var(--accent) 16%, var(--surface));--text:#F1F5F9;--text-secondary:#94A3B8;--border:#334155;--shadow:0 8px 24px rgba(2,6,23,.45);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1e40af 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%)}}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+    .app{min-height:100vh;color:var(--text)}
+    .surface{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow)}
+    .header{border-bottom:1px solid var(--border);background:var(--surface)}
+    .btn{border-radius:10px;padding:.65rem 1rem;font-family:inherit;font-size:.92rem;font-weight:500;cursor:pointer;transition:.2s all;border:1px solid transparent}
+    .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover:not(:disabled){filter:brightness(1.05)}
+    .btn-ghost{background:var(--surface);color:var(--text);border-color:var(--border)} .btn-ghost:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .tab{background:none;border:none;border-bottom:2px solid transparent;padding:.95rem 1rem;cursor:pointer;color:var(--text-secondary);font-weight:500}
+    .tab.active{border-bottom-color:var(--primary);color:var(--primary)}
+    .chip,.seg{width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.65rem .8rem;color:var(--text);font-size:.9rem;cursor:pointer;transition:.2s all}
+    .chip:hover,.seg:hover{border-color:var(--primary)} .seg.selected{background:color-mix(in oklab,var(--primary) 10%, var(--surface));border-color:var(--primary);color:var(--primary)}
+    input,textarea,select{width:100%;padding:.65rem .75rem;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;line-height:1.6}
+    input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in oklab,var(--primary) 35%, transparent);border-color:var(--primary)}
+    input::placeholder,textarea::placeholder{color:var(--text-secondary)}
+    .muted{color:var(--text-secondary)}
+    .fade{animation:fadeUp .3s ease}@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .pulse{animation:pulse 1.3s infinite}@keyframes pulse{50%{opacity:.4}}
+    .md-content h1{font-size:1.3rem;font-weight:600;margin:1rem 0 .4rem;border-bottom:1px solid var(--border);padding-bottom:.35rem}
+    .md-content h2{font-size:1.15rem;font-weight:600;margin:.9rem 0 .35rem}
+    .md-content h3{font-size:1rem;font-weight:600;margin:.8rem 0 .3rem}
+    .md-content p,.md-content li{font-size:.95rem;line-height:1.75}
+    .md-content strong{color:var(--primary);font-weight:600}
+    .md-content ul,.md-content ol{padding-left:1.2rem;margin:.35rem 0}
+    .advisor-layout{padding:0;display:flex;flex-direction:row;height:calc(100vh - 120px);overflow:hidden}
+    .advisor-quick-panel{width:300px;flex-shrink:0;border-right:1px solid var(--border);padding:1rem;position:sticky;top:0;align-self:flex-start}
+    .advisor-quick-list{display:grid;grid-template-columns:1fr;gap:.5rem}
+    .advisor-chat-panel{flex:1;min-width:0;min-height:0}
+    .advisor-chat-messages{display:grid;gap:.75rem;background:var(--surface)}
+    .advisor-input-row{display:flex;gap:.5rem}
+    .quick-group{overflow:hidden;transition:max-height .3s ease,opacity .3s ease;opacity:0;max-height:0}
+    .quick-group.open{opacity:1;max-height:360px}
+    @media (max-width: 767px){
+      .advisor-layout{flex-direction:column}
+      .advisor-quick-panel{width:100%;position:static;border-right:none;border-bottom:1px solid var(--border)}
+      .advisor-chat-messages{max-height:none}
+    }
   `;
 
-  // ── Role selection screen ──
-  if (!role) return (
-    <div style={{ minHeight: "100vh", background: C.background, fontFamily: "'Lora','Georgia',serif", color: C.text, display: "flex", flexDirection: "column" }}>
-      <style>{css}</style>
-      {/* Header */}
-      <div style={{ borderBottom: `1px solid ${C.border}`, padding: "18px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.surface }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 10, background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19 }}>⚖</div>
-          <div>
-            <div style={{ fontSize: "1.4em", fontWeight: 600, color: "#f0e8d0" }}>{L.appTitle}</div>
-            <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".05em" }}>{L.appSubtitle}</div>
-          </div>
-        </div>
-        <button className="btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")} style={{ padding: "7px 16px", borderRadius: 6, fontSize: "0.82em", fontFamily: "'DM Mono',monospace" }}>{L.langToggle}</button>
-      </div>
+  const resultCard = (content) => content && <div className="surface fade" style={{ padding: "1rem 1.2rem" }}><MD text={content} /></div>;
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 24px" }}>
-        <div style={{ maxWidth: 560, width: "100%", textAlign: "center" }}>
-          <div style={{ fontSize: "1.7em", fontWeight: 600, color: "#f0e8d0", marginBottom: 10 }}>{L.roleSelect.title}</div>
-          <div style={{ color: C.muted, fontSize: "0.92em", marginBottom: 36, lineHeight: 1.6 }}>{L.roleSelect.subtitle}</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
+  if (!role) return (
+    <div className="app" suppressHydrationWarning style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
+      <style>{css}</style>
+      <div className="header" style={{ padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: "var(--primary)", color: "#fff", display: "grid", placeItems: "center", fontWeight: 600 }}>⚖</div>
+          <div><div style={{ fontSize: "1.25rem", fontWeight: 600 }}>{L.appTitle}</div><div className="muted" style={{ fontSize: ".85rem" }}>{L.appSubtitle}</div></div>
+        </div>
+        <button className="btn btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")}>{L.langToggle}</button>
+      </div>
+      <div style={{ maxWidth: 820, margin: "2.5rem auto", padding: "0 1rem" }}>
+        <div className="surface" style={{ padding: "1.4rem" }}>
+          <h1 style={{ margin: 0, fontSize: "1.7rem", fontWeight: 600 }}>{L.roleSelect.title}</h1>
+          <p className="muted" style={{ margin: ".4rem 0 1.3rem" }}>{L.roleSelect.subtitle}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "0.9rem" }}>
             {L.roleSelect.roles.map(r => (
-              <div key={r.id} className={`role-card${role === r.id ? " chosen" : ""}`}
+              <button
+                key={r.id}
                 onClick={() => setRole(r.id)}
-                style={{ border: `1px solid ${role === r.id ? C.amber : C.border}`, background: role === r.id ? "#132230" : C.surface, borderRadius: 12, padding: "20px 16px", cursor: "pointer", textAlign: "left", transition: "all .2s" }}>
-                <div style={{ fontSize: "1.8em", marginBottom: 8 }}>{r.icon}</div>
-                <div style={{ fontWeight: 600, color: "#f0e8d0", marginBottom: 4 }}>{r.label}</div>
-                <div style={{ fontSize: "0.8em", color: C.muted, lineHeight: 1.5 }}>{r.desc}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {L.roleSelect.roles.map(r => (
-              <button key={r.id} className="btn-primary" onClick={() => setRole(r.id)}
-                style={{ padding: "12px", borderRadius: 8, fontSize: "0.9em" }}>
-                {r.icon} {r.label}
+                style={{
+                  background: role === r.id ? "var(--role-gradient-active)" : "var(--role-gradient)",
+                  border: role === r.id ? "2px solid rgba(255,255,255,0.5)" : "none",
+                  borderRadius: 16,
+                  padding: "28px 24px",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  boxShadow: role === r.id ? "0 14px 32px rgba(37,99,235,0.45), inset 0 0 0 1px rgba(255,255,255,0.2)" : "0 8px 24px rgba(37,99,235,0.35)",
+                  color: "#ffffff",
+                  transition: "all 0.2s ease",
+                  display: "grid",
+                  gap: "0.45rem",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "translateY(-3px)";
+                  e.currentTarget.style.boxShadow = role === r.id
+                    ? "0 14px 32px rgba(37,99,235,0.45), inset 0 0 0 1px rgba(255,255,255,0.2)"
+                    : "0 14px 32px rgba(37,99,235,0.45)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = role === r.id
+                    ? "0 14px 32px rgba(37,99,235,0.45), inset 0 0 0 1px rgba(255,255,255,0.2)"
+                    : "0 8px 24px rgba(37,99,235,0.35)";
+                }}
+              >
+                <div style={{ fontSize: "2em", lineHeight: 1 }}>{r.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: "1.1em", color: "#fff" }}>{r.label}</div>
+                <div style={{ fontSize: "0.82em", color: "rgba(255,255,255,0.75)" }}>{r.desc}</div>
               </button>
             ))}
           </div>
@@ -768,219 +1465,183 @@ export default function EsitlikAsistani() {
     </div>
   );
 
-  // ── Main app ──
   return (
-    <div style={{ minHeight: "100vh", background: C.background, fontFamily: "'Lora','Georgia',serif", color: C.text }}>
+    <div className="app" suppressHydrationWarning style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
       <style>{css}</style>
-
-      {/* Header */}
-      <div style={{ borderBottom: `1px solid ${C.border}`, padding: "14px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.surface }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
-          <div style={{ width: 38, height: 38, borderRadius: 9, background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17 }}>⚖</div>
-          <div>
-            <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0" }}>{L.appTitle}</div>
-            <div style={{ fontSize: "0.68em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".05em" }}>{L.appSubtitle}</div>
-          </div>
+      <div className="header" style={{ padding: "0.8rem 1.2rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "0.7rem", alignItems: "center" }}>
+          <div style={{ width: 36, height: 36, borderRadius: 9, background: "var(--primary)", color: "#fff", display: "grid", placeItems: "center", fontWeight: 600 }}>⚖</div>
+          <div><div style={{ fontSize: "1.15rem", fontWeight: 600 }}>{L.appTitle}</div><div className="muted" style={{ fontSize: ".8rem" }}>{L.appSubtitle}</div></div>
         </div>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <div style={{ fontSize: "0.75em", color: C.muted, fontFamily: "'DM Mono',monospace", background: "#132230", border: `1px solid ${C.border}`, padding: "5px 12px", borderRadius: 20 }}>
-            {L.roleSelect.roles.find(r => r.id === role)?.icon} {ROLE_LABELS[lang][role]}
-          </div>
-          <button className="btn-ghost" onClick={() => setRole(null)} style={{ padding: "5px 12px", borderRadius: 6, fontSize: "0.75em", fontFamily: "'DM Mono',monospace" }}>{L.chat.changeRole}</button>
-          <button className="btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")} style={{ padding: "5px 12px", borderRadius: 6, fontSize: "0.75em", fontFamily: "'DM Mono',monospace" }}>{L.langToggle}</button>
+        <div style={{ display: "flex", gap: ".5rem" }}>
+          <button className="btn btn-ghost" onClick={() => { setRole(null); }}>{L.chat.changeRole}</button>
+          <button className="btn btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")}>{L.langToggle}</button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ borderBottom: `1px solid ${C.border}`, padding: "0 28px", background: C.surface, display: "flex" }}>
-        {L.tabs.map((t, i) => (
-          <button key={i} className="tab" onClick={() => setActiveTab(i)}
-            style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: "13px 18px", fontSize: "0.88em", color: activeTab === i ? C.amber : "#5a7090", borderBottom: activeTab === i ? `2px solid ${C.amber}` : "2px solid transparent", transition: "all .2s", letterSpacing: ".02em" }}>
-            {t}
-          </button>
-        ))}
+      <div className="header" style={{ display: "flex", padding: "0 1rem", gap: "0.25rem", overflowX: "auto" }}>
+        {L.tabs.map((t, i) => <button key={i} className={`tab ${activeTab === i ? "active" : ""}`} onClick={() => setActiveTab(i)}>{t}</button>)}
       </div>
 
-      <div style={{ maxWidth: 860, margin: "0 auto", padding: "28px 20px" }}>
-
-        {/* TAB 0 – Chat */}
+      <div style={{ maxWidth: 900, margin: "1.2rem auto", padding: "0 1rem 1.5rem" }}>
         {activeTab === 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {/* Quick questions */}
-            <div>
-              <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".07em", marginBottom: 10 }}>{L.chat.quickTitle}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                {L.chat.quick.map((q, i) => (
-                  <button key={i} className="chip" onClick={() => sendChat(q)}
-                    style={{ background: "#0a1520", border: `1px solid ${C.border}`, color: "#8aA4bc", borderRadius: 8, padding: "10px 14px", textAlign: "left", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", lineHeight: 1.5, transition: "all .2s" }}>
-                    <span style={{ color: C.amber, marginRight: 6 }}>›</span>{q}
-                  </button>
-                ))}
+          <div className="surface advisor-layout">
+            <div className="advisor-quick-panel">
+              <div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.chat.quickTitle}</div>
+              <div className="advisor-quick-list">
+                {quickGroups.map((group, i) => {
+                  const isOpen = openGroup === i;
+                  return (
+                    <div key={group.title}>
+                      <button
+                        className="btn"
+                        onClick={() => setOpenGroup(isOpen ? -1 : i)}
+                        style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--accent-soft)", borderRadius: 8, padding: "10px 14px", fontWeight: 600, border: "1px solid var(--border)", color: "var(--text)" }}
+                      >
+                        <span>{group.title}</span>
+                        <span>{isOpen ? "▲" : "▼"}</span>
+                      </button>
+                      <div className={`quick-group ${isOpen ? "open" : ""}`}>
+                        <div style={{ display: "grid", gap: ".5rem", marginTop: ".5rem" }}>
+                          {group.questions.map((q, questionIndex) => (
+                            <button key={questionIndex} className="chip" onClick={() => sendChat(q, true)} style={{ background: activeQuick === q ? "var(--accent)" : "var(--surface)", color: activeQuick === q ? "#ffffff" : "var(--text-secondary)", border: `1px solid ${activeQuick === q ? "var(--accent)" : "var(--border)"}`, fontWeight: activeQuick === q ? 600 : 400 }}>{q}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-
-            {/* Messages */}
-            <div style={{ minHeight: 260, maxHeight: 420, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
-              {messages.map((m, i) => (
-                <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
-                  {m.role === "assistant" && (
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, marginRight: 9, flexShrink: 0, marginTop: 3 }}>⚖</div>
-                  )}
-                  <div style={{ maxWidth: "80%", padding: "11px 15px", borderRadius: m.role === "user" ? "14px 4px 14px 14px" : "4px 14px 14px 14px", background: m.role === "user" ? "#1a3a5c" : C.surface, border: `1px solid ${m.role === "user" ? "#2a4d6c" : C.border}`, fontSize: "0.9em", lineHeight: 1.7 }}>
-                    {m.role === "assistant" ? <MD text={m.content} /> : m.content}
-                  </div>
+            <div className="advisor-chat-panel">
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+              <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+                <div className="advisor-chat-messages">
+                  {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : m.role === "user" && i === lastUserIndex ? lastUserMsgRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
+                  {chatLoading && <div ref={endRef} className="muted pulse">{L.chat.thinking}</div>}
                 </div>
-              ))}
-              {chatLoading && (
-                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#f0a847,#c06010)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>⚖</div>
-                  <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.chat.thinking}</span>
+              </div>
+              <div style={{ borderTop: "1px solid var(--border)", padding: "12px", background: "var(--surface)", flexShrink: 0 }}>
+                <div className="advisor-input-row">
+                  <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
+                  <button className="btn btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>{L.chat.send}</button>
                 </div>
-              )}
-              <div ref={endRef} />
+              </div>
             </div>
-
-            {/* Input */}
-            <div style={{ display: "flex", gap: 9 }}>
-              <textarea value={chatInput} onChange={e => setChatInput(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
-                placeholder={L.chat.placeholder}
-                style={{ flex: 1, padding: "11px 14px", borderRadius: 10, fontSize: "0.88em", resize: "none", height: 60, lineHeight: 1.5 }} />
-              <button className="btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}
-                style={{ padding: "0 20px", borderRadius: 10, fontSize: "0.88em" }}>
-                {L.chat.send}
-              </button>
             </div>
           </div>
         )}
 
-        {/* TAB 1 – Doc Analysis */}
         {activeTab === 1 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <div className="surface" style={{ padding: "1rem", display: "grid", gap: "1rem" }}>
+            <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.docAnalysis.title}</div><div className="muted">{L.docAnalysis.subtitle}</div></div>
             <div>
-              <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0", marginBottom: 4 }}>{L.docAnalysis.title}</div>
-              <div style={{ color: C.muted, fontSize: "0.82em", fontFamily: "'DM Mono',monospace" }}>{L.docAnalysis.subtitle}</div>
-            </div>
-            <div style={{ border: `2px dashed ${C.border}`, borderRadius: 10, padding: "26px 18px", textAlign: "center", cursor: "pointer" }}
-              onDragOver={e => e.preventDefault()}
-              onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) { const r = new FileReader(); r.onload = ev => setDocText(ev.target.result); r.readAsText(f); } }}>
-              <div style={{ fontSize: "1.8em", marginBottom: 6 }}>📄</div>
-              <div style={{ color: "#5a7090" }}>{L.docAnalysis.upload}</div>
-              <div style={{ color: C.dim, fontSize: "0.75em", marginTop: 4, fontFamily: "'DM Mono',monospace" }}>{L.docAnalysis.uploadHint}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: "0.75em", color: C.muted, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>{L.docAnalysis.pasteLabel}</div>
-              <textarea value={docText} onChange={e => setDocText(e.target.value)} placeholder={L.docAnalysis.pastePlaceholder}
-                style={{ width: "100%", height: 150, padding: "11px 14px", borderRadius: 8, fontSize: "0.85em", resize: "vertical", lineHeight: 1.6 }} />
-            </div>
-            <button className="btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, docText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }}
-              disabled={docLoading || !docText.trim()} style={{ padding: "12px 26px", borderRadius: 8, fontSize: "0.9em", alignSelf: "flex-start" }}>
-              {docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}
-            </button>
-            {docLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.docAnalysis.analyzing}</span>}
-            {docResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={docResult} /></div>}
-          </div>
-        )}
-
-        {/* TAB 2 – Checklist */}
-        {activeTab === 2 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            <div>
-              <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0", marginBottom: 4 }}>{L.checklist.title}</div>
-              <div style={{ color: C.muted, fontSize: "0.82em", fontFamily: "'DM Mono',monospace" }}>{L.checklist.subtitle}</div>
-            </div>
-            {[{ label: L.checklist.phaseLabel, items: L.checklist.phases, val: phase, set: setPhase },
-              { label: L.checklist.sectorLabel, items: L.checklist.sectors, val: sector, set: setSector }].map(({ label, items, val, set }, gi) => (
-              <div key={gi}>
-                <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", letterSpacing: ".07em", marginBottom: 8 }}>{label}</div>
-                <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
-                  {items.map((it, i) => (
-                    <button key={i} className={`seg${val === i ? " sel" : ""}`} onClick={() => set(i)}
-                      style={{ background: val === i ? "#1a3a5c" : "#0a1520", border: `1px solid ${val === i ? C.amber : C.border}`, color: val === i ? "#f0c060" : "#6080a0", borderRadius: 7, padding: "8px 14px", fontSize: "0.84em", cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}>
-                      {it}
-                    </button>
-                  ))}
-                </div>
+              <div className="muted" style={{ fontWeight: 500, marginBottom: ".4rem" }}>{L.docAnalysis.uploadSection}</div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".txt,.pdf,.doc,.docx"
+                style={{ display: "none" }}
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (f) await handleDocFile(f);
+                }}
+              />
+              <div
+                role="button"
+                tabIndex={0}
+                style={{
+                  border: `2px dashed ${docDragActive ? "var(--primary)" : "var(--border)"}`,
+                  borderRadius: 10,
+                  padding: "1.2rem",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  background: docDragActive ? "rgba(37,99,235,.06)" : "transparent",
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDocDragActive(true);
+                }}
+                onDragLeave={() => setDocDragActive(false)}
+                onDrop={async (e) => {
+                  e.preventDefault();
+                  setDocDragActive(false);
+                  const f = e.dataTransfer.files?.[0];
+                  if (f) await handleDocFile(f);
+                }}
+              >
+                <div style={{ fontSize: "1.6rem" }}>📄</div><div>{L.docAnalysis.upload}</div><div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.uploadHint}</div>
+                {docFileName && (
+                  <div className="muted" style={{ marginTop: ".5rem", fontSize: ".85rem" }}>
+                    {L.docAnalysis.selectedFile}: <strong>{docFileName}</strong> • {docFileChars} {L.docAnalysis.charCount}
+                  </div>
+                )}
               </div>
-            ))}
-            <button className="btn-primary" onClick={async () => { setClLoading(true); setClResult(""); const r = await callClaude(buildChecklistPrompt(lang, L.checklist.phases[phase], L.checklist.sectors[sector]), buildSystemPrompt(lang, role)); setClResult(r); setClLoading(false); }}
-              disabled={clLoading} style={{ padding: "12px 26px", borderRadius: 8, fontSize: "0.9em", alignSelf: "flex-start" }}>
-              {clLoading ? L.checklist.generating : L.checklist.generate}
-            </button>
-            {clLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.checklist.generating}</span>}
-            {clResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={clResult} /></div>}
+            </div>
+            <div>
+              <div className="muted" style={{ fontWeight: 500 }}>{L.docAnalysis.pasteSection}</div>
+              <textarea value={pastedDocText} onChange={e => setPastedDocText(e.target.value)} placeholder={L.docAnalysis.pastePlaceholder} style={{ minHeight: 150 }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: ".75rem", flexWrap: "wrap" }}>
+              <div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.wordCount}: {analysisWordCount}</div>
+              <button className="btn" onClick={clearDocInputs}>{L.docAnalysis.clear}</button>
+            </div>
+              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, analysisText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }} disabled={docLoading || !analysisText.trim()}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
+            {docLoading && <span className="muted pulse">{L.docAnalysis.analyzing}</span>}
+            {resultCard(docResult)}
           </div>
         )}
 
-        {/* TAB 3 – Report */}
+        {activeTab === 2 && (
+          <div className="surface" style={{ padding: "1rem", display: "grid", gap: "1rem" }}>
+            <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.checklist.title}</div><div className="muted">{L.checklist.subtitle}</div></div>
+            {[{ label: L.checklist.phaseLabel, items: L.checklist.phases, val: phase, set: setPhase }, { label: L.checklist.sectorLabel, items: L.checklist.sectors, val: sector, set: setSector }].map(({ label, items, val, set }, idx) => (
+              <div key={idx}><div className="muted" style={{ fontWeight: 500, marginBottom: ".4rem" }}>{label}</div><div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}>{items.map((it, i) => <button key={i} className={`seg ${val === i ? "selected" : ""}`} onClick={() => set(i)} style={{ width: "auto" }}>{it}</button>)}</div></div>
+            ))}
+            <button className="btn btn-primary" onClick={() => {
+              const phaseName = L.checklist.phases[phase];
+              const sectorName = L.checklist.sectors[sector];
+              const activePresets = lang === "en" ? CHECKLIST_PRESETS_EN : CHECKLIST_PRESETS;
+              const preset = activePresets[L.checklist.phases[phase]]?.[L.checklist.sectors[sector]];
+              if (preset) {
+                setClResult(preset);
+              } else {
+                // fallback to API if no preset found
+                setClLoading(true);
+                setClResult("");
+                callClaude(buildChecklistPrompt(lang, phaseName, sectorName), buildSystemPrompt(lang, role))
+                  .then(r => setClResult(r))
+                  .finally(() => setClLoading(false));
+              }
+            }} disabled={clLoading}>{clLoading ? L.checklist.generating : L.checklist.generate}</button>
+            {clLoading && <span className="muted pulse">{L.checklist.generating}</span>}
+            {resultCard(clResult)}
+          </div>
+        )}
+
         {activeTab === 3 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            <div>
-              <div style={{ fontSize: "1.3em", fontWeight: 600, color: "#f0e8d0", marginBottom: 4 }}>{L.report.title}</div>
-              <div style={{ color: C.muted, fontSize: "0.82em", fontFamily: "'DM Mono',monospace" }}>{L.report.subtitle}</div>
+          <div className="surface" style={{ padding: "1rem", display: "grid", gap: "1rem" }}>
+            <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.report.title}</div><div className="muted">{L.report.subtitle}</div></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".75rem" }}>
+              {[{ key: "institution", label: L.report.institution }, { key: "year", label: L.report.year }].map(({ key, label }) => <div key={key}><div className="muted" style={{ fontWeight: 500 }}>{label}</div><input value={rpForm[key]} onChange={e => setRpForm(f => ({ ...f, [key]: e.target.value }))} /></div>)}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {[{ key: "institution", label: L.report.institution }, { key: "year", label: L.report.year }].map(({ key, label }) => (
-                <div key={key}>
-                  <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>{label}</div>
-                  <input value={rpForm[key]} onChange={e => setRpForm(f => ({ ...f, [key]: e.target.value }))}
-                    style={{ width: "100%", padding: "9px 13px", borderRadius: 7, fontSize: "0.88em" }} />
-                </div>
-              ))}
-            </div>
-            <div>
-              <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>{L.report.sector}</div>
-              <select value={rpForm.sector} onChange={e => setRpForm(f => ({ ...f, sector: e.target.value }))}
-                style={{ width: "100%", padding: "9px 13px", borderRadius: 7, fontSize: "0.88em" }}>
-                {L.checklist.sectors.map((s, i) => <option key={i} value={s}>{s}</option>)}
-              </select>
-            </div>
-            <div>
-              <div style={{ fontSize: "0.72em", color: C.muted, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>{L.report.context}</div>
-              <textarea value={rpForm.context} onChange={e => setRpForm(f => ({ ...f, context: e.target.value }))} placeholder={L.report.contextPlaceholder}
-                style={{ width: "100%", height: 90, padding: "9px 13px", borderRadius: 7, fontSize: "0.88em", resize: "vertical", lineHeight: 1.6 }} />
-            </div>
-            <button className="btn-primary" onClick={async () => { setRpLoading(true); setRpResult(""); const r = await callClaude(buildReportPrompt(lang, rpForm.institution, rpForm.year, rpForm.sector || L.checklist.sectors[0], rpForm.context), buildSystemPrompt(lang, role)); setRpResult(r); setRpLoading(false); }}
-              disabled={rpLoading || !rpForm.institution || !rpForm.year} style={{ padding: "12px 26px", borderRadius: 8, fontSize: "0.9em", alignSelf: "flex-start" }}>
-              {rpLoading ? L.report.generating : L.report.generate}
-            </button>
-            {rpLoading && <span style={{ color: C.muted, fontStyle: "italic", fontSize: "0.84em" }} className="pulse">{L.report.generating}</span>}
-            {rpResult && <div className="fade" style={{ background: "#0a1520", border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 10, padding: "18px 22px" }}><MD text={rpResult} /></div>}
+            <div><div className="muted" style={{ fontWeight: 500 }}>{L.report.sector}</div><select value={rpForm.sector} onChange={e => setRpForm(f => ({ ...f, sector: e.target.value }))}>{L.checklist.sectors.map((s, i) => <option key={i} value={s}>{s}</option>)}</select></div>
+            <div><div className="muted" style={{ fontWeight: 500 }}>{L.report.context}</div><textarea value={rpForm.context} onChange={e => setRpForm(f => ({ ...f, context: e.target.value }))} placeholder={L.report.contextPlaceholder} style={{ minHeight: 96 }} /></div>
+            <button className="btn btn-primary" onClick={async () => { setRpLoading(true); setRpResult(""); const r = await callClaude(buildReportPrompt(lang, rpForm.institution, rpForm.year, rpForm.sector || L.checklist.sectors[0], rpForm.context), buildSystemPrompt(lang, role)); setRpResult(r); setRpLoading(false); }} disabled={rpLoading || !rpForm.institution || !rpForm.year}>{rpLoading ? L.report.generating : L.report.generate}</button>
+            {rpLoading && <span className="muted pulse">{L.report.generating}</span>}
+            {resultCard(rpResult)}
           </div>
         )}
 
-                <section aria-labelledby="references-title" style={{ marginTop: 40, padding: "18px 16px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#0a1520" }}>
-          <div id="references-title" style={{ fontSize: "0.85em", color: "#f0e8d0", fontWeight: 600, marginBottom: 4 }}>{L.resources.title}</div>
-          <div style={{ color: C.muted, fontSize: "0.74em", fontFamily: "'DM Mono',monospace", marginBottom: 12 }}>{L.resources.subtitle}</div>
-          <ul style={{ display: "flex", flexWrap: "wrap", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
-            {L.resources.links.map((item) => (
-              <li key={item.url}>
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="chip"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    background: "#0f1f2e",
-                    border: `1px solid ${C.border}`,
-                    color: "#8aa4bc",
-                    borderRadius: 8,
-                    padding: "8px 12px",
-                    textDecoration: "none",
-                    fontSize: "0.8em",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  ↗ {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid #1a2e40`, textAlign: "center", color: "#384c5c", fontSize: "0.7em", fontFamily: "'DM Mono',monospace" }}>{L.poweredBy}</div>      </div>
+        <div className="muted" style={{ textAlign: "center", fontSize: ".82rem", marginTop: "1rem" }}>{L.poweredBy}</div>
+      </div>
     </div>
   );
 }
