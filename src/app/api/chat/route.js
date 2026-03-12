@@ -1,14 +1,6 @@
-
-import Anthropic from "@anthropic-ai/sdk";
 import fs from "node:fs";
 import path from "node:path";
 import { KEEDB_DOC } from "../../../lib/keedb-doc";
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const MODEL_CANDIDATES = (process.env.ANTHROPIC_MODELS || "claude-3-5-haiku-latest,claude-3-5-sonnet-latest")
-  .split(",")
-  .map((m) => m.trim())
-  .filter(Boolean);
 
 const MEMORY_PATH = path.join(process.cwd(), "memory.md");
 const MEMORY_RULES = (() => {
@@ -54,28 +46,49 @@ Use "GRB" in English responses. Redirect off-topic questions humorously.
 Apply memory.md rules first, then check the provided guide document, then use general knowledge. Add APA 7 references.${memorySection}${docSection}`;
 }
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const { messages, lang, role, customSystem } = await req.json();
-    const baseSystem = buildSystem(lang || "tr", role || "official");
-    const system = customSystem
-      ? `${customSystem}\n\n---\nMerkezi Sistem Kuralları:\n${baseSystem}`
-      : baseSystem;
+    const { messages, lang, role } = await request.json();
 
-    const response = await client.messages.create({
-      model: "claude-3-5-haiku-20241022",
-      max_tokens: 2000,
-      system,
-      messages,
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error("ANTHROPIC_API_KEY environment variable is not set.");
+    }
+
+    if (!Array.isArray(messages) || !lang || !role) {
+      throw new Error("Request body must include messages, lang, and role fields.");
+    }
+
+    const customSystem = buildSystem(lang, role);
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-opus-4-5",
+        max_tokens: 2048,
+        system: customSystem,
+        messages: messages,
+      }),
     });
 
-    const text = response.content.map((b) => b.text || "").join("\n");
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Anthropic API error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+    const text = Array.isArray(data?.content)
+      ? data.content.map((block) => block?.text || "").join("\n")
+      : "";
+
     return Response.json({ text });
-  } catch (err) {
-    console.error(err);
-    const payload = getErrorPayload(err);
-    const safeMessage = payload?.message || err.message || "Bilinmeyen sunucu hatası.";
-    return Response.json({ error: safeMessage }, { status: 500 });
+  } catch (error) {
+    console.error("/api/chat error:", error);
+    return Response.json({ error: error?.message || "Bilinmeyen sunucu hatası." }, { status: 500 });
   }
 }
                                       
