@@ -155,7 +155,7 @@ const LANG = {
 
 const QUICK_PRESET_RESPONSES = {
   tr: {
-    "keedb nedir ve neden önemlidir?": `## Kısa Özet
+    "keedb nedir ve neden önemlidir?": `## 
 
 Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu bütçelerinin hazırlanması, uygulanması ve izlenmesi süreçlerinde kadınların ve erkeklerin farklı ihtiyaç ve önceliklerini dikkate alan bir yaklaşımdır. Amaç, kamu kaynaklarının kadın erkek eşitliğini destekleyecek şekilde adil ve etkili kullanılmasını sağlamaktır.
 
@@ -210,7 +210,7 @@ Kadın erkek eşitliği, ekonomik büyüme ve sosyal kalkınma ile doğrudan ili
 ## KEEDB'nin Nihai Hedefi
 
 ➡️ Kadınların ve erkeklerin eşit hak, fırsat ve imkanlara sahip olduğu bir toplum oluşturmaktır.`,
-    "keedb için hangi ilk adımları atabiliriz?": `## Kısa Özet
+    "keedb için hangi ilk adımları atabiliriz?": `##
 
 Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uygulamasına başlamak için genellikle 5 temel ilk adım önerilir:
 
@@ -344,7 +344,7 @@ Bir belediyenin spor tesisleri bütçesini düşünelim:
 - **KEEDB ile:** Kadınların kullandığı spor alanları da planlanır, kadın-erkek kullanım oranı analiz edilir, hizmetler herkes için erişilebilir olur.
 
 ✅ **Özet:** KEEDB kadınlara ayrı bir bütçe oluşturmaz. Ama bütçenin kadınlar ve erkekler için eşit ve adil sonuçlar üretmesini sağlamaya çalışır.`,
-    "keedb'nin temel araçları nelerdir?": `## Kısa Özet
+    "keedb'nin temel araçları nelerdir?": `##
 
 Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu politikası ve bütçe süreçlerinde kadın ve erkeklerin farklı ihtiyaç ve etkilerini dikkate almak için çeşitli analiz, planlama, izleme ve raporlama araçları kullanır.
 
@@ -371,7 +371,7 @@ Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu politikası ve büt
 - **İzleme:** İzleme ve değerlendirme
 
 ✅ Bu araçlar birlikte kullanıldığında bütçe sürecinin tamamına eşitlik perspektifi yerleştirilmiş olur.`,
-    "keedb hangi politika döngüsü aşamalarında uygulanabilir?": `## Kısa Özet
+    "keedb hangi politika döngüsü aşamalarında uygulanabilir?": `##
 
 Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) yalnızca bütçe hazırlama aşamasında değil, kamu politika döngüsünün tüm aşamalarında uygulanabilir.
 
@@ -388,7 +388,7 @@ Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) yalnızca bütçe hazırl
 5️⃣ **İzleme ve Değerlendirme** — Eşitliğe duyarlı performans göstergeleri, bütçe etkisinin değerlendirilmesi, politika sonuçlarının kadınlar ve erkekler üzerindeki etkisinin analizi.
 
 ✅ **Sonuç:** KEEDB, bütçenin yalnızca hazırlanmasında değil; politika geliştirme, planlama, uygulama ve değerlendirme süreçlerinin tamamında uygulanabilen bir yaklaşımdır.`,
-    "dünya'dan başarılı örnekler paylaşır mısın?": `## Kısa Özet
+    "dünya'dan başarılı örnekler paylaşır mısın?": `##
 
 Dünyada KEEDB uygulamasında öne çıkan birçok başarılı örnek vardır. Özellikle Avusturya, İsveç ve Güney Kore KEEDB'yi bütçe sistemine kurumsal olarak entegre etmiş ülkeler arasında gösterilir.
 
@@ -1079,10 +1079,7 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
   const timeoutId = setTimeout(() => controller.abort(), 45000);
 
   try {
-    const messages = [
-      ...history,
-      { role: "user", content: userContent },
-    ];
+    const messages = [{ role: "user", content: userContent }];
 
     const res = await fetch("/api/chat", {
       method: "POST",
@@ -1392,7 +1389,7 @@ export default function EsitlikAsistani() {
     .md-content p,.md-content li{font-size:.95rem;line-height:1.75}
     .md-content strong{color:var(--primary);font-weight:600}
     .md-content ul,.md-content ol{padding-left:1.2rem;margin:.35rem 0}
-    .advisor-layout{padding:0;display:flex;flex-direction:row;height:calc(100vh - 120px);overflow:hidden}
+    .advisor-layout{padding:0;display:flex;flex-direction:row;height:calc(100vh - 160px);overflow:hidden}
     .advisor-quick-panel{width:300px;flex-shrink:0;border-right:1px solid var(--border);padding:1rem;position:sticky;top:0;align-self:flex-start}
     .advisor-quick-list{display:grid;grid-template-columns:1fr;gap:.5rem}
     .advisor-chat-panel{flex:1;min-width:0;min-height:0}
@@ -1514,18 +1511,35 @@ export default function EsitlikAsistani() {
               </div>
             </div>
             <div className="advisor-chat-panel">
-            <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-              <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+            <div style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              height: "calc(100vh - 160px)",
+              minHeight: 0,
+              overflow: "hidden"
+            }}>
+              <div style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "16px",
+                minHeight: 0
+              }}>
                 <div className="advisor-chat-messages">
                   {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : m.role === "user" && i === lastUserIndex ? lastUserMsgRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
                   {chatLoading && <div ref={endRef} className="muted pulse">{L.chat.thinking}</div>}
                 </div>
               </div>
-              <div style={{ borderTop: "1px solid var(--border)", padding: "12px", background: "var(--surface)", flexShrink: 0 }}>
-                <div className="advisor-input-row">
-                  <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
-                  <button className="btn btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>{L.chat.send}</button>
-                </div>
+              <div style={{
+                flexShrink: 0,
+                borderTop: "1px solid var(--border)",
+                padding: "12px 16px",
+                background: "var(--surface)",
+                display: "flex",
+                gap: 9
+              }}>
+                <textarea value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }} placeholder={L.chat.placeholder} style={{ height: 64, resize: "none" }} />
+                <button className="btn btn-primary" onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}>{L.chat.send}</button>
               </div>
             </div>
             </div>
