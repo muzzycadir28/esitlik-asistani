@@ -1079,10 +1079,7 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
   const timeoutId = setTimeout(() => controller.abort(), 45000);
 
   try {
-    const messages = [
-      ...history,
-      { role: "user", content: userContent },
-    ];
+    const messages = [{ role: "user", content: userContent }];
 
     const res = await fetch("/api/chat", {
       method: "POST",
