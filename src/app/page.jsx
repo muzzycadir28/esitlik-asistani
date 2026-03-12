@@ -1069,7 +1069,7 @@ export default function EsitlikAsistani() {
           </div>
         )}
 
-                <section aria-labelledby="references-title" className="card" style={{ marginTop: 40, padding: "18px 16px" }}>
+        <section aria-labelledby="references-title" className="card" style={{ marginTop: 40, padding: "18px 16px" }}>
           <div id="references-title" style={{ fontSize: "0.85em", color: "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>{L.resources.title}</div>
           <div style={{ color: C.muted, fontSize: "0.74em", fontFamily: "inherit", marginBottom: 12 }}>{L.resources.subtitle}</div>
           <ul style={{ display: "flex", flexWrap: "wrap", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
@@ -1100,7 +1100,10 @@ export default function EsitlikAsistani() {
           </ul>
         </section>
 
-        <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.border}`, textAlign: "center", color: "var(--text-secondary)", fontSize: "0.7em", fontFamily: "inherit" }}>{L.poweredBy}</div>      </div>
+        <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.border}`, textAlign: "center", color: "var(--text-secondary)", fontSize: "0.7em", fontFamily: "inherit" }}>
+          {L.poweredBy}
+        </div>
+      </div>
     </div>
   );
 }
