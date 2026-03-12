@@ -1280,7 +1280,7 @@ export default function EsitlikAsistani() {
     @media (prefers-color-scheme: dark){:root{--bg:#0F172A;--surface:#1E293B;--primary:#3B82F6;--accent:#3B82F6;--text:#F1F5F9;--text-secondary:#94A3B8;--border:#334155;--shadow:0 8px 24px rgba(2,6,23,.45);--role-gradient:linear-gradient(135deg, #2563EB 0%, #1e40af 100%);--role-gradient-active:linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%)}}
     *{box-sizing:border-box}
     body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-    .app{min-height:100vh;background:var(--bg);color:var(--text)}
+    .app{min-height:100vh;color:var(--text)}
     .surface{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow)}
     .header{border-bottom:1px solid var(--border);background:var(--surface)}
     .btn{border-radius:10px;padding:.65rem 1rem;font-family:inherit;font-size:.92rem;font-weight:500;cursor:pointer;transition:.2s all;border:1px solid transparent}
@@ -1307,7 +1307,7 @@ export default function EsitlikAsistani() {
     .advisor-quick-panel{width:300px;flex-shrink:0;border-right:1px solid var(--border);padding:1rem;position:sticky;top:0;align-self:flex-start}
     .advisor-quick-list{display:grid;grid-template-columns:1fr;gap:.5rem}
     .advisor-chat-panel{flex:1;padding:1rem;display:flex;flex-direction:column;gap:1rem;min-width:0}
-    .advisor-chat-messages{flex:1;min-height:260px;max-height:520px;overflow-y:auto;display:grid;gap:.75rem}
+    .advisor-chat-messages{flex:1;min-height:260px;max-height:520px;overflow-y:auto;display:grid;gap:.75rem;background:var(--surface)}
     .advisor-input-row{display:flex;gap:.5rem}
     @media (max-width: 767px){
       .advisor-layout{flex-direction:column}
@@ -1319,7 +1319,7 @@ export default function EsitlikAsistani() {
   const resultCard = (content) => content && <div className="surface fade" style={{ padding: "1rem 1.2rem" }}><MD text={content} /></div>;
 
   if (!role) return (
-    <div className="app" suppressHydrationWarning>
+    <div className="app" suppressHydrationWarning style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
       <style>{css}</style>
       <div className="header" style={{ padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
@@ -1375,7 +1375,7 @@ export default function EsitlikAsistani() {
   );
 
   return (
-    <div className="app" suppressHydrationWarning>
+    <div className="app" suppressHydrationWarning style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
       <style>{css}</style>
       <div className="header" style={{ padding: "0.8rem 1.2rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
         <div style={{ display: "flex", gap: "0.7rem", alignItems: "center" }}>
@@ -1400,7 +1400,7 @@ export default function EsitlikAsistani() {
               <div className="advisor-quick-list">{L.chat.quick.map((q, i) => <button key={i} className="chip" onClick={() => sendChat(q, true)} style={{ background: activeQuick === q ? 'var(--accent)' : 'var(--surface)', color: activeQuick === q ? '#ffffff' : 'var(--text-secondary)', border: `1px solid ${activeQuick === q ? 'var(--accent)' : 'var(--border)'}`, fontWeight: activeQuick === q ? 600 : 400 }}>{q}</button>)}</div>
             </div>
             <div className="advisor-chat-panel">
-            <div className="advisor-chat-messages" style={{ backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}>
+            <div className="advisor-chat-messages">
               {messages.map((m, i) => <div key={i} className="fade" style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}><div ref={m.role === "assistant" && i === lastAssistantIndex ? lastAssistantRef : m.role === "user" && i === lastUserIndex ? lastUserMsgRef : null} className="surface" style={{ maxWidth: "82%", padding: "0.8rem 0.9rem", borderRadius: 10, background: m.role === "user" ? "color-mix(in oklab,var(--primary) 14%, var(--surface))" : "var(--surface)" }}>{m.role === "assistant" ? <MD text={m.content} /> : <p style={{ margin: 0 }}>{m.content}</p>}</div></div>)}
               {chatLoading && <div ref={endRef} className="muted pulse">{L.chat.thinking}</div>}
             </div>
