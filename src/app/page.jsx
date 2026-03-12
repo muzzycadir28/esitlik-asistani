@@ -582,8 +582,52 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
       signal: controller.signal,
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || "Sunucu hatası oluştu.");
+    const rawBody = await res.text();
+    let data = null;
+
+    if (rawBody?.trim()) {
+      try {
+        data = JSON.parse(rawBody);
+      } catch {
+        const sseChunks = rawBody
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line.startsWith("data:"))
+          .map((line) => line.replace(/^data:\s*/, ""))
+          .filter((line) => line && line !== "[DONE]");
+
+        if (sseChunks.length) {
+          const sseText = sseChunks
+            .map((chunk) => {
+              try {
+                const parsed = JSON.parse(chunk);
+                return parsed?.text || parsed?.delta || "";
+              } catch {
+                return "";
+              }
+            })
+            .join("")
+            .trim();
+
+          if (sseText) return sseText;
+        }
+
+        throw new Error(
+          lang === "tr"
+            ? "Sunucu yanıtı okunamadı. Lütfen tekrar deneyin."
+            : "Could not read the server response. Please try again."
+        );
+      }
+    }
+
+    if (!res.ok) {
+      throw new Error(data?.error || (lang === "tr" ? "Sunucu hatası oluştu." : "A server error occurred."));
+    }
+
+    if (!data) {
+      throw new Error(lang === "tr" ? "Sunucudan boş yanıt alındı. Lütfen tekrar deneyin." : "Received an empty response from the server. Please try again.");
+    }
+
     if (data.error) throw new Error(data.error);
     return data.text || "—";
   } catch (error) {
