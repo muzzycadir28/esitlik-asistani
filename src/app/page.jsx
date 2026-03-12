@@ -937,6 +937,7 @@ export default function EsitlikAsistani() {
                   </button>
                 ))}
               </div>
+            </div>
 
             {/* Messages */}
             <div style={{ minHeight: 260, maxHeight: 420, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
