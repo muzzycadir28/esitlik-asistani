@@ -582,8 +582,31 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
       signal: controller.signal,
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || "Sunucu hatası oluştu.");
+    const rawText = await res.text();
+    console.log("[callClaude] /api/chat raw response:", {
+      status: res.status,
+      statusText: res.statusText,
+      ok: res.ok,
+      text: rawText,
+    });
+
+    let data;
+    try {
+      data = rawText ? JSON.parse(rawText) : null;
+    } catch (parseError) {
+      console.error("[callClaude] JSON parse failed for /api/chat response", parseError);
+      throw new Error(`Geçersiz JSON yanıtı alındı (HTTP ${res.status}).`);
+    }
+
+    if (!res.ok) {
+      const serverError = data?.error || `Sunucu hatası (HTTP ${res.status}).`;
+      throw new Error(serverError);
+    }
+
+    if (!data) {
+      throw new Error(`Boş yanıt alındı (HTTP ${res.status}).`);
+    }
+
     if (data.error) throw new Error(data.error);
     return data.text || "—";
   } catch (error) {
