@@ -1389,18 +1389,36 @@ export default function EsitlikAsistani() {
     .md-content p,.md-content li{font-size:.95rem;line-height:1.75}
     .md-content strong{color:var(--primary);font-weight:600}
     .md-content ul,.md-content ol{padding-left:1.2rem;margin:.35rem 0}
+    .main-container{max-width:100%;margin:1.2rem auto;padding:16px}
+    .card{width:100%}
+    .header-top{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap}
+    .header-brand{display:flex;gap:.7rem;align-items:center}
+    .header-actions{display:flex;gap:.5rem}
+    .app-title{font-size:1.15rem;font-weight:600}
+    .app-subtitle{font-size:.8rem}
     .advisor-layout{padding:0;display:flex;flex-direction:row;height:calc(100vh - 160px);overflow:hidden}
-    .advisor-quick-panel{width:300px;flex-shrink:0;border-right:1px solid var(--border);padding:1rem;position:sticky;top:0;align-self:flex-start}
+    .advisor-quick-panel{width:280px;flex-shrink:0;border-right:1px solid var(--border);padding:1rem;position:sticky;top:0;align-self:flex-start}
     .advisor-quick-list{display:grid;grid-template-columns:1fr;gap:.5rem}
     .advisor-chat-panel{flex:1;min-width:0;min-height:0}
     .advisor-chat-messages{display:grid;gap:.75rem;background:var(--surface)}
     .advisor-input-row{display:flex;gap:.5rem}
     .quick-group{overflow:hidden;transition:max-height .3s ease,opacity .3s ease;opacity:0;max-height:0}
     .quick-group.open{opacity:1;max-height:360px}
-    @media (max-width: 767px){
-      .advisor-layout{flex-direction:column}
-      .advisor-quick-panel{width:100%;position:static;border-right:none;border-bottom:1px solid var(--border)}
+    @media (max-width: 768px){
+      .two-col{flex-direction:column !important}
+      .sidebar{width:100% !important;max-height:280px;overflow-y:auto}
+      .chat-panel{height:calc(100vh - 420px) !important}
+      .card{border-radius:8px !important}
+      .header-top{flex-direction:column;align-items:flex-start}
+      .header-actions{width:100%;flex-direction:column}
+      .header-actions .btn{width:100%}
+      .app-title{font-size:1rem}
+      .app-subtitle{font-size:.74rem}
+      .advisor-quick-panel{position:static;border-right:none;border-bottom:1px solid var(--border)}
       .advisor-chat-messages{max-height:none}
+    }
+    @media (min-width: 1400px){
+      .main-container{max-width:1300px !important}
     }
   `;
 
@@ -1416,7 +1434,7 @@ export default function EsitlikAsistani() {
         </div>
         <button className="btn btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")}>{L.langToggle}</button>
       </div>
-      <div style={{ maxWidth: 820, margin: "2.5rem auto", padding: "0 1rem" }}>
+      <div className="main-container" style={{ marginTop: "2.5rem" }}>
         <div className="surface" style={{ padding: "1.4rem" }}>
           <h1 style={{ margin: 0, fontSize: "1.7rem", fontWeight: 600 }}>{L.roleSelect.title}</h1>
           <p className="muted" style={{ margin: ".4rem 0 1.3rem" }}>{L.roleSelect.subtitle}</p>
@@ -1465,14 +1483,16 @@ export default function EsitlikAsistani() {
   return (
     <div className="app" suppressHydrationWarning style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
       <style>{css}</style>
-      <div className="header" style={{ padding: "0.8rem 1.2rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
-        <div style={{ display: "flex", gap: "0.7rem", alignItems: "center" }}>
+      <div className="header" style={{ padding: "0.8rem 1.2rem" }}>
+        <div className="header-top">
+        <div className="header-brand">
           <div style={{ width: 36, height: 36, borderRadius: 9, background: "var(--primary)", color: "#fff", display: "grid", placeItems: "center", fontWeight: 600 }}>⚖</div>
-          <div><div style={{ fontSize: "1.15rem", fontWeight: 600 }}>{L.appTitle}</div><div className="muted" style={{ fontSize: ".8rem" }}>{L.appSubtitle}</div></div>
+          <div><div className="app-title">{L.appTitle}</div><div className="muted app-subtitle">{L.appSubtitle}</div></div>
         </div>
-        <div style={{ display: "flex", gap: ".5rem" }}>
+        <div className="header-actions">
           <button className="btn btn-ghost" onClick={() => { setRole(null); }}>{L.chat.changeRole}</button>
           <button className="btn btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")}>{L.langToggle}</button>
+        </div>
         </div>
       </div>
 
@@ -1480,10 +1500,10 @@ export default function EsitlikAsistani() {
         {L.tabs.map((t, i) => <button key={i} className={`tab ${activeTab === i ? "active" : ""}`} onClick={() => setActiveTab(i)}>{t}</button>)}
       </div>
 
-      <div style={{ maxWidth: 900, margin: "1.2rem auto", padding: "0 1rem 1.5rem" }}>
+      <div className="main-container" style={{ paddingBottom: "1.5rem" }}>
         {activeTab === 0 && (
-          <div className="surface advisor-layout">
-            <div className="advisor-quick-panel">
+          <div className="surface advisor-layout two-col card">
+            <div className="advisor-quick-panel sidebar">
               <div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.chat.quickTitle}</div>
               <div className="advisor-quick-list">
                 {quickGroups.map((group, i) => {
@@ -1510,12 +1530,12 @@ export default function EsitlikAsistani() {
                 })}
               </div>
             </div>
-            <div className="advisor-chat-panel">
+            <div className="advisor-chat-panel chat-panel">
             <div style={{
               flex: 1,
               display: "flex",
               flexDirection: "column",
-              height: "calc(100vh - 160px)",
+              height: "100%",
               minHeight: 0,
               overflow: "hidden"
             }}>
@@ -1547,7 +1567,7 @@ export default function EsitlikAsistani() {
         )}
 
         {activeTab === 1 && (
-          <div className="surface" style={{ padding: "1rem", display: "grid", gap: "1rem" }}>
+          <div className="surface card" style={{ width: "100%", padding: "1rem", display: "grid", gap: "1rem" }}>
             <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.docAnalysis.title}</div><div className="muted">{L.docAnalysis.subtitle}</div></div>
             <div>
               <div className="muted" style={{ fontWeight: 500, marginBottom: ".4rem" }}>{L.docAnalysis.uploadSection}</div>
@@ -1614,7 +1634,7 @@ export default function EsitlikAsistani() {
         )}
 
         {activeTab === 2 && (
-          <div className="surface" style={{ padding: "1rem", display: "grid", gap: "1rem" }}>
+          <div className="surface card" style={{ width: "100%", padding: "1rem", display: "grid", gap: "1rem" }}>
             <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.checklist.title}</div><div className="muted">{L.checklist.subtitle}</div></div>
             {[{ label: L.checklist.phaseLabel, items: L.checklist.phases, val: phase, set: setPhase }, { label: L.checklist.sectorLabel, items: L.checklist.sectors, val: sector, set: setSector }].map(({ label, items, val, set }, idx) => (
               <div key={idx}><div className="muted" style={{ fontWeight: 500, marginBottom: ".4rem" }}>{label}</div><div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}>{items.map((it, i) => <button key={i} className={`seg ${val === i ? "selected" : ""}`} onClick={() => set(i)} style={{ width: "auto" }}>{it}</button>)}</div></div>
@@ -1641,9 +1661,9 @@ export default function EsitlikAsistani() {
         )}
 
         {activeTab === 3 && (
-          <div className="surface" style={{ padding: "1rem", display: "grid", gap: "1rem" }}>
+          <div className="surface card" style={{ width: "100%", padding: "1rem", display: "grid", gap: "1rem" }}>
             <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.report.title}</div><div className="muted">{L.report.subtitle}</div></div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".75rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: ".75rem" }}>
               {[{ key: "institution", label: L.report.institution }, { key: "year", label: L.report.year }].map(({ key, label }) => <div key={key}><div className="muted" style={{ fontWeight: 500 }}>{label}</div><input value={rpForm[key]} onChange={e => setRpForm(f => ({ ...f, [key]: e.target.value }))} /></div>)}
             </div>
             <div><div className="muted" style={{ fontWeight: 500 }}>{L.report.sector}</div><select value={rpForm.sector} onChange={e => setRpForm(f => ({ ...f, sector: e.target.value }))}>{L.checklist.sectors.map((s, i) => <option key={i} value={s}>{s}</option>)}</select></div>
