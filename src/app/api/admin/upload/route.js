@@ -1,4 +1,3 @@
-import { extractText } from 'unpdf';
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 
@@ -26,14 +25,6 @@ function splitIntoChunks(text, chunkSize = CHUNK_SIZE, overlap = CHUNK_OVERLAP) 
   return chunks;
 }
 
-async function extractTextFromPDF(buffer) {
-  try {
-    const { text } = await extractText(new Uint8Array(buffer), { mergePages: true });
-    return text;
-  } catch (err) {
-    throw new Error('PDF okunamadı: ' + err.message);
-  }
-}
 function streamingJsonResponse(handler) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -102,27 +93,16 @@ export async function POST(request) {
       return;
     }
 
-    const file = formData.get("file");
     const title = formData.get("title")?.toString().trim();
     const category = formData.get("category")?.toString().trim();
     const language = formData.get("language")?.toString().trim();
     const year = formData.get("year")?.toString().trim();
     const source = formData.get("source")?.toString().trim();
+    const extractedText = formData.get("extractedText")?.toString();
 
-    if (!file || !(file instanceof File)) { send({ type: "error", message: "PDF dosyası bulunamadı." }); return; }
-    if (!title || !category || !language || !year || !source) { send({ type: "error", message: "Lütfen tüm alanları doldurun." }); return; }
+    if (!title || !category || !language || !year || !source || !extractedText) { send({ type: "error", message: "Lütfen tüm alanları doldurun." }); return; }
 
-    send({ type: "progress", message: "PDF okunuyor..." });
-
-    const fileBuffer = await file.arrayBuffer();
-    const text = await extractTextFromPDF(fileBuffer);
-
-    if (!text || text.length < 50) {
-      send({ type: "error", message: "PDF'den metin çıkarılamadı. Dosya taranmış (scanned) görsel olabilir." });
-      return;
-    }
-
-    const chunks = splitIntoChunks(text);
+    const chunks = splitIntoChunks(extractedText);
     send({ type: "progress", message: `${chunks.length} chunk oluşturuldu, embedding başlıyor...`, chunkCount: chunks.length });
 
     if (!chunks.length) { send({ type: "error", message: "Chunk oluşturulamadı." }); return; }
@@ -137,7 +117,7 @@ export async function POST(request) {
     send({ type: "progress", message: "Supabase'e kaydediliyor..." });
 
     const { data: documentData, error: documentError } = await supabase
-      .from("documents").insert({ title, category, language, year, source, file_name: file.name }).select("id").single();
+      .from("documents").insert({ title, category, language, year, source }).select("id").single();
 
     if (documentError) { send({ type: "error", message: documentError.message }); return; }
 

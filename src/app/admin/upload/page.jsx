@@ -13,6 +13,31 @@ const initialForm = {
   source: "",
 };
 
+async function extractTextFromPDFClientSide(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer);
+  const str = new TextDecoder("latin1").decode(bytes);
+
+  const textBlocks = [];
+  const btEtRegex = /BT[\s\S]*?ET/g;
+  const matches = str.match(btEtRegex) || [];
+
+  for (const block of matches) {
+    const tjMatches = block.match(/\(([^)]*)\)\s*Tj/g) || [];
+    const tjArrayMatches = block.match(/\[([^\]]*)\]\s*TJ/g) || [];
+    for (const m of tjMatches) {
+      textBlocks.push(m.replace(/\(([^)]*)\)\s*Tj/, "$1"));
+    }
+    for (const m of tjArrayMatches) {
+      const inner = m.replace(/\[([^\]]*)\]\s*TJ/, "$1");
+      const parts = inner.match(/\(([^)]*)\)/g) || [];
+      for (const p of parts) textBlocks.push(p.replace(/[()]/g, ""));
+    }
+  }
+
+  return textBlocks.join(" ").replace(/\s+/g, " ").trim();
+}
+
 export default function AdminUploadPage() {
   const [password, setPassword] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
@@ -137,9 +162,26 @@ export default function AdminUploadPage() {
     setProgressMessages([]);
     setListError("");
 
+    addProgress("PDF okunuyor...");
+
+    let extractedText = "";
+    try {
+      extractedText = await extractTextFromPDFClientSide(file);
+    } catch {
+      addProgress("Hata: PDF metni okunamadı");
+      setIsUploading(false);
+      return;
+    }
+
+    if (!extractedText || extractedText.length < 50) {
+      addProgress("Hata: PDF metni okunamadı");
+      setIsUploading(false);
+      return;
+    }
+
     const formData = new FormData();
     formData.append("password", password);
-    formData.append("file", file);
+    formData.append("extractedText", extractedText);
     formData.append("title", form.title);
     formData.append("category", form.category);
     formData.append("language", form.language);
