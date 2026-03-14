@@ -1,9 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-
-// Disable worker - run in main thread for server-side
-pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -43,26 +40,11 @@ function splitIntoChunks(text, chunkSize = CHUNK_SIZE, overlap = CHUNK_OVERLAP) 
 }
 
 async function extractPdfText(buffer) {
-  const loadingTask = pdfjsLib.getDocument({
-    data: new Uint8Array(buffer),
-    useWorkerFetch: false,
-    isEvalSupported: false,
-    useSystemFonts: true,
-  });
-
-  const pdf = await loadingTask.promise;
-  const pages = [];
-
-  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-    const page = await pdf.getPage(pageNumber);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items.map((item) => item.str).join(" ");
-    pages.push(pageText);
-  }
+  const data = await pdfParse(Buffer.from(buffer));
 
   return {
-    pageCount: pdf.numPages,
-    text: pages.join("\n\n"),
+    pageCount: data.numpages,
+    text: data.text,
   };
 }
 
