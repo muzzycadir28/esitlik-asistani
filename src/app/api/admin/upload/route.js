@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -14,62 +13,52 @@ const CHUNK_OVERLAP = 50;
 
 function splitIntoChunks(text, chunkSize = CHUNK_SIZE, overlap = CHUNK_OVERLAP) {
   const words = text.replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
-
-  if (!words.length) {
-    return [];
-  }
-
+  if (!words.length) return [];
   const chunks = [];
   const step = Math.max(chunkSize - overlap, 1);
-
   for (let start = 0; start < words.length; start += step) {
     const chunkWords = words.slice(start, start + chunkSize);
-
-    if (!chunkWords.length) {
-      break;
-    }
-
+    if (!chunkWords.length) break;
     chunks.push(chunkWords.join(" "));
-
-    if (start + chunkSize >= words.length) {
-      break;
-    }
+    if (start + chunkSize >= words.length) break;
   }
-
   return chunks;
 }
 
 async function extractTextFromPDF(buffer) {
   try {
+    // Dynamically import to avoid worker issues
+    const pdfParse = (await import('pdf-parse')).default;
     const data = await pdfParse(Buffer.from(buffer));
     return data.text;
   } catch (err) {
-    throw new Error('PDF okunamadı: ' + err.message);
+    // Fallback: try alternative import
+    try {
+      const { default: pdfParse } = await import('pdf-parse/lib/pdf-parse.js');
+      const data = await pdfParse(Buffer.from(buffer));
+      return data.text;
+    } catch (err2) {
+      throw new Error('PDF okunamadı: ' + err2.message);
+    }
   }
 }
 
 function streamingJsonResponse(handler) {
   const encoder = new TextEncoder();
-
   const stream = new ReadableStream({
     async start(controller) {
       const send = (payload) => {
         controller.enqueue(encoder.encode(`${JSON.stringify(payload)}\n`));
       };
-
       try {
         await handler(send);
       } catch (error) {
-        send({
-          type: "error",
-          message: error.message || "Yükleme sırasında bir hata oluştu.",
-        });
+        send({ type: "error", message: error.message || "Yükleme sırasında bir hata oluştu." });
       } finally {
         controller.close();
       }
     },
   });
-
   return new Response(stream, {
     headers: {
       "Content-Type": "application/x-ndjson; charset=utf-8",
@@ -85,9 +74,7 @@ export async function GET() {
     .select("id, title, category, year, created_at")
     .order("created_at", { ascending: false });
 
-  if (error) {
-    return Response.json({ success: false, error: error.message }, { status: 500 });
-  }
+  if (error) return Response.json({ success: false, error: error.message }, { status: 500 });
 
   const ids = data.map((doc) => doc.id);
   let chunkCountMap = {};
@@ -98,9 +85,7 @@ export async function GET() {
       .select("document_id")
       .in("document_id", ids);
 
-    if (chunkError) {
-      return Response.json({ success: false, error: chunkError.message }, { status: 500 });
-    }
+    if (chunkError) return Response.json({ success: false, error: chunkError.message }, { status: 500 });
 
     chunkCountMap = chunkRows.reduce((acc, row) => {
       acc[row.document_id] = (acc[row.document_id] || 0) + 1;
@@ -108,20 +93,16 @@ export async function GET() {
     }, {});
   }
 
-  const documents = data.map((doc) => ({
-    ...doc,
-    chunk_count: chunkCountMap[doc.id] || 0,
-  }));
-
+  const documents = data.map((doc) => ({ ...doc, chunk_count: chunkCountMap[doc.id] || 0 }));
   return Response.json({ success: true, documents });
 }
 
 export async function POST(request) {
   return streamingJsonResponse(async (send) => {
     const formData = await request.formData();
-
     const mode = formData.get("mode")?.toString();
     const password = formData.get("password");
+
     if (password !== process.env.ADMIN_PASSWORD) {
       send({ type: "error", message: "Admin şifresi hatalı." });
       return;
@@ -153,13 +134,11 @@ export async function POST(request) {
 
     const fileBuffer = await file.arrayBuffer();
     const text = await extractTextFromPDF(fileBuffer);
-    const pageCount = null;
-
     const chunks = splitIntoChunks(text);
+
     send({
       type: "progress",
-      message: `${pageCount} sayfa bulundu, parçalara bölünüyor...`,
-      pageCount,
+      message: `Parçalara bölünüyor... ${chunks.length} chunk oluşturuldu.`,
       chunkCount: chunks.length,
     });
 
@@ -169,9 +148,7 @@ export async function POST(request) {
     }
 
     const embeddings = [];
-
-    for (let i = 0; i < chunks.length; i += 1) {
-      const chunk = chunks[i];
+    for (let i = 0; i < chunks.length; i++) {
       send({
         type: "progress",
         message: `Embedding oluşturuluyor... (${i + 1}/${chunks.length} chunk)`,
@@ -181,9 +158,8 @@ export async function POST(request) {
 
       const embeddingRes = await openai.embeddings.create({
         model: "text-embedding-3-small",
-        input: chunk,
+        input: chunks[i],
       });
-
       embeddings.push(embeddingRes.data[0].embedding);
     }
 
@@ -191,15 +167,7 @@ export async function POST(request) {
 
     const { data: documentData, error: documentError } = await supabase
       .from("documents")
-      .insert({
-        title,
-        category,
-        language,
-        year,
-        source,
-        file_name: file.name,
-        page_count: pageCount,
-      })
+      .insert({ title, category, language, year, source, file_name: file.name })
       .select("id")
       .single();
 
