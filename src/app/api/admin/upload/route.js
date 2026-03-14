@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
+import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -39,13 +39,13 @@ function splitIntoChunks(text, chunkSize = CHUNK_SIZE, overlap = CHUNK_OVERLAP) 
   return chunks;
 }
 
-async function extractPdfText(buffer) {
-  const data = await pdfParse(Buffer.from(buffer));
-
-  return {
-    pageCount: data.numpages,
-    text: data.text,
-  };
+async function extractTextFromPDF(buffer) {
+  try {
+    const data = await pdfParse(Buffer.from(buffer));
+    return data.text;
+  } catch (err) {
+    throw new Error('PDF okunamadı: ' + err.message);
+  }
 }
 
 function streamingJsonResponse(handler) {
@@ -152,7 +152,8 @@ export async function POST(request) {
     send({ type: "progress", message: "PDF okunuyor..." });
 
     const fileBuffer = await file.arrayBuffer();
-    const { pageCount, text } = await extractPdfText(fileBuffer);
+    const text = await extractTextFromPDF(fileBuffer);
+    const pageCount = null;
 
     const chunks = splitIntoChunks(text);
     send({
