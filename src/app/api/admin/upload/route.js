@@ -1,3 +1,4 @@
+import { extractText } from 'unpdf';
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 
@@ -25,38 +26,14 @@ function splitIntoChunks(text, chunkSize = CHUNK_SIZE, overlap = CHUNK_OVERLAP) 
   return chunks;
 }
 
-function extractTextFromPDFBuffer(buffer) {
+async function extractTextFromPDF(buffer) {
   try {
-    const str = Buffer.from(buffer).toString('latin1');
-    const textBlocks = [];
-    const btEtRegex = /BT[\s\S]*?ET/g;
-    const matches = str.match(btEtRegex) || [];
-
-    for (const block of matches) {
-      const tjMatches = block.match(/\(([^)]*)\)\s*Tj/g) || [];
-      const tjArrayMatches = block.match(/\[([^\]]*)\]\s*TJ/g) || [];
-      for (const m of tjMatches) {
-        textBlocks.push(m.replace(/\(([^)]*)\)\s*Tj/, '$1'));
-      }
-      for (const m of tjArrayMatches) {
-        const inner = m.replace(/\[([^\]]*)\]\s*TJ/, '$1');
-        const parts = inner.match(/\(([^)]*)\)/g) || [];
-        for (const p of parts) textBlocks.push(p.replace(/[()]/g, ''));
-      }
-    }
-
-    let combined = textBlocks.join(' ');
-    combined = combined
-      .replace(/[^\x20-\x7E\u00C0-\u024F\n]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    return combined;
+    const { text } = await extractText(new Uint8Array(buffer), { mergePages: true });
+    return text;
   } catch (err) {
-    throw new Error('PDF metin çıkarma hatası: ' + err.message);
+    throw new Error('PDF okunamadı: ' + err.message);
   }
 }
-
 function streamingJsonResponse(handler) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -138,7 +115,7 @@ export async function POST(request) {
     send({ type: "progress", message: "PDF okunuyor..." });
 
     const fileBuffer = await file.arrayBuffer();
-    const text = extractTextFromPDFBuffer(fileBuffer);
+    const text = await extractTextFromPDF(fileBuffer);
 
     if (!text || text.length < 50) {
       send({ type: "error", message: "PDF'den metin çıkarılamadı. Dosya taranmış (scanned) görsel olabilir." });
