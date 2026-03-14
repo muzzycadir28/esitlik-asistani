@@ -25,21 +25,35 @@ function splitIntoChunks(text, chunkSize = CHUNK_SIZE, overlap = CHUNK_OVERLAP) 
   return chunks;
 }
 
-async function extractTextFromPDF(buffer) {
+function extractTextFromPDFBuffer(buffer) {
   try {
-    // Dynamically import to avoid worker issues
-    const pdfParse = (await import('pdf-parse')).default;
-    const data = await pdfParse(Buffer.from(buffer));
-    return data.text;
-  } catch (err) {
-    // Fallback: try alternative import
-    try {
-      const { default: pdfParse } = await import('pdf-parse/lib/pdf-parse.js');
-      const data = await pdfParse(Buffer.from(buffer));
-      return data.text;
-    } catch (err2) {
-      throw new Error('PDF okunamadı: ' + err2.message);
+    const str = Buffer.from(buffer).toString('latin1');
+    const textBlocks = [];
+    const btEtRegex = /BT[\s\S]*?ET/g;
+    const matches = str.match(btEtRegex) || [];
+
+    for (const block of matches) {
+      const tjMatches = block.match(/\(([^)]*)\)\s*Tj/g) || [];
+      const tjArrayMatches = block.match(/\[([^\]]*)\]\s*TJ/g) || [];
+      for (const m of tjMatches) {
+        textBlocks.push(m.replace(/\(([^)]*)\)\s*Tj/, '$1'));
+      }
+      for (const m of tjArrayMatches) {
+        const inner = m.replace(/\[([^\]]*)\]\s*TJ/, '$1');
+        const parts = inner.match(/\(([^)]*)\)/g) || [];
+        for (const p of parts) textBlocks.push(p.replace(/[()]/g, ''));
+      }
     }
+
+    let combined = textBlocks.join(' ');
+    combined = combined
+      .replace(/[^\x20-\x7E\u00C0-\u024F\n]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    return combined;
+  } catch (err) {
+    throw new Error('PDF metin çıkarma hatası: ' + err.message);
   }
 }
 
@@ -81,20 +95,18 @@ export async function GET() {
 
   if (ids.length) {
     const { data: chunkRows, error: chunkError } = await supabase
-      .from("document_chunks")
-      .select("document_id")
-      .in("document_id", ids);
-
+      .from("document_chunks").select("document_id").in("document_id", ids);
     if (chunkError) return Response.json({ success: false, error: chunkError.message }, { status: 500 });
-
     chunkCountMap = chunkRows.reduce((acc, row) => {
       acc[row.document_id] = (acc[row.document_id] || 0) + 1;
       return acc;
     }, {});
   }
 
-  const documents = data.map((doc) => ({ ...doc, chunk_count: chunkCountMap[doc.id] || 0 }));
-  return Response.json({ success: true, documents });
+  return Response.json({
+    success: true,
+    documents: data.map((doc) => ({ ...doc, chunk_count: chunkCountMap[doc.id] || 0 })),
+  });
 }
 
 export async function POST(request) {
@@ -120,81 +132,44 @@ export async function POST(request) {
     const year = formData.get("year")?.toString().trim();
     const source = formData.get("source")?.toString().trim();
 
-    if (!file || !(file instanceof File)) {
-      send({ type: "error", message: "PDF dosyası bulunamadı." });
-      return;
-    }
-
-    if (!title || !category || !language || !year || !source) {
-      send({ type: "error", message: "Lütfen tüm metadata alanlarını doldurun." });
-      return;
-    }
+    if (!file || !(file instanceof File)) { send({ type: "error", message: "PDF dosyası bulunamadı." }); return; }
+    if (!title || !category || !language || !year || !source) { send({ type: "error", message: "Lütfen tüm alanları doldurun." }); return; }
 
     send({ type: "progress", message: "PDF okunuyor..." });
 
     const fileBuffer = await file.arrayBuffer();
-    const text = await extractTextFromPDF(fileBuffer);
-    const chunks = splitIntoChunks(text);
+    const text = extractTextFromPDFBuffer(fileBuffer);
 
-    send({
-      type: "progress",
-      message: `Parçalara bölünüyor... ${chunks.length} chunk oluşturuldu.`,
-      chunkCount: chunks.length,
-    });
-
-    if (!chunks.length) {
-      send({ type: "error", message: "PDF içinden metin çıkarılamadı." });
+    if (!text || text.length < 50) {
+      send({ type: "error", message: "PDF'den metin çıkarılamadı. Dosya taranmış (scanned) görsel olabilir." });
       return;
     }
 
+    const chunks = splitIntoChunks(text);
+    send({ type: "progress", message: `${chunks.length} chunk oluşturuldu, embedding başlıyor...`, chunkCount: chunks.length });
+
+    if (!chunks.length) { send({ type: "error", message: "Chunk oluşturulamadı." }); return; }
+
     const embeddings = [];
     for (let i = 0; i < chunks.length; i++) {
-      send({
-        type: "progress",
-        message: `Embedding oluşturuluyor... (${i + 1}/${chunks.length} chunk)`,
-        current: i + 1,
-        total: chunks.length,
-      });
-
-      const embeddingRes = await openai.embeddings.create({
-        model: "text-embedding-3-small",
-        input: chunks[i],
-      });
-      embeddings.push(embeddingRes.data[0].embedding);
+      send({ type: "progress", message: `Embedding oluşturuluyor... (${i + 1}/${chunks.length})`, current: i + 1, total: chunks.length });
+      const res = await openai.embeddings.create({ model: "text-embedding-3-small", input: chunks[i] });
+      embeddings.push(res.data[0].embedding);
     }
 
     send({ type: "progress", message: "Supabase'e kaydediliyor..." });
 
     const { data: documentData, error: documentError } = await supabase
-      .from("documents")
-      .insert({ title, category, language, year, source, file_name: file.name })
-      .select("id")
-      .single();
+      .from("documents").insert({ title, category, language, year, source, file_name: file.name }).select("id").single();
 
-    if (documentError) {
-      send({ type: "error", message: documentError.message });
-      return;
-    }
+    if (documentError) { send({ type: "error", message: documentError.message }); return; }
 
-    const rows = chunks.map((chunk, index) => ({
-      document_id: documentData.id,
-      chunk_index: index,
-      content: chunk,
-      embedding: embeddings[index],
-    }));
+    const { error: chunksError } = await supabase.from("document_chunks").insert(
+      chunks.map((chunk, index) => ({ document_id: documentData.id, chunk_index: index, content: chunk, embedding: embeddings[index] }))
+    );
 
-    const { error: chunksError } = await supabase.from("document_chunks").insert(rows);
+    if (chunksError) { send({ type: "error", message: chunksError.message }); return; }
 
-    if (chunksError) {
-      send({ type: "error", message: chunksError.message });
-      return;
-    }
-
-    send({
-      type: "done",
-      success: true,
-      chunks: chunks.length,
-      message: `Tamamlandı! ${chunks.length} chunk yüklendi.`,
-    });
+    send({ type: "done", success: true, chunks: chunks.length, message: `Tamamlandı! ${chunks.length} chunk yüklendi.` });
   });
 }
