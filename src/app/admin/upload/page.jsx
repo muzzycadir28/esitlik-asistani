@@ -50,6 +50,7 @@ export default function AdminUploadPage() {
   const [authError, setAuthError] = useState("");
 
   const [file, setFile] = useState(null);
+  const [pastedText, setPastedText] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [progressMessages, setProgressMessages] = useState([]);
@@ -58,8 +59,8 @@ export default function AdminUploadPage() {
   const [listError, setListError] = useState("");
 
   const canUpload = useMemo(() => {
-    return Boolean(file && form.title && form.category && form.language && form.year && form.source);
-  }, [file, form]);
+    return Boolean((file || pastedText.trim()) && form.title && form.category && form.language && form.year && form.source);
+  }, [file, pastedText, form]);
 
   async function fetchDocuments() {
     const response = await fetch("/api/admin/upload", { cache: "no-store" });
@@ -160,7 +161,7 @@ export default function AdminUploadPage() {
 
   async function handleUpload(event) {
     event.preventDefault();
-    if (!file) {
+    if (!file && !pastedText.trim()) {
       return;
     }
 
@@ -170,17 +171,16 @@ export default function AdminUploadPage() {
 
     addProgress("PDF okunuyor...");
 
-    let extractedText = "";
-    try {
-      extractedText = await extractTextFromPDFClientSide(file);
-    } catch {
-      addProgress("Hata: PDF metni okunamadı");
-      setIsUploading(false);
-      return;
+    let extractedText = pastedText.trim();
+    if (file) {
+      try {
+        const fromPDF = await extractTextFromPDFClientSide(file);
+        if (fromPDF && fromPDF.length >= 50) extractedText = fromPDF;
+      } catch {}
     }
 
     if (!extractedText || extractedText.length < 50) {
-      addProgress("Hata: PDF metni okunamadı");
+      addProgress("Hata: Metin bulunamadı. Lütfen metni yapıştırın.");
       setIsUploading(false);
       return;
     }
@@ -342,6 +342,31 @@ export default function AdminUploadPage() {
                   onChange={(event) => onDropFile(event.target.files?.[0])}
                 />
                 {file && <p style={{ marginTop: ".6rem", color: "#0f172a" }}>Seçilen dosya: {file.name}</p>}
+              </div>
+
+              <div>
+                <label style={{ fontWeight: 600, display: "block", marginBottom: 6 }}>
+                  Veya metni buraya yapıştırın (PDF açıp kopyalayabilirsiniz)
+                </label>
+                <textarea
+                  value={pastedText}
+                  onChange={(e) => setPastedText(e.target.value)}
+                  placeholder="PDF içeriğini buraya yapıştırın..."
+                  style={{
+                    width: "100%",
+                    height: 150,
+                    padding: "10px",
+                    borderRadius: 10,
+                    border: "1px solid #cbd5e1",
+                    fontSize: "0.9em",
+                    resize: "vertical",
+                  }}
+                />
+                {pastedText && (
+                  <div style={{ fontSize: "0.8em", color: "#64748b", marginTop: 4 }}>
+                    {pastedText.split(" ").length} kelime
+                  </div>
+                )}
               </div>
 
               <input
