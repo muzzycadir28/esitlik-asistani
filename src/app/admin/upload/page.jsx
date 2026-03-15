@@ -1,10 +1,40 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { extractTextFromPdf } from "@/lib/pdf-text";
-
 const CATEGORIES = ["Rehber", "Rapor", "Araştırma", "Politika", "Diğer"];
 const LANGUAGES = ["TR", "EN"];
+
+async function extractTextFromPDFClientSide(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const binary = e.target.result;
+        const textBlocks = [];
+
+        // Extract text between parentheses after Tj/TJ operators
+        const regex = /\(([^)\\]*(\\.[^)\\]*)*)\)\s*T[jJ]/g;
+        let match;
+        while ((match = regex.exec(binary)) !== null) {
+          const text = match[1]
+            .replace(/\\n/g, " ")
+            .replace(/\\r/g, " ")
+            .replace(/\\t/g, " ")
+            .replace(/\\\\/g, "\\")
+            .replace(/\\[()]/g, (m) => m[1]);
+          if (text.trim()) textBlocks.push(text);
+        }
+
+        const result = textBlocks.join(" ").replace(/\s+/g, " ").trim();
+        resolve(result);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error("Dosya okunamadı"));
+    reader.readAsBinaryString(file);
+  });
+}
 
 const initialForm = {
   title: "",
@@ -142,7 +172,7 @@ export default function AdminUploadPage() {
 
     let extractedText = "";
     try {
-      extractedText = await extractTextFromPdf(file);
+      extractedText = await extractTextFromPDFClientSide(file);
     } catch {
       addProgress("Hata: PDF metni okunamadı");
       setIsUploading(false);
