@@ -2,7 +2,6 @@
 import { useState, useRef } from "react";
 import mammoth from "mammoth";
 import bgImage from "../lib/background.webp";
-import { extractTextFromPdf } from "@/lib/pdf-text";
 
 
 // ─── LANGUAGE STRINGS ────────────────────────────────────────────────────────
