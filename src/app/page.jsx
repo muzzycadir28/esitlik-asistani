@@ -1237,7 +1237,35 @@ export default function EsitlikAsistani() {
   const [lang, setLang] = useState("tr");
   const [activeTab, setActiveTab] = useState(0);
   const [role, setRole] = useState(null);
+  const [activeNav, setActiveNav] = useState(null);
   const L = LANG[lang];
+  const navItems = lang === "tr"
+    ? ["Ana Sayfa", "KEEDB Nedir?", "Nasıl Çalışır?", "Kaynaklar", "Rolünü Seç"]
+    : ["Home", "What is GRB?", "How It Works?", "Resources", "Select Role"];
+  const navContent = {
+    "KEEDB Nedir?": `Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB), kamu politikaları ve bütçelerinin kadınların ve erkeklerin farklı ihtiyaç ve önceliklerini dikkate alacak şekilde planlanmasını sağlayan bir yaklaşımdır.
+
+KEEDB, kamu kaynaklarının kadınlar ve erkekler üzerindeki etkilerini analiz etmeyi ve bütçe süreçlerinin eşitliği destekleyecek biçimde tasarlanmasını amaçlar. Bu yaklaşım sayesinde kamu hizmetlerinin herkes için daha erişilebilir, adil ve etkili olması hedeflenir.
+
+Kadın Erkek Eşitliğine Duyarlı Bütçeleme aynı zamanda kamu yönetiminde şeffaflığı, hesap verebilirliği ve katılımcılığı güçlendiren önemli bir politika aracıdır.
+
+KEEDB yaklaşımı:
+- Kamu politikalarının eşitlik perspektifiyle geliştirilmesini,
+- Kamu harcamalarının kadınlar ve erkekler üzerindeki etkilerinin analiz edilmesini,
+- Bütçe süreçlerine eşitlik bakış açısının entegre edilmesini destekler.`,
+
+    "Nasıl Çalışır?": `Bu platform, kamu kurumları, yerel yönetimler, akademisyenler ve sivil toplum kuruluşlarının Kadın Erkek Eşitliğine Duyarlı Bütçeleme yaklaşımını uygulamalarına yardımcı olmak amacıyla geliştirilmiştir.
+
+Platform; politika geliştirme, bütçe analizi, izleme ve raporlama süreçlerinde kullanılabilecek rehberler, analiz araçları ve kontrol listeleri sunar.
+
+Kullanıcılar platforma giriş yaptıklarında kendi rollerini seçerek ihtiyaçlarına uygun araçlara erişebilirler:
+- Kamu görevlileri politika ve bütçe süreçlerini analiz edebilir,
+- Yerel yönetimler hizmet ve bütçelerini eşitlik perspektifiyle değerlendirebilir,
+- Akademisyenler veri ve analiz araçlarını kullanabilir,
+- Sivil toplum kuruluşları bütçe ve politika süreçlerini izleyebilir.
+
+Platform ayrıca kullanıcıların stratejik planlar, bütçeler veya raporlar gibi belgeleri analiz etmelerine ve eşitlik perspektifinden değerlendirme yapmalarına yardımcı olur.`,
+  };
 
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -1468,11 +1496,28 @@ export default function EsitlikAsistani() {
         </div>
         <button className="btn btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")}>{L.langToggle}</button>
       </div>
+      <div className="header" style={{ display: "flex", padding: "0 1rem", gap: "0.25rem", overflowX: "auto" }}>
+        {navItems.map((item, i) => (
+          <button
+            key={i}
+            className="tab"
+            onClick={() => {
+              if (item === "Rolünü Seç" || item === "Select Role") {
+                document.getElementById("role-selector")?.scrollIntoView({ behavior: "smooth" });
+              } else {
+                setActiveNav(activeNav === item ? null : item);
+              }
+            }}
+          >
+            {item}
+          </button>
+        ))}
+      </div>
       <div className="main-container" style={{ marginTop: "2.5rem" }}>
         <div className="surface" style={{ padding: "1.4rem" }}>
           <h1 style={{ margin: 0, fontSize: "1.7rem", fontWeight: 600 }}>{L.roleSelect.title}</h1>
           <p className="muted" style={{ margin: ".4rem 0 1.3rem" }}>{L.roleSelect.subtitle}</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "0.9rem" }}>
+          <div id="role-selector" style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "0.9rem" }}>
             {L.roleSelect.roles.map(r => (
               <button
                 key={r.id}
@@ -1511,6 +1556,31 @@ export default function EsitlikAsistani() {
           </div>
         </div>
       </div>
+      {activeNav && navContent[activeNav] && (
+        <div
+          onClick={() => setActiveNav(null)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+            zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px"
+          }}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "var(--surface)", borderRadius: 16, padding: "32px",
+              maxWidth: 600, width: "100%", maxHeight: "80vh", overflowY: "auto",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)"
+            }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h2 style={{ margin: 0, color: "var(--accent)", fontSize: "1.3em" }}>{activeNav}</h2>
+              <button onClick={() => setActiveNav(null)} style={{ background: "none", border: "none", fontSize: "1.5em", cursor: "pointer", color: "var(--text-secondary)" }}>×</button>
+            </div>
+            <div style={{ whiteSpace: "pre-line", lineHeight: 1.8, color: "var(--text-primary)" }}>
+              {navContent[activeNav]}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
