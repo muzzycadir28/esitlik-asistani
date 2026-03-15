@@ -103,14 +103,21 @@ export async function POST(request) {
     if (!title || !category || !language || !year || !source || !extractedText) { send({ type: "error", message: "Lütfen tüm alanları doldurun." }); return; }
 
     const chunks = splitIntoChunks(extractedText);
-    send({ type: "progress", message: `${chunks.length} chunk oluşturuldu, embedding başlıyor...`, chunkCount: chunks.length });
+    const cleanChunks = chunks.map((chunk) =>
+      chunk
+        .replace(/\\u[0-9a-fA-F]{0,3}(?![0-9a-fA-F])/g, " ")
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+    );
+    send({ type: "progress", message: `${cleanChunks.length} chunk oluşturuldu, embedding başlıyor...`, chunkCount: cleanChunks.length });
 
-    if (!chunks.length) { send({ type: "error", message: "Chunk oluşturulamadı." }); return; }
+    if (!cleanChunks.length) { send({ type: "error", message: "Chunk oluşturulamadı." }); return; }
 
     const embeddings = [];
-    for (let i = 0; i < chunks.length; i++) {
-      send({ type: "progress", message: `Embedding oluşturuluyor... (${i + 1}/${chunks.length})`, current: i + 1, total: chunks.length });
-      const res = await openai.embeddings.create({ model: "text-embedding-3-small", input: chunks[i] });
+    for (let i = 0; i < cleanChunks.length; i++) {
+      send({ type: "progress", message: `Embedding oluşturuluyor... (${i + 1}/${cleanChunks.length})`, current: i + 1, total: cleanChunks.length });
+      const res = await openai.embeddings.create({ model: "text-embedding-3-small", input: cleanChunks[i] });
       embeddings.push(res.data[0].embedding);
     }
 
@@ -122,11 +129,11 @@ export async function POST(request) {
     if (documentError) { send({ type: "error", message: documentError.message }); return; }
 
     const { error: chunksError } = await supabase.from("document_chunks").insert(
-      chunks.map((chunk, index) => ({ document_id: documentData.id, chunk_index: index, content: chunk, embedding: embeddings[index] }))
+      cleanChunks.map((chunk, index) => ({ document_id: documentData.id, chunk_index: index, content: chunk, embedding: embeddings[index] }))
     );
 
     if (chunksError) { send({ type: "error", message: chunksError.message }); return; }
 
-    send({ type: "done", success: true, chunks: chunks.length, message: `Tamamlandı! ${chunks.length} chunk yüklendi.` });
+    send({ type: "done", success: true, chunks: cleanChunks.length, message: `Tamamlandı! ${cleanChunks.length} chunk yüklendi.` });
   });
 }
