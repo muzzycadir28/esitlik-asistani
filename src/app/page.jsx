@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
 import mammoth from "mammoth";
 import bgImage from "../lib/background.webp";
 
@@ -1333,9 +1333,6 @@ export default function EsitlikAsistani() {
   const [activeTabId, setActiveTabId] = useState("dashboard");
   const [role, setRole] = useState(null);
   const [activeNav, setActiveNav] = useState(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
 
   const L = LANG[lang];
   const currentTabs = useMemo(() => {
@@ -1345,8 +1342,6 @@ export default function EsitlikAsistani() {
     const cardIds = DASHBOARD_CARDS[role] || DASHBOARD_CARDS.official;
     return currentTabs.filter(t => cardIds.includes(t.id));
   }, [currentTabs, role]);
-
-  if (!mounted) return null;
 
   const handleRoleChange = () => {
     setRole(null);
