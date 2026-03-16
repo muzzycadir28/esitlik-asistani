@@ -2035,7 +2035,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
         )}
 
         {activeTabId === 'policy' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 160px)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 160px)', background: 'var(--surface)', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}>
 
             {/* Header */}
             <div style={{ background: 'var(--surface)', borderBottom: `1px solid ${C.border}`, padding: '16px 20px' }}>
@@ -2049,7 +2049,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
 
             {/* Start screen */}
             {!policyStarted && (
-              <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: 24, background: 'var(--bg)' }}>
                 <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
                   <div style={{ fontSize: '1.1em', color: 'var(--text-primary)', marginBottom: 24, lineHeight: 1.7 }}>
                     Adım adım sorularla bir politika veya program fikrini yapılandırmanıza yardımcı olacağım. Yanıtlarınıza göre amaç, hedef, faaliyet, gösterge ve bütçe bağlantısı içeren bir taslak oluşturacağım.
@@ -2255,7 +2255,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
         )}
 
         {activeTabId === 'urban' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 160px)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 160px)', background: 'var(--surface)', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}>
 
             {/* Header */}
             <div style={{ background: 'var(--surface)', borderBottom: `1px solid ${C.border}`, padding: '16px 20px' }}>
@@ -2269,7 +2269,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
 
             {/* Start screen */}
             {!urbanStarted && (
-              <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: 24, background: 'var(--bg)' }}>
                 <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
                   <div style={{ fontSize: '1em', color: 'var(--text-primary)', marginBottom: 24, lineHeight: 1.7 }}>
                     Kentsel planlama kararlarınızı adım adım sorgularla eşitlik perspektifiyle değerlendireceğim. Sonunda belediye meclisi sunumuna hazır bir planlama taslağı oluşacak.
