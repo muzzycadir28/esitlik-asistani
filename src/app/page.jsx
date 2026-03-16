@@ -1327,12 +1327,90 @@ function MD({ text }) {
   return <div className="md-content">{elements}</div>;
 }
 
+const POLICY_STEPS = [
+  {
+    id: 1, title: 'Politika Alanı',
+    aiPrompt: 'Hangi politika alanında çalışıyorsunuz? Bu yeni bir politika mı, mevcut programın iyileştirilmesi mi? Kurumunuzun yetki alanı nedir?',
+    chips: ['Yeni politika', 'Mevcut programı geliştirme', 'Stratejik plana bağlı', 'Performans programına bağlı'],
+    outputFields: ['area', 'context', 'strategicGoal'],
+    outputLabels: ['Politika alanı', 'Kurumsal bağlam', 'İlgili stratejik hedef'],
+  },
+  {
+    id: 2, title: 'Sorun Tanımı',
+    aiPrompt: 'Çözmek istediğiniz temel sorun nedir? Bu sorun kadınlar ve erkekleri farklı biçimde etkiliyor mu? Elinizde veri var mı?',
+    chips: ['Hizmet erişimi sorunu', 'Zaman kullanımı sorunu', 'Güvenlik sorunu', 'Gelir/istihdam sorunu'],
+    outputFields: ['problem', 'problemCauses', 'affectedGroups', 'equalityDimension'],
+    outputLabels: ['Sorun tanımı', 'Temel nedenler', 'Etkilenen gruplar', 'Eşitlik boyutu'],
+  },
+  {
+    id: 3, title: 'Hedef Grup',
+    aiPrompt: 'Politika kimleri hedefliyor? Kadınlar ve erkekler içinde farklı alt gruplar var mı? Kırılgan gruplar kimler?',
+    chips: ['Genç kadınlar', 'Yaşlılar', 'Engelli bireyler', 'Kırsal nüfus', 'Bakım verenler', 'İşsizler'],
+    outputFields: ['targetGroup', 'secondaryGroup', 'intersections'],
+    outputLabels: ['Birincil hedef grup', 'İkincil hedef grup', 'Kesişen eşitsizlikler'],
+  },
+  {
+    id: 4, title: 'Politika Amacı',
+    aiPrompt: 'Bu politika sonunda ne değişsin istiyorsunuz? Eşitsizlik hangi yönde azalmalı? Hizmet erişimi mi, katılım mı, temsil mi öncelik?',
+    chips: ['Hizmet erişimi', 'İşgücü katılımı', 'Temsil', 'Güvenlik', 'Ekonomik güçlenme'],
+    outputFields: ['objective', 'transformation'],
+    outputLabels: ['Genel amaç', 'Beklenen dönüşüm'],
+  },
+  {
+    id: 5, title: 'Hedefler ve Sonuçlar',
+    aiPrompt: '1 yıl içinde hangi kısa vadeli sonuç bekleniyor? 3 yıl içinde hangi kurumsal değişim hedefleniyor? Ölçülebilir bir hedef yazabilir misiniz?',
+    chips: ['Çıktı göstergesi', 'Sonuç göstergesi', 'Etki göstergesi'],
+    outputFields: ['shortTermResults', 'midTermGoals', 'measurements'],
+    outputLabels: ['Kısa vadeli sonuçlar', 'Orta vadeli hedefler', 'Ölçüm alanları'],
+  },
+  {
+    id: 6, title: 'Faaliyet Tasarımı',
+    aiPrompt: 'Hedefe ulaşmak için hangi faaliyetler yapılacak? Hangi kurumlarla iş birliği gerekecek?',
+    chips: ['Eğitim/kapasite', 'Hizmet sunumu', 'Veri toplama', 'Farkındalık', 'Altyapı', 'Mevzuat güncellemesi'],
+    outputFields: ['activities', 'responsibleUnits', 'stakeholders'],
+    outputLabels: ['Faaliyet listesi', 'Sorumlu birimler', 'Paydaşlar'],
+  },
+  {
+    id: 7, title: 'Bütçe Bağlantısı',
+    aiPrompt: 'Bu politikanın mevcut bütçede karşılığı var mı? Yeni kaynak gerekiyor mu? Bütçeden kimlerin yararlanacağı izlenebiliyor mu?',
+    chips: ['Mevcut bütçe yeterli', 'Kısmi kaynak gerekli', 'Yeni kaynak gerekli', 'Belirsiz'],
+    outputFields: ['budgetNote', 'spendingItems', 'resourceNeeds'],
+    outputLabels: ['Bütçe notu', 'Muhtemel harcama başlıkları', 'Kaynak ihtiyacı'],
+  },
+  {
+    id: 8, title: 'Gösterge ve İzleme',
+    aiPrompt: 'Veriler cinsiyete göre ayrıştırılabiliyor mu? Hangi göstergeler izlenecek? Uygulamada karşılaşılabilecek riskler neler?',
+    chips: ['Veri mevcut', 'Veri kısmen var', 'Veri yok', 'Dış veri gerekli'],
+    outputFields: ['indicators', 'dataNeeds', 'risks', 'monitoringPlan'],
+    outputLabels: ['Gösterge seti', 'Veri ihtiyacı', 'Riskler', 'İzleme planı'],
+  },
+];
+
+const POLICY_TEMPLATES = ['İstihdam', 'Eğitim', 'Sağlık', 'Ulaşım', 'Sosyal Koruma', 'Bakım Hizmetleri', 'Şiddetle Mücadele', 'Yerel Hizmetler'];
+
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function EsitlikAsistani() {
   const [lang, setLang] = useState("tr");
   const [activeTabId, setActiveTabId] = useState("dashboard");
   const [role, setRole] = useState(null);
   const [activeNav, setActiveNav] = useState(null);
+  const [policyStep, setPolicyStep] = useState(0);
+  const [policyData, setPolicyData] = useState({
+    area: '', context: '', strategicGoal: '',
+    problem: '', problemCauses: '', affectedGroups: '', equalityDimension: '',
+    targetGroup: '', secondaryGroup: '', intersections: '',
+    objective: '', transformation: '',
+    shortTermResults: '', midTermGoals: '', measurements: '',
+    activities: '', responsibleUnits: '', stakeholders: '',
+    budgetNote: '', spendingItems: '', resourceNeeds: '',
+    indicators: '', dataNeeds: '', risks: '', monitoringPlan: ''
+  });
+  const [policyInput, setPolicyInput] = useState('');
+  const [policyMessages, setPolicyMessages] = useState([]);
+  const [policyLoading, setPolicyLoading] = useState(false);
+  const [policyStarted, setPolicyStarted] = useState(false);
+  const [policyMode, setPolicyMode] = useState(null);
+  const [policyTemplate, setPolicyTemplate] = useState(null);
 
   const C = {
     background: "var(--bg)",
@@ -1533,6 +1611,38 @@ The platform also allows users to analyze documents such as strategic plans, bud
       });
     } finally {
       setChatLoading(false);
+    }
+  };
+
+  const handlePolicySend = async () => {
+    if (!policyInput.trim() || policyLoading) return;
+    const userText = policyInput.trim();
+    setPolicyInput('');
+
+    const newMessages = [...policyMessages, { role: 'user', content: userText }];
+    setPolicyMessages(newMessages);
+    setPolicyLoading(true);
+
+    const currentStep = POLICY_STEPS[policyStep];
+    const nextStep = POLICY_STEPS[policyStep + 1];
+
+    // Update policyData with user's answer for current step fields
+    const updatedData = { ...policyData };
+    if (currentStep?.outputFields?.[0]) {
+      updatedData[currentStep.outputFields[0]] = userText;
+    }
+    setPolicyData(updatedData);
+
+    try {
+      const systemPrompt = `Sen Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uzmanı bir politika tasarım asistanısın. Kullanıcıyı adım adım bir politika taslağı oluşturmak için yönlendiriyorsun. Şu an ${currentStep?.title} adımındasın. Kullanıcının yanıtını kısa değerlendir (1-2 cümle), gerekirse somutlaştırmak için 1 soru sor veya öneri ver, ardından ${nextStep ? nextStep.title + ' adımına geç: ' + nextStep.aiPrompt : 'politika taslağının tamamlandığını belirt ve tebrik et.'}. Yanıtını kısa ve odaklı tut.`;
+
+      const reply = await callClaude(userText, systemPrompt, newMessages.slice(-4), lang, role);
+      setPolicyMessages([...newMessages, { role: 'assistant', content: reply }]);
+      if (policyStep < 7) setPolicyStep(prev => prev + 1);
+    } catch (error) {
+      setPolicyMessages([...newMessages, { role: 'assistant', content: 'Bir hata oluştu: ' + error.message }]);
+    } finally {
+      setPolicyLoading(false);
     }
   };
 
@@ -1812,15 +1922,211 @@ The platform also allows users to analyze documents such as strategic plans, bud
           </div>
         )}
 
-        {activeTabId === "policy" && (
-          <div className="card" style={{ padding: 40, textAlign: "center" }}>
-            <div style={{ fontSize: "3em", marginBottom: 16 }}>🚧</div>
-            <div style={{ fontSize: "1.3em", fontWeight: 600, marginBottom: 8 }}>
-              {lang === "tr" ? "Politika Tasarımı" : "Policy Design"}
+        {activeTabId === 'policy' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 160px)' }}>
+
+            {/* Header */}
+            <div style={{ background: 'var(--surface)', borderBottom: `1px solid ${C.border}`, padding: '16px 20px' }}>
+              <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                🏛️ Politika Tasarımı Asistanı
+              </div>
+              <div style={{ fontSize: '0.85em', color: C.muted, marginTop: 2 }}>
+                Politika fikrinizi kadın erkek eşitliği perspektifiyle yapılandırın
+              </div>
             </div>
-            <div style={{ color: "var(--muted)" }}>
-              {lang === "tr" ? "Bu bölüm yakında aktif olacak." : "This section is coming soon."}
-            </div>
+
+            {/* Start screen */}
+            {!policyStarted && (
+              <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+                <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.1em', color: 'var(--text-primary)', marginBottom: 24, lineHeight: 1.7 }}>
+                    Adım adım sorularla bir politika veya program fikrini yapılandırmanıza yardımcı olacağım. Yanıtlarınıza göre amaç, hedef, faaliyet, gösterge ve bütçe bağlantısı içeren bir taslak oluşturacağım.
+                  </div>
+                  <div style={{ fontSize: '1em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
+                    Nasıl başlamak istiyorsunuz?
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 32 }}>
+                    {[
+                      { id: 'scratch', icon: '✏️', title: 'Sıfırdan Başla', desc: 'Yeni bir politika taslağı oluştur' },
+                      { id: 'template', icon: '📋', title: 'Şablondan Başla', desc: 'Hazır sektör şablonu kullan' },
+                      { id: 'document', icon: '📄', title: 'Belgeden İlerle', desc: 'Mevcut belgenizi yükleyin' },
+                    ].map(m => (
+                      <button key={m.id} onClick={() => setPolicyMode(m.id)}
+                        className='card'
+                        style={{
+                          padding: '20px 16px', borderRadius: 12, cursor: 'pointer', textAlign: 'center',
+                          border: `2px solid ${policyMode === m.id ? 'var(--accent)' : C.border}`,
+                          background: policyMode === m.id ? 'var(--accent-soft)' : 'var(--surface)',
+                          transition: 'all .2s',
+                        }}>
+                        <div style={{ fontSize: '2em', marginBottom: 8 }}>{m.icon}</div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{m.title}</div>
+                        <div style={{ fontSize: '0.8em', color: C.muted }}>{m.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {policyMode === 'template' && (
+                    <div style={{ marginBottom: 24 }}>
+                      <div style={{ fontSize: '0.9em', color: C.muted, marginBottom: 12 }}>Sektör seçin:</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+                        {POLICY_TEMPLATES.map(t => (
+                          <button key={t} onClick={() => setPolicyTemplate(t)}
+                            style={{
+                              padding: '8px 16px', borderRadius: 20, cursor: 'pointer', fontSize: '0.9em',
+                              border: `1px solid ${policyTemplate === t ? 'var(--accent)' : C.border}`,
+                              background: policyTemplate === t ? 'var(--accent)' : 'var(--surface)',
+                              color: policyTemplate === t ? '#fff' : 'var(--text-secondary)',
+                              transition: 'all .2s',
+                            }}>
+                            {t}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    className='btn-primary'
+                    disabled={!policyMode || (policyMode === 'template' && !policyTemplate)}
+                    onClick={() => {
+                      const firstStep = POLICY_STEPS[0];
+                      const welcomeMsg = policyTemplate
+                        ? `${policyTemplate} alanında politika tasarımına başlıyoruz. ${firstStep.aiPrompt}`
+                        : firstStep.aiPrompt;
+                      setPolicyMessages([{ role: 'assistant', content: welcomeMsg }]);
+                      setPolicyStep(0);
+                      setPolicyStarted(true);
+                    }}
+                    style={{ padding: '14px 40px', borderRadius: 12, fontSize: '1em' }}>
+                    Başla →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Main chat + output panel */}
+            {policyStarted && (
+              <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
+
+                {/* Left: Chat */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: `1px solid ${C.border}`, minHeight: 0 }}>
+
+                  {/* Progress bar */}
+                  <div style={{ padding: '10px 16px', background: 'var(--surface)', borderBottom: `1px solid ${C.border}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      {POLICY_STEPS.map((s, i) => (
+                        <div key={s.id} title={s.title}
+                          style={{
+                            flex: 1, height: 4, borderRadius: 2, marginRight: i < 7 ? 3 : 0,
+                            background: i < policyStep ? 'var(--accent)' : i === policyStep ? 'var(--accent)' : C.border,
+                            opacity: i <= policyStep ? 1 : 0.4,
+                          }} />
+                      ))}
+                    </div>
+                    <div style={{ fontSize: '0.78em', color: C.muted }}>
+                      Adım {policyStep + 1}/8: <strong style={{ color: 'var(--text-primary)' }}>{POLICY_STEPS[policyStep]?.title}</strong>
+                    </div>
+                  </div>
+
+                  {/* Messages */}
+                  <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {policyMessages.map((m, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                        {m.role === 'assistant' && (
+                          <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, marginRight: 8, flexShrink: 0, marginTop: 3 }}>🏛</div>
+                        )}
+                        <div style={{
+                          maxWidth: '80%', padding: '10px 14px', borderRadius: m.role === 'user' ? '14px 4px 14px 14px' : '4px 14px 14px 14px',
+                          background: m.role === 'user' ? 'var(--accent-soft)' : 'var(--surface)',
+                          border: `1px solid ${m.role === 'user' ? 'var(--accent-border)' : C.border}`,
+                          fontSize: '0.92em', lineHeight: 1.65, whiteSpace: 'pre-wrap',
+                        }}>
+                          {m.content}
+                        </div>
+                      </div>
+                    ))}
+                    {policyLoading && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>🏛</div>
+                        <span style={{ color: C.muted, fontStyle: 'italic', fontSize: '0.9em' }} className='pulse'>Yanıt hazırlanıyor…</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quick chips */}
+                  {policyStep < 8 && POLICY_STEPS[policyStep]?.chips && (
+                    <div style={{ padding: '8px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {POLICY_STEPS[policyStep].chips.map(chip => (
+                        <button key={chip} onClick={() => setPolicyInput(prev => prev ? prev + ', ' + chip : chip)}
+                          style={{
+                            padding: '5px 12px', borderRadius: 16, fontSize: '0.82em', cursor: 'pointer',
+                            border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-secondary)',
+                            transition: 'all .2s',
+                          }}>
+                          + {chip}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Input */}
+                  <div style={{ padding: '12px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8 }}>
+                    <textarea
+                      value={policyInput}
+                      onChange={e => setPolicyInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handlePolicySend(); } }}
+                      placeholder={policyStep < 8 ? `${POLICY_STEPS[policyStep]?.title} için yanıtınızı yazın...` : 'Ek notlarınızı yazın...'}
+                      style={{ flex: 1, padding: '10px 12px', borderRadius: 10, fontSize: '0.92em', resize: 'none', height: 56, lineHeight: 1.5, border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+                    />
+                    <button className='btn-primary' onClick={handlePolicySend} disabled={policyLoading || !policyInput.trim()}
+                      style={{ padding: '0 16px', borderRadius: 10, fontSize: '0.9em' }}>
+                      {policyStep < 7 ? 'İleri →' : 'Tamamla'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right: Live output */}
+                <div style={{ width: 340, flexShrink: 0, overflowY: 'auto', background: 'var(--surface)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ fontSize: '0.9em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+                    📄 Canlı Politika Taslağı
+                  </div>
+                  {POLICY_STEPS.map(step => (
+                    step.outputFields.some(f => policyData[f]) && (
+                      <div key={step.id} style={{ background: 'var(--bg)', border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+                        <div style={{ fontSize: '0.78em', fontWeight: 600, color: 'var(--accent)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          {step.title}
+                        </div>
+                        {step.outputFields.map((field, fi) => policyData[field] && (
+                          <div key={field} style={{ marginBottom: 8 }}>
+                            <div style={{ fontSize: '0.75em', color: C.muted, marginBottom: 2 }}>{step.outputLabels[fi]}</div>
+                            <div style={{ fontSize: '0.88em', color: 'var(--text-primary)', lineHeight: 1.5 }}>{policyData[field]}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  ))}
+                  {!Object.values(policyData).some(v => v) && (
+                    <div style={{ color: C.muted, fontSize: '0.85em', textAlign: 'center', marginTop: 20 }}>
+                      Sorulara yanıt verdikçe taslak burada oluşacak...
+                    </div>
+                  )}
+                  {policyStep >= 8 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                      <button className='btn-primary' style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
+                        📝 Word'e Aktar
+                      </button>
+                      <button className='btn-ghost' style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
+                        📊 Performans Programı Formatı
+                      </button>
+                      <button className='btn-ghost' style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
+                        📋 Yönetici Özeti
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
