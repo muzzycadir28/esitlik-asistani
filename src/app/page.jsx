@@ -1334,6 +1334,20 @@ export default function EsitlikAsistani() {
   const [role, setRole] = useState(null);
   const [activeNav, setActiveNav] = useState(null);
 
+  const C = {
+    background: "var(--bg)",
+    surface: "var(--surface)",
+    border: "var(--border)",
+    primary: "var(--accent)",
+    muted: "var(--text-secondary)",
+    text: "var(--text-primary)",
+    dim: "var(--text-secondary)",
+    inputBg: "var(--surface)",
+    userBubble: "var(--accent-soft)",
+    userBubbleBorder: "var(--accent-border)",
+    shadow: "var(--shadow)",
+  };
+
   const L = LANG[lang];
   const currentTabs = useMemo(() => {
     return ROLE_TABS[lang]?.[role] || ROLE_TABS.tr.official;
