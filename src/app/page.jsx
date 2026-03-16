@@ -166,23 +166,25 @@ const ROLE_TABS = {
     local: [
       { id: "dashboard", label: "Ana Sayfa" },
       { id: "chat", label: "Danışman" },
-      { id: "doc", label: "Belge Analizi" },
-      { id: "checklist", label: "Rehber & Kontrol" },
+      { id: "urban", label: "Kentsel Planlama" },
+      { id: "service", label: "Hizmet Analizi" },
+      { id: "monitoring", label: "İzleme & Göstergeler" },
       { id: "report", label: "Rapor Oluştur" },
-      { id: "resources", label: "Kaynaklar" },
+      { id: "bestpractice", label: "İyi Uygulamalar" },
     ],
     academic: [
       { id: "dashboard", label: "Ana Sayfa" },
       { id: "chat", label: "Danışman" },
       { id: "doc", label: "Belge Analizi" },
-      { id: "checklist", label: "Rehber & Kontrol" },
+      { id: "data", label: "Veri & Göstergeler" },
       { id: "resources", label: "Kaynaklar" },
     ],
     ngo: [
       { id: "dashboard", label: "Ana Sayfa" },
       { id: "chat", label: "Danışman" },
+      { id: "advocacy", label: "Savunuculuk Rehberi" },
       { id: "doc", label: "Belge Analizi" },
-      { id: "checklist", label: "Rehber & Kontrol" },
+      { id: "monitoring", label: "İzleme Soruları" },
       { id: "resources", label: "Kaynaklar" },
     ],
   },
@@ -199,23 +201,25 @@ const ROLE_TABS = {
     local: [
       { id: "dashboard", label: "Dashboard" },
       { id: "chat", label: "Advisor" },
-      { id: "doc", label: "Document Analysis" },
-      { id: "checklist", label: "Guide & Checklist" },
+      { id: "urban", label: "Urban Planning" },
+      { id: "service", label: "Service Analysis" },
+      { id: "monitoring", label: "Monitoring & Indicators" },
       { id: "report", label: "Generate Report" },
-      { id: "resources", label: "Resources" },
+      { id: "bestpractice", label: "Good Practices" },
     ],
     academic: [
       { id: "dashboard", label: "Dashboard" },
       { id: "chat", label: "Advisor" },
       { id: "doc", label: "Document Analysis" },
-      { id: "checklist", label: "Guide & Checklist" },
+      { id: "data", label: "Data & Indicators" },
       { id: "resources", label: "Resources" },
     ],
     ngo: [
       { id: "dashboard", label: "Dashboard" },
       { id: "chat", label: "Advisor" },
+      { id: "advocacy", label: "Advocacy Guide" },
       { id: "doc", label: "Document Analysis" },
-      { id: "checklist", label: "Guide & Checklist" },
+      { id: "monitoring", label: "Monitoring Questions" },
       { id: "resources", label: "Resources" },
     ],
   },
@@ -1309,7 +1313,29 @@ export default function EsitlikAsistani() {
   const [activeNav, setActiveNav] = useState(null);
   const L = LANG[lang];
   const currentTabs = ROLE_TABS[lang]?.[role] || ROLE_TABS.tr.official;
-  const dashboardCards = currentTabs.filter(t => ["chat", "policy", "doc", "report"].includes(t.id));
+  const DASHBOARD_CARDS = {
+    official: ["chat", "policy", "doc", "report"],
+    local: ["chat", "urban", "service", "bestpractice"],
+    academic: ["chat", "doc", "data", "resources"],
+    ngo: ["chat", "advocacy", "doc", "monitoring"],
+  };
+  const dashboardCards = currentTabs.filter(t =>
+    (DASHBOARD_CARDS[role] || DASHBOARD_CARDS.official).includes(t.id)
+  );
+  const TAB_ICONS = {
+    chat: "💬",
+    policy: "📋",
+    doc: "📄",
+    checklist: "✅",
+    report: "📊",
+    resources: "📚",
+    urban: "🏙️",
+    service: "🔧",
+    monitoring: "📈",
+    bestpractice: "⭐",
+    data: "📉",
+    advocacy: "📣",
+  };
 
   const handleRoleChange = () => {
     setRole(null);
@@ -1730,7 +1756,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
                   style={{ padding: "20px 16px", borderRadius: 12, fontSize: "1em", textAlign: "left",
                     display: "flex", flexDirection: "column", gap: 8, cursor: "pointer" }}>
                   <span style={{ fontSize: "1.4em" }}>
-                    {tab.id === "chat" ? "💬" : tab.id === "policy" ? "📋" : tab.id === "doc" ? "📄" : tab.id === "checklist" ? "✅" : tab.id === "report" ? "📊" : "📚"}
+                    {TAB_ICONS[tab.id] || "📌"}
                   </span>
                   <span style={{ fontWeight: 600 }}>{tab.label}</span>
                 </button>
@@ -1762,6 +1788,20 @@ The platform also allows users to analyze documents such as strategic plans, bud
             </div>
           </div>
         )}
+
+        {["urban", "service", "monitoring", "bestpractice", "data", "advocacy"].map((tabId) => (
+          activeTabId === tabId && (
+            <div key={tabId} className="card" style={{ padding: 40, textAlign: "center" }}>
+              <div style={{ fontSize: "3em", marginBottom: 16 }}>🚧</div>
+              <div style={{ fontSize: "1.3em", fontWeight: 600, marginBottom: 8 }}>
+                {currentTabs.find(t => t.id === tabId)?.label}
+              </div>
+              <div style={{ color: "var(--muted)" }}>
+                {lang === "tr" ? "Bu bölüm yakında aktif olacak." : "This section is coming soon."}
+              </div>
+            </div>
+          )
+        ))}
 
         {activeTabId === "chat" && (
           <div className="surface advisor-layout two-col card">
