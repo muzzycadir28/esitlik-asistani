@@ -152,6 +152,75 @@ const LANG = {
   },
 };
 
+const ROLE_TABS = {
+  tr: {
+    official: [
+      { id: "dashboard", label: "Dashboard" },
+      { id: "chat", label: "Danışman" },
+      { id: "policy", label: "Politika Tasarımı" },
+      { id: "doc", label: "Belge Analizi" },
+      { id: "checklist", label: "Rehber & Kontrol" },
+      { id: "report", label: "Rapor Oluştur" },
+      { id: "resources", label: "Kaynaklar" },
+    ],
+    local: [
+      { id: "dashboard", label: "Dashboard" },
+      { id: "chat", label: "Danışman" },
+      { id: "doc", label: "Belge Analizi" },
+      { id: "checklist", label: "Rehber & Kontrol" },
+      { id: "report", label: "Rapor Oluştur" },
+      { id: "resources", label: "Kaynaklar" },
+    ],
+    academic: [
+      { id: "dashboard", label: "Dashboard" },
+      { id: "chat", label: "Danışman" },
+      { id: "doc", label: "Belge Analizi" },
+      { id: "checklist", label: "Rehber & Kontrol" },
+      { id: "resources", label: "Kaynaklar" },
+    ],
+    ngo: [
+      { id: "dashboard", label: "Dashboard" },
+      { id: "chat", label: "Danışman" },
+      { id: "doc", label: "Belge Analizi" },
+      { id: "checklist", label: "Rehber & Kontrol" },
+      { id: "resources", label: "Kaynaklar" },
+    ],
+  },
+  en: {
+    official: [
+      { id: "dashboard", label: "Dashboard" },
+      { id: "chat", label: "Advisor" },
+      { id: "policy", label: "Policy Design" },
+      { id: "doc", label: "Document Analysis" },
+      { id: "checklist", label: "Guide & Checklist" },
+      { id: "report", label: "Generate Report" },
+      { id: "resources", label: "Resources" },
+    ],
+    local: [
+      { id: "dashboard", label: "Dashboard" },
+      { id: "chat", label: "Advisor" },
+      { id: "doc", label: "Document Analysis" },
+      { id: "checklist", label: "Guide & Checklist" },
+      { id: "report", label: "Generate Report" },
+      { id: "resources", label: "Resources" },
+    ],
+    academic: [
+      { id: "dashboard", label: "Dashboard" },
+      { id: "chat", label: "Advisor" },
+      { id: "doc", label: "Document Analysis" },
+      { id: "checklist", label: "Guide & Checklist" },
+      { id: "resources", label: "Resources" },
+    ],
+    ngo: [
+      { id: "dashboard", label: "Dashboard" },
+      { id: "chat", label: "Advisor" },
+      { id: "doc", label: "Document Analysis" },
+      { id: "checklist", label: "Guide & Checklist" },
+      { id: "resources", label: "Resources" },
+    ],
+  },
+};
+
 const QUICK_PRESET_RESPONSES = {
   tr: {
     "keedb nedir ve neden önemlidir?": `## 
@@ -1235,10 +1304,16 @@ function MD({ text }) {
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function EsitlikAsistani() {
   const [lang, setLang] = useState("tr");
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTabId, setActiveTabId] = useState("dashboard");
   const [role, setRole] = useState(null);
   const [activeNav, setActiveNav] = useState(null);
   const L = LANG[lang];
+  const currentTabs = ROLE_TABS[lang]?.[role] || ROLE_TABS.tr.official;
+
+  const handleRoleChange = () => {
+    setRole(null);
+    setActiveTabId("dashboard");
+  };
   const navItems = lang === "tr"
     ? ["Ana Sayfa", "KEEDB Nedir?", "Nasıl Çalışır?", "Kaynaklar", "Rolünü Seç"]
     : ["Home", "What is GRB?", "How It Works?", "Resources", "Select Role"];
@@ -1617,18 +1692,75 @@ The platform also allows users to analyze documents such as strategic plans, bud
           <div><div className="app-title">{L.appTitle}</div><div className="muted app-subtitle">{L.appSubtitle}</div></div>
         </div>
         <div className="header-actions">
-          <button className="btn btn-ghost" onClick={() => { setRole(null); }}>{L.chat.changeRole}</button>
+          <button className="btn btn-ghost" onClick={handleRoleChange}>{L.chat.changeRole}</button>
           <button className="btn btn-ghost" onClick={() => setLang(l => l === "tr" ? "en" : "tr")}>{L.langToggle}</button>
         </div>
         </div>
       </div>
 
-      <div className="header" style={{ display: "flex", padding: "0 1rem", gap: "0.25rem", overflowX: "auto" }}>
-        {L.tabs.map((t, i) => <button key={i} className={`tab ${activeTab === i ? "active" : ""}`} onClick={() => setActiveTab(i)}>{t}</button>)}
+      <div style={{ borderBottom: "1px solid var(--border)", padding: "0 28px", background: "var(--surface)", display: "flex", overflowX: "auto" }}>
+        {currentTabs.map((tab) => (
+          <button key={tab.id} onClick={() => setActiveTabId(tab.id)}
+            style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
+              padding: "13px 18px", fontSize: "0.95em", whiteSpace: "nowrap",
+              color: activeTabId === tab.id ? "var(--primary)" : "var(--text-secondary)",
+              borderBottom: activeTabId === tab.id ? "2px solid var(--primary)" : "2px solid transparent",
+              transition: "all .2s" }}>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <div className="main-container" style={{ paddingBottom: "1.5rem" }}>
-        {activeTab === 0 && (
+        {activeTabId === "dashboard" && (
+          <div className="card" style={{ padding: 32 }}>
+            <div style={{ fontSize: "1.6rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>
+              {lang === "tr" ? "Hoş Geldiniz" : "Welcome"} {L.roleSelect.roles.find(r => r.id === role)?.icon}
+            </div>
+            <div style={{ color: "var(--muted)", marginBottom: 32, fontSize: "0.95em" }}>
+              {lang === "tr" ? "Bugün ne yapmak istiyorsunuz?" : "What would you like to do today?"}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+              {currentTabs.filter(t => t.id !== "dashboard").map((tab) => (
+                <button key={tab.id} onClick={() => setActiveTabId(tab.id)}
+                  className="btn-primary"
+                  style={{ padding: "20px 16px", borderRadius: 12, fontSize: "1em", textAlign: "left",
+                    display: "flex", flexDirection: "column", gap: 8, cursor: "pointer" }}>
+                  <span style={{ fontSize: "1.4em" }}>
+                    {tab.id === "chat" ? "💬" : tab.id === "policy" ? "📋" : tab.id === "doc" ? "📄" : tab.id === "checklist" ? "✅" : tab.id === "report" ? "📊" : "📚"}
+                  </span>
+                  <span style={{ fontWeight: 600 }}>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTabId === "policy" && (
+          <div className="card" style={{ padding: 40, textAlign: "center" }}>
+            <div style={{ fontSize: "3em", marginBottom: 16 }}>🚧</div>
+            <div style={{ fontSize: "1.3em", fontWeight: 600, marginBottom: 8 }}>
+              {lang === "tr" ? "Politika Tasarımı" : "Policy Design"}
+            </div>
+            <div style={{ color: "var(--muted)" }}>
+              {lang === "tr" ? "Bu bölüm yakında aktif olacak." : "This section is coming soon."}
+            </div>
+          </div>
+        )}
+
+        {activeTabId === "resources" && (
+          <div className="card" style={{ padding: 40, textAlign: "center" }}>
+            <div style={{ fontSize: "3em", marginBottom: 16 }}>📚</div>
+            <div style={{ fontSize: "1.3em", fontWeight: 600, marginBottom: 8 }}>
+              {lang === "tr" ? "Kaynaklar" : "Resources"}
+            </div>
+            <div style={{ color: "var(--muted)" }}>
+              {lang === "tr" ? "Bu bölüm yakında aktif olacak." : "This section is coming soon."}
+            </div>
+          </div>
+        )}
+
+        {activeTabId === "chat" && (
           <div className="surface advisor-layout two-col card">
             <div className="advisor-quick-panel sidebar">
               <div className="muted" style={{ fontSize: ".86rem", marginBottom: ".4rem", fontWeight: 500 }}>{L.chat.quickTitle}</div>
@@ -1693,7 +1825,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
           </div>
         )}
 
-        {activeTab === 1 && (
+        {activeTabId === "doc" && (
           <div className="surface card" style={{ width: "100%", padding: "1rem", display: "grid", gap: "1rem" }}>
             <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.docAnalysis.title}</div><div className="muted">{L.docAnalysis.subtitle}</div></div>
             <div>
@@ -1760,7 +1892,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
           </div>
         )}
 
-        {activeTab === 2 && (
+        {activeTabId === "checklist" && (
           <div className="surface card" style={{ width: "100%", padding: "1rem", display: "grid", gap: "1rem" }}>
             <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.checklist.title}</div><div className="muted">{L.checklist.subtitle}</div></div>
             {[{ label: L.checklist.phaseLabel, items: L.checklist.phases, val: phase, set: setPhase }, { label: L.checklist.sectorLabel, items: L.checklist.sectors, val: sector, set: setSector }].map(({ label, items, val, set }, idx) => (
@@ -1787,7 +1919,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
           </div>
         )}
 
-        {activeTab === 3 && (
+        {activeTabId === "report" && (
           <div className="surface card" style={{ width: "100%", padding: "1rem", display: "grid", gap: "1rem" }}>
             <div><div style={{ fontSize: "1.2rem", fontWeight: 600 }}>{L.report.title}</div><div className="muted">{L.report.subtitle}</div></div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: ".75rem" }}>
