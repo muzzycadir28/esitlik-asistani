@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import mammoth from "mammoth";
 import bgImage from "../lib/background.webp";
 
@@ -1499,6 +1499,11 @@ export default function EsitlikAsistani() {
   const [urbanLoading, setUrbanLoading] = useState(false);
   const [urbanStarted, setUrbanStarted] = useState(false);
   const [urbanArea, setUrbanArea] = useState(null);
+  const [resources, setResources] = useState([]);
+  const [resourcesLoading, setResourcesLoading] = useState(false);
+  const [resourceFilter, setResourceFilter] = useState('all');
+  const [resourceSearch, setResourceSearch] = useState('');
+  const [selectedResource, setSelectedResource] = useState(null);
 
   const C = {
     background: "var(--bg)",
@@ -1576,7 +1581,26 @@ After entering the platform, users select their role and access tools tailored t
 - Civil society organizations can monitor policies and public budgets.
 
 The platform also allows users to analyze documents such as strategic plans, budgets or reports and assess them from an equality perspective. By using these tools, institutions can develop more inclusive and equitable policies and budgets.`,
+    "Kaynaklar": lang === 'tr'
+      ? 'Kaynak dokümanlarına erişmek için lütfen rolünüzü seçerek platforma giriş yapın. Giriş yaptıktan sonra Kaynaklar sekmesinden tüm rehber, rapor ve araştırmalara ulaşabilirsiniz.'
+      : 'Please select your role to access resource documents. After logging in, you can access all guides, reports and research from the Resources tab.',
+    "Resources": lang === 'tr'
+      ? 'Kaynak dokümanlarına erişmek için lütfen rolünüzü seçerek platforma giriş yapın. Giriş yaptıktan sonra Kaynaklar sekmesinden tüm rehber, rapor ve araştırmalara ulaşabilirsiniz.'
+      : 'Please select your role to access resource documents. After logging in, you can access all guides, reports and research from the Resources tab.',
   };
+
+  useEffect(() => {
+    if (activeTabId === 'resources' && resources.length === 0) {
+      setResourcesLoading(true);
+      fetch('/api/admin/upload')
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) setResources(data.documents || []);
+        })
+        .catch(() => {})
+        .finally(() => setResourcesLoading(false));
+    }
+  }, [activeTabId]);
 
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -2242,15 +2266,111 @@ The platform also allows users to analyze documents such as strategic plans, bud
           </div>
         )}
 
-        {activeTabId === "resources" && (
-          <div className="card" style={{ padding: 40, textAlign: "center" }}>
-            <div style={{ fontSize: "3em", marginBottom: 16 }}>📚</div>
-            <div style={{ fontSize: "1.3em", fontWeight: 600, marginBottom: 8 }}>
-              {lang === "tr" ? "Kaynaklar" : "Resources"}
+        {activeTabId === 'resources' && (
+          <div className='card' style={{ padding: 24, minHeight: 400, background: 'var(--surface)' }}>
+
+            {/* Header */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: '1.3rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+                📚 {lang === 'tr' ? 'Kaynaklar ve Referans Dokümanlar' : 'Resources & Reference Documents'}
+              </div>
+              <div style={{ color: C.muted, fontSize: '0.9em' }}>
+                {lang === 'tr' ? 'KEEDB çalışmalarında kullanılan rehberler, raporlar ve araştırmalar' : 'Guides, reports and research used in GRB work'}
+              </div>
             </div>
-            <div style={{ color: "var(--muted)" }}>
-              {lang === "tr" ? "Bu bölüm yakında aktif olacak." : "This section is coming soon."}
+
+            {/* Search + Filter */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+              <input
+                value={resourceSearch}
+                onChange={e => setResourceSearch(e.target.value)}
+                placeholder={lang === 'tr' ? 'Dokümanda ara...' : 'Search documents...'}
+                style={{ flex: 1, minWidth: 200, padding: '9px 14px', borderRadius: 10, fontSize: '0.9em', border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+              />
+              {['all', 'Rehber', 'Rapor', 'Araştırma', 'Politika'].map(cat => (
+                <button key={cat}
+                  onClick={() => setResourceFilter(cat)}
+                  style={{
+                    padding: '8px 14px', borderRadius: 20, fontSize: '0.85em', cursor: 'pointer', fontFamily: 'inherit',
+                    border: `1px solid ${resourceFilter === cat ? 'var(--accent)' : C.border}`,
+                    background: resourceFilter === cat ? 'var(--accent)' : 'var(--surface)',
+                    color: resourceFilter === cat ? '#fff' : 'var(--text-secondary)',
+                    transition: 'all .2s',
+                  }}>
+                  {cat === 'all' ? (lang === 'tr' ? 'Tümü' : 'All') : cat}
+                </button>
+              ))}
             </div>
+
+            {/* Loading */}
+            {resourcesLoading && (
+              <div style={{ textAlign: 'center', padding: 40, color: C.muted }} className='pulse'>
+                {lang === 'tr' ? 'Dokümanlar yükleniyor...' : 'Loading documents...'}
+              </div>
+            )}
+
+            {/* Document list */}
+            {!resourcesLoading && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+                {resources
+                  .filter(doc => resourceFilter === 'all' || doc.category === resourceFilter)
+                  .filter(doc => !resourceSearch || doc.title.toLowerCase().includes(resourceSearch.toLowerCase()))
+                  .map(doc => (
+                    <div key={doc.id}
+                      onClick={() => setSelectedResource(selectedResource?.id === doc.id ? null : doc)}
+                      style={{
+                        border: `1px solid ${selectedResource?.id === doc.id ? 'var(--accent)' : C.border}`,
+                        borderRadius: 12, padding: '16px', cursor: 'pointer',
+                        background: selectedResource?.id === doc.id ? 'var(--accent-soft)' : 'var(--bg)',
+                        transition: 'all .2s',
+                      }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                        <div style={{ fontSize: '1.8em', flexShrink: 0 }}>
+                          {doc.category === 'Rehber' ? '📘' : doc.category === 'Rapor' ? '📊' : doc.category === 'Araştırma' ? '🔬' : '📄'}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95em', marginBottom: 4, lineHeight: 1.4 }}>
+                            {doc.title}
+                          </div>
+                          <div style={{ fontSize: '0.78em', color: C.muted }}>
+                            {doc.category} • {doc.year} • {doc.chunk_count} bölüm
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                }
+                {resources.length === 0 && !resourcesLoading && (
+                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: C.muted }}>
+                    {lang === 'tr' ? 'Henüz doküman yüklenmemiş.' : 'No documents uploaded yet.'}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Selected document detail */}
+            {selectedResource && (
+              <div style={{ marginTop: 20, border: `1px solid var(--accent)`, borderRadius: 12, padding: 20, background: 'var(--surface)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '1.05em', color: 'var(--text-primary)' }}>{selectedResource.title}</div>
+                    <div style={{ fontSize: '0.82em', color: C.muted, marginTop: 2 }}>
+                      {selectedResource.category} • {selectedResource.year} • {selectedResource.chunk_count} bölüm
+                    </div>
+                  </div>
+                  <button onClick={() => setSelectedResource(null)}
+                    style={{ background: 'none', border: 'none', fontSize: '1.3em', cursor: 'pointer', color: C.muted }}>×</button>
+                </div>
+                <button className='btn-primary'
+                  onClick={() => {
+                    setActiveTabId('chat');
+                    setTimeout(() => sendChat(`${selectedResource.title} hakkında bilgi ver`), 100);
+                  }}
+                  style={{ padding: '9px 18px', borderRadius: 10, fontSize: '0.88em' }}>
+                  💬 {lang === 'tr' ? 'Bu doküman hakkında soru sor' : 'Ask about this document'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
