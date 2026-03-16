@@ -1740,25 +1740,52 @@ The platform also allows users to analyze documents such as strategic plans, bud
 
       <div className="main-container" style={{ paddingBottom: "1.5rem" }}>
         {activeTabId === "dashboard" && (
-          <div className="card" style={{ padding: 32 }}>
-            <div style={{ textAlign: "center", marginBottom: 40 }}>
-              <div style={{ fontSize: "2.2rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: 12 }}>
+          <div style={{ minHeight: "calc(100vh - 160px)", display: "flex", flexDirection: "column" }}>
+            <div
+              style={{
+                background: "linear-gradient(135deg, rgba(37,99,235,0.92) 0%, rgba(29,78,216,0.95) 100%)",
+                borderRadius: 16,
+                padding: "48px 32px",
+                textAlign: "center",
+                marginBottom: 24,
+                color: "#ffffff",
+                boxShadow: "0 8px 32px rgba(37,99,235,0.3)",
+              }}
+            >
+              <div style={{ fontSize: "2.8rem", fontWeight: 700, marginBottom: 12, letterSpacing: "-0.5px" }}>
                 {lang === "tr" ? "Hoş Geldiniz" : "Welcome"} {L.roleSelect.roles.find(r => r.id === role)?.icon}
               </div>
-              <div style={{ color: "var(--muted)", fontSize: "1.1em" }}>
+              <div style={{ fontSize: "1.15em", opacity: 0.9, marginBottom: 4 }}>
+                {ROLE_LABELS[lang][role]}
+              </div>
+              <div style={{ fontSize: "1em", opacity: 0.75 }}>
                 {lang === "tr" ? "Bugün ne yapmak istiyorsunuz?" : "What would you like to do today?"}
               </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
               {dashboardCards.map((tab) => (
                 <button key={tab.id} onClick={() => setActiveTabId(tab.id)}
-                  className="btn-primary"
-                  style={{ padding: "20px 16px", borderRadius: 12, fontSize: "1em", textAlign: "left",
-                    display: "flex", flexDirection: "column", gap: 8, cursor: "pointer" }}>
-                  <span style={{ fontSize: "1.4em" }}>
-                    {TAB_ICONS[tab.id] || "📌"}
+                  className="card"
+                  style={{
+                    padding: "28px 20px",
+                    borderRadius: 14,
+                    fontSize: "1em",
+                    textAlign: "left",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                    cursor: "pointer",
+                    border: `1px solid ${C.border}`,
+                    background: "var(--surface)",
+                    transition: "all .2s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.transform = "translateY(0)"; }}>
+                  <span style={{ fontSize: "2em" }}>{TAB_ICONS[tab.id] || "📌"}</span>
+                  <span style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: "1.05em" }}>{tab.label}</span>
+                  <span style={{ fontSize: "0.82em", color: "var(--text-secondary)" }}>
+                    {lang === "tr" ? "Buraya tıklayın →" : "Click to open →"}
                   </span>
-                  <span style={{ fontWeight: 600 }}>{tab.label}</span>
                 </button>
               ))}
             </div>
