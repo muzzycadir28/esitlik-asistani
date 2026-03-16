@@ -1386,6 +1386,78 @@ const POLICY_STEPS = [
   },
 ];
 
+const URBAN_STEPS = [
+  {
+    id: 1, title: 'Planlama Bağlamı',
+    aiPrompt: 'Planlama çalışması hangi ölçekte? Yeni plan mı yoksa mevcut planın revizyonu mu? Bu plan hangi mahalle veya bölgeyi kapsıyor?',
+    chips: ['Yeni yerleşim', 'Mevcut mahalle iyileştirmesi', 'Ulaşım planı', 'Kamusal alan tasarımı', 'Kentsel dönüşüm'],
+    outputFields: ['planningArea', 'planType', 'planScale', 'planPurpose'],
+    outputLabels: ['Planlama alanı', 'Plan türü', 'Plan ölçeği', 'Plan amacı'],
+  },
+  {
+    id: 2, title: 'Kentsel Sorun Tanımı',
+    aiPrompt: 'Bu bölgede hangi kentsel sorunlar var? Kamusal alan kullanımı eşit mi? Güvenlik algısı nasıl? Hizmetlere erişimde farklılık var mı?',
+    chips: ['Gece güvenliği', 'Toplu taşıma erişimi', 'Bakım hizmetleri', 'Kamusal alan kullanımı', 'Yaya erişimi', 'Çocuk bakım yükü'],
+    outputFields: ['urbanProblem', 'equalityDimension', 'currentSituation'],
+    outputLabels: ['Kentsel sorun', 'Eşitlik boyutu', 'Mevcut durum'],
+  },
+  {
+    id: 3, title: 'Kullanıcı Grupları',
+    aiPrompt: 'Bu alanı kimler kullanıyor? Kadınlar ve erkekler aynı sıklıkta mı kullanıyor? Günün farklı saatlerinde kullanım değişiyor mu? Hangi gruplar zorlanıyor?',
+    chips: ['Çocuklu kadınlar', 'Yaşlılar', 'Gençler', 'Engelli bireyler', 'Öğrenciler', 'Bakım verenler', 'Çalışan kadınlar'],
+    outputFields: ['userGroups', 'accessProblems', 'inequalityFindings'],
+    outputLabels: ['Ana kullanıcı grupları', 'Erişim sorunları', 'Eşitsizlik tespiti'],
+  },
+  {
+    id: 4, title: 'Planlama Amacı',
+    aiPrompt: 'Bu plan ile hangi eşitsizlik azaltılmak isteniyor? Alan daha güvenli mi olacak? Hizmetlere erişim mi artacak? Kamusal alan kullanımı mı dengelenecek?',
+    chips: ['Güvenlik artırma', 'Erişim iyileştirme', 'Kamusal alan dengesi', 'Bakım hizmetleri', 'Ulaşım erişimi'],
+    outputFields: ['planningObjective', 'expectedChange'],
+    outputLabels: ['Planlama amacı', 'Beklenen değişim'],
+  },
+  {
+    id: 5, title: 'Kentsel Müdahaleler',
+    aiPrompt: 'Fiziksel düzenlemeler gerekli mi? Aydınlatma yeterli mi? Kreş veya bakım hizmetleri gerekli mi? Alan gece de kullanılabilir mi?',
+    chips: ['Aydınlatma artırma', 'Güvenli yürüyüş yolları', 'Toplu taşıma erişimi', 'Bakım hizmetleri', 'Kamusal alan tasarımı', 'Yeşil alan', 'Karma kullanım'],
+    outputFields: ['interventions', 'spatialArrangements'],
+    outputLabels: ['Planlama müdahaleleri', 'Mekansal düzenlemeler'],
+  },
+  {
+    id: 6, title: 'Belediye Hizmet Bağlantısı',
+    aiPrompt: 'Bu plan hangi belediye hizmetleriyle bağlantılı? Ulaşım, park ve bahçeler, sosyal hizmetler, zabıta, kent güvenliği? Kurumlar arası koordinasyon gerekli mi?',
+    chips: ['Ulaşım', 'Park ve Bahçeler', 'Sosyal Hizmetler', 'Zabıta', 'Kent Güvenliği', 'Sağlık'],
+    outputFields: ['responsibleUnits', 'serviceConnections'],
+    outputLabels: ['Sorumlu birimler', 'Hizmet bağlantısı'],
+  },
+  {
+    id: 7, title: 'Bütçe ve Uygulama',
+    aiPrompt: 'Bu plan için yatırım gerekiyor mu? Hangi bütçe kalemlerinden finanse edilecek? Mevcut yatırım programında var mı?',
+    chips: ['Mevcut bütçe yeterli', 'Yeni yatırım gerekli', 'AB fonu', 'Merkezi destek', 'Kısmi finansman'],
+    outputFields: ['investmentNeeds', 'budgetConnection'],
+    outputLabels: ['Yatırım ihtiyacı', 'Bütçe bağlantısı'],
+  },
+  {
+    id: 8, title: 'Göstergeler ve İzleme',
+    aiPrompt: 'Alanın kullanımını nasıl ölçeceksiniz? Kadın ve erkek kullanıcı sayısı ölçülebilir mi? Güvenlik algısı izlenebilir mi?',
+    chips: ['Park kullanım oranı', 'Gece kullanım oranı', 'Kadın kullanıcı oranı', 'Toplu taşıma erişim süresi', 'Bakım kapasitesi'],
+    outputFields: ['monitoringIndicators', 'dataNeeds'],
+    outputLabels: ['İzleme göstergeleri', 'Veri ihtiyacı'],
+  },
+];
+
+const URBAN_AREAS = [
+  { id: 'transport', icon: '🚌', label: 'Ulaşım' },
+  { id: 'public', icon: '🏛️', label: 'Kamusal Alan' },
+  { id: 'park', icon: '🌳', label: 'Park ve Yeşil Alan' },
+  { id: 'lighting', icon: '💡', label: 'Aydınlatma ve Güvenlik' },
+  { id: 'social', icon: '🏥', label: 'Sosyal Hizmet Tesisleri' },
+  { id: 'care', icon: '👶', label: 'Kreş / Bakım Hizmetleri' },
+  { id: 'housing', icon: '🏘️', label: 'Konut Alanları' },
+  { id: 'mixed', icon: '🏙️', label: 'Karma Kullanım' },
+  { id: 'renewal', icon: '🔄', label: 'Kentsel Dönüşüm' },
+  { id: 'new', icon: '🏗️', label: 'Yeni Yerleşim' },
+];
+
 const POLICY_TEMPLATES = ['İstihdam', 'Eğitim', 'Sağlık', 'Ulaşım', 'Sosyal Koruma', 'Bakım Hizmetleri', 'Şiddetle Mücadele', 'Yerel Hizmetler'];
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
@@ -1411,6 +1483,22 @@ export default function EsitlikAsistani() {
   const [policyStarted, setPolicyStarted] = useState(false);
   const [policyMode, setPolicyMode] = useState(null);
   const [policyTemplate, setPolicyTemplate] = useState(null);
+  const [urbanStep, setUrbanStep] = useState(0);
+  const [urbanData, setUrbanData] = useState({
+    planningArea: '', planType: '', planScale: '', planPurpose: '',
+    urbanProblem: '', equalityDimension: '', currentSituation: '',
+    userGroups: '', accessProblems: '', inequalityFindings: '',
+    planningObjective: '', expectedChange: '',
+    interventions: '', spatialArrangements: '',
+    responsibleUnits: '', serviceConnections: '',
+    investmentNeeds: '', budgetConnection: '',
+    monitoringIndicators: '', dataNeeds: '',
+  });
+  const [urbanInput, setUrbanInput] = useState('');
+  const [urbanMessages, setUrbanMessages] = useState([]);
+  const [urbanLoading, setUrbanLoading] = useState(false);
+  const [urbanStarted, setUrbanStarted] = useState(false);
+  const [urbanArea, setUrbanArea] = useState(null);
 
   const C = {
     background: "var(--bg)",
@@ -1643,6 +1731,30 @@ The platform also allows users to analyze documents such as strategic plans, bud
       setPolicyMessages([...newMessages, { role: 'assistant', content: 'Bir hata oluştu: ' + error.message }]);
     } finally {
       setPolicyLoading(false);
+    }
+  };
+
+  const handleUrbanSend = async () => {
+    if (!urbanInput.trim() || urbanLoading) return;
+    const userText = urbanInput.trim();
+    setUrbanInput('');
+    const newMessages = [...urbanMessages, { role: 'user', content: userText }];
+    setUrbanMessages(newMessages);
+    setUrbanLoading(true);
+    const currentStep = URBAN_STEPS[urbanStep];
+    const nextStep = URBAN_STEPS[urbanStep + 1];
+    const updatedData = { ...urbanData };
+    if (currentStep?.outputFields?.[0]) updatedData[currentStep.outputFields[0]] = userText;
+    setUrbanData(updatedData);
+    try {
+      const systemPrompt = `Sen Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uzmanı bir kentsel planlama asistanısın. Belediye çalışanlarına kentsel planlama kararlarını eşitlik perspektifiyle geliştirmeleri için yardım ediyorsun. Şu an ${currentStep?.title} adımındasın. Kullanıcının yanıtını kısa değerlendir (1-2 cümle), ardından ${nextStep ? nextStep.title + ' adımına geç: ' + nextStep.aiPrompt : 'planlama taslağının tamamlandığını belirt ve tebrik et.'}`;
+      const reply = await callClaude(userText, systemPrompt, newMessages.slice(-4), lang, role);
+      setUrbanMessages([...newMessages, { role: 'assistant', content: reply }]);
+      if (urbanStep < 7) setUrbanStep(prev => prev + 1);
+    } catch (error) {
+      setUrbanMessages([...newMessages, { role: 'assistant', content: 'Bir hata oluştu: ' + error.message }]);
+    } finally {
+      setUrbanLoading(false);
     }
   };
 
@@ -2142,7 +2254,159 @@ The platform also allows users to analyze documents such as strategic plans, bud
           </div>
         )}
 
-        {["urban", "service", "monitoring", "bestpractice", "data", "advocacy"].map((tabId) => (
+        {activeTabId === 'urban' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 160px)' }}>
+
+            {/* Header */}
+            <div style={{ background: 'var(--surface)', borderBottom: `1px solid ${C.border}`, padding: '16px 20px' }}>
+              <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                🏙️ Eşitlik Odaklı Kentsel Planlama Asistanı
+              </div>
+              <div style={{ fontSize: '0.85em', color: C.muted, marginTop: 2 }}>
+                Kentsel planlama kararlarınızı kadın erkek eşitliği perspektifiyle değerlendirin
+              </div>
+            </div>
+
+            {/* Start screen */}
+            {!urbanStarted && (
+              <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+                <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
+                  <div style={{ fontSize: '1em', color: 'var(--text-primary)', marginBottom: 24, lineHeight: 1.7 }}>
+                    Kentsel planlama kararlarınızı adım adım sorgularla eşitlik perspektifiyle değerlendireceğim. Sonunda belediye meclisi sunumuna hazır bir planlama taslağı oluşacak.
+                  </div>
+                  <div style={{ fontSize: '1em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
+                    Planlamak istediğiniz alanı seçin:
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 28 }}>
+                    {URBAN_AREAS.map(area => (
+                      <button key={area.id} onClick={() => setUrbanArea(area.id)}
+                        className='card'
+                        style={{
+                          padding: '16px 10px', borderRadius: 12, cursor: 'pointer', textAlign: 'center',
+                          border: `2px solid ${urbanArea === area.id ? 'var(--accent)' : C.border}`,
+                          background: urbanArea === area.id ? 'var(--accent-soft)' : 'var(--surface)',
+                          transition: 'all .2s',
+                        }}>
+                        <div style={{ fontSize: '1.8em', marginBottom: 6 }}>{area.icon}</div>
+                        <div style={{ fontSize: '0.82em', fontWeight: 600, color: 'var(--text-primary)' }}>{area.label}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <button className='btn-primary' disabled={!urbanArea}
+                    onClick={() => {
+                      const areaLabel = URBAN_AREAS.find(a => a.id === urbanArea)?.label;
+                      setUrbanMessages([{ role: 'assistant', content: `${areaLabel} alanında kentsel planlama çalışmasına başlıyoruz. ${URBAN_STEPS[0].aiPrompt}` }]);
+                      setUrbanStep(0);
+                      setUrbanStarted(true);
+                    }}
+                    style={{ padding: '14px 40px', borderRadius: 12, fontSize: '1em' }}>
+                    Başla →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Main chat + output */}
+            {urbanStarted && (
+              <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
+
+                {/* Left: Chat */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: `1px solid ${C.border}`, minHeight: 0 }}>
+
+                  {/* Progress */}
+                  <div style={{ padding: '10px 16px', background: 'var(--surface)', borderBottom: `1px solid ${C.border}` }}>
+                    <div style={{ display: 'flex', gap: 3, marginBottom: 6 }}>
+                      {URBAN_STEPS.map((s, i) => (
+                        <div key={s.id} title={s.title} style={{ flex: 1, height: 4, borderRadius: 2, background: i <= urbanStep ? 'var(--accent)' : C.border, opacity: i <= urbanStep ? 1 : 0.4 }} />
+                      ))}
+                    </div>
+                    <div style={{ fontSize: '0.78em', color: C.muted }}>
+                      Adım {urbanStep + 1}/8: <strong style={{ color: 'var(--text-primary)' }}>{URBAN_STEPS[urbanStep]?.title}</strong>
+                    </div>
+                  </div>
+
+                  {/* Messages */}
+                  <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {urbanMessages.map((m, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                        {m.role === 'assistant' && (
+                          <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, marginRight: 8, flexShrink: 0, marginTop: 3 }}>🏙</div>
+                        )}
+                        <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: m.role === 'user' ? '14px 4px 14px 14px' : '4px 14px 14px 14px', background: m.role === 'user' ? 'var(--accent-soft)' : 'var(--surface)', border: `1px solid ${m.role === 'user' ? 'var(--accent-border)' : C.border}`, fontSize: '0.92em', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>
+                          {m.content}
+                        </div>
+                      </div>
+                    ))}
+                    {urbanLoading && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>🏙</div>
+                        <span style={{ color: C.muted, fontStyle: 'italic', fontSize: '0.9em' }} className='pulse'>Yanıt hazırlanıyor…</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Chips */}
+                  {urbanStep < 8 && URBAN_STEPS[urbanStep]?.chips && (
+                    <div style={{ padding: '8px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {URBAN_STEPS[urbanStep].chips.map(chip => (
+                        <button key={chip} onClick={() => setUrbanInput(prev => prev ? prev + ', ' + chip : chip)}
+                          style={{ padding: '5px 12px', borderRadius: 16, fontSize: '0.82em', cursor: 'pointer', border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-secondary)', transition: 'all .2s' }}>
+                          + {chip}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Input */}
+                  <div style={{ padding: '12px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8 }}>
+                    <textarea value={urbanInput} onChange={e => setUrbanInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleUrbanSend(); } }}
+                      placeholder={`${URBAN_STEPS[urbanStep]?.title} için yanıtınızı yazın...`}
+                      style={{ flex: 1, padding: '10px 12px', borderRadius: 10, fontSize: '0.92em', resize: 'none', height: 56, lineHeight: 1.5, border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-primary)', fontFamily: 'inherit' }} />
+                    <button className='btn-primary' onClick={handleUrbanSend} disabled={urbanLoading || !urbanInput.trim()}
+                      style={{ padding: '0 16px', borderRadius: 10, fontSize: '0.9em' }}>
+                      {urbanStep < 7 ? 'İleri →' : 'Tamamla'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right: Live output */}
+                <div style={{ width: 340, flexShrink: 0, overflowY: 'auto', background: 'var(--surface)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ fontSize: '0.9em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+                    🗺️ Kentsel Planlama Taslağı
+                  </div>
+                  {URBAN_STEPS.map(step => (
+                    step.outputFields.some(f => urbanData[f]) && (
+                      <div key={step.id} style={{ background: 'var(--bg)', border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+                        <div style={{ fontSize: '0.78em', fontWeight: 600, color: 'var(--accent)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{step.title}</div>
+                        {step.outputFields.map((field, fi) => urbanData[field] && (
+                          <div key={field} style={{ marginBottom: 8 }}>
+                            <div style={{ fontSize: '0.75em', color: C.muted, marginBottom: 2 }}>{step.outputLabels[fi]}</div>
+                            <div style={{ fontSize: '0.88em', color: 'var(--text-primary)', lineHeight: 1.5 }}>{urbanData[field]}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  ))}
+                  {!Object.values(urbanData).some(v => v) && (
+                    <div style={{ color: C.muted, fontSize: '0.85em', textAlign: 'center', marginTop: 20 }}>
+                      Sorulara yanıt verdikçe planlama taslağı burada oluşacak...
+                    </div>
+                  )}
+                  {urbanStep >= 8 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                      <button className='btn-primary' style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>📝 Plan Notu Üret</button>
+                      <button className='btn-ghost' style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>🏛️ Meclis Sunumu</button>
+                      <button className='btn-ghost' style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>📋 Proje Özeti</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {["service", "monitoring", "bestpractice", "data", "advocacy"].map((tabId) => (
           activeTabId === tabId && (
             <div key={tabId} className="card" style={{ padding: 40, textAlign: "center" }}>
               <div style={{ fontSize: "3em", marginBottom: 16 }}>🚧</div>
