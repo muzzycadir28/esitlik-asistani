@@ -155,7 +155,7 @@ const LANG = {
 const ROLE_TABS = {
   tr: {
     official: [
-      { id: "dashboard", label: "Dashboard" },
+      { id: "dashboard", label: "Ana Sayfa" },
       { id: "chat", label: "Danışman" },
       { id: "policy", label: "Politika Tasarımı" },
       { id: "doc", label: "Belge Analizi" },
@@ -164,7 +164,7 @@ const ROLE_TABS = {
       { id: "resources", label: "Kaynaklar" },
     ],
     local: [
-      { id: "dashboard", label: "Dashboard" },
+      { id: "dashboard", label: "Ana Sayfa" },
       { id: "chat", label: "Danışman" },
       { id: "doc", label: "Belge Analizi" },
       { id: "checklist", label: "Rehber & Kontrol" },
@@ -172,14 +172,14 @@ const ROLE_TABS = {
       { id: "resources", label: "Kaynaklar" },
     ],
     academic: [
-      { id: "dashboard", label: "Dashboard" },
+      { id: "dashboard", label: "Ana Sayfa" },
       { id: "chat", label: "Danışman" },
       { id: "doc", label: "Belge Analizi" },
       { id: "checklist", label: "Rehber & Kontrol" },
       { id: "resources", label: "Kaynaklar" },
     ],
     ngo: [
-      { id: "dashboard", label: "Dashboard" },
+      { id: "dashboard", label: "Ana Sayfa" },
       { id: "chat", label: "Danışman" },
       { id: "doc", label: "Belge Analizi" },
       { id: "checklist", label: "Rehber & Kontrol" },
@@ -1309,6 +1309,7 @@ export default function EsitlikAsistani() {
   const [activeNav, setActiveNav] = useState(null);
   const L = LANG[lang];
   const currentTabs = ROLE_TABS[lang]?.[role] || ROLE_TABS.tr.official;
+  const dashboardCards = currentTabs.filter(t => ["chat", "policy", "doc", "report"].includes(t.id));
 
   const handleRoleChange = () => {
     setRole(null);
@@ -1714,14 +1715,16 @@ The platform also allows users to analyze documents such as strategic plans, bud
       <div className="main-container" style={{ paddingBottom: "1.5rem" }}>
         {activeTabId === "dashboard" && (
           <div className="card" style={{ padding: 32 }}>
-            <div style={{ fontSize: "1.6rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: 8 }}>
-              {lang === "tr" ? "Hoş Geldiniz" : "Welcome"} {L.roleSelect.roles.find(r => r.id === role)?.icon}
-            </div>
-            <div style={{ color: "var(--muted)", marginBottom: 32, fontSize: "0.95em" }}>
-              {lang === "tr" ? "Bugün ne yapmak istiyorsunuz?" : "What would you like to do today?"}
+            <div style={{ textAlign: "center", marginBottom: 40 }}>
+              <div style={{ fontSize: "2.2rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: 12 }}>
+                {lang === "tr" ? "Hoş Geldiniz" : "Welcome"} {L.roleSelect.roles.find(r => r.id === role)?.icon}
+              </div>
+              <div style={{ color: "var(--muted)", fontSize: "1.1em" }}>
+                {lang === "tr" ? "Bugün ne yapmak istiyorsunuz?" : "What would you like to do today?"}
+              </div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
-              {currentTabs.filter(t => t.id !== "dashboard").map((tab) => (
+              {dashboardCards.map((tab) => (
                 <button key={tab.id} onClick={() => setActiveTabId(tab.id)}
                   className="btn-primary"
                   style={{ padding: "20px 16px", borderRadius: 12, fontSize: "1em", textAlign: "left",
