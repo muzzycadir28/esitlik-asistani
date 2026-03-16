@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import mammoth from "mammoth";
 import bgImage from "../lib/background.webp";
 
@@ -223,6 +223,28 @@ const ROLE_TABS = {
       { id: "resources", label: "Resources" },
     ],
   },
+};
+
+const DASHBOARD_CARDS = {
+  official: ["chat", "policy", "doc", "report"],
+  local: ["chat", "urban", "service", "bestpractice"],
+  academic: ["chat", "doc", "data", "resources"],
+  ngo: ["chat", "advocacy", "doc", "monitoring"],
+};
+
+const TAB_ICONS = {
+  chat: "💬",
+  policy: "📋",
+  doc: "📄",
+  checklist: "✅",
+  report: "📊",
+  resources: "📚",
+  urban: "🏙️",
+  service: "🔧",
+  monitoring: "📈",
+  bestpractice: "⭐",
+  data: "📉",
+  advocacy: "📣",
 };
 
 const QUICK_PRESET_RESPONSES = {
@@ -1311,31 +1333,20 @@ export default function EsitlikAsistani() {
   const [activeTabId, setActiveTabId] = useState("dashboard");
   const [role, setRole] = useState(null);
   const [activeNav, setActiveNav] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   const L = LANG[lang];
-  const currentTabs = ROLE_TABS[lang]?.[role] || ROLE_TABS.tr.official;
-  const DASHBOARD_CARDS = {
-    official: ["chat", "policy", "doc", "report"],
-    local: ["chat", "urban", "service", "bestpractice"],
-    academic: ["chat", "doc", "data", "resources"],
-    ngo: ["chat", "advocacy", "doc", "monitoring"],
-  };
-  const dashboardCards = currentTabs.filter(t =>
-    (DASHBOARD_CARDS[role] || DASHBOARD_CARDS.official).includes(t.id)
-  );
-  const TAB_ICONS = {
-    chat: "💬",
-    policy: "📋",
-    doc: "📄",
-    checklist: "✅",
-    report: "📊",
-    resources: "📚",
-    urban: "🏙️",
-    service: "🔧",
-    monitoring: "📈",
-    bestpractice: "⭐",
-    data: "📉",
-    advocacy: "📣",
-  };
+  const currentTabs = useMemo(() => {
+    return ROLE_TABS[lang]?.[role] || ROLE_TABS.tr.official;
+  }, [lang, role]);
+  const dashboardCards = useMemo(() => {
+    const cardIds = DASHBOARD_CARDS[role] || DASHBOARD_CARDS.official;
+    return currentTabs.filter(t => cardIds.includes(t.id));
+  }, [currentTabs, role]);
+
+  if (!mounted) return null;
 
   const handleRoleChange = () => {
     setRole(null);
