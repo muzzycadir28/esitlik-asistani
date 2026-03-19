@@ -1660,32 +1660,52 @@ The platform also allows users to analyze documents such as strategic plans, bud
     reader.readAsText(file);
   });
 
-  const extractPdfText = async (file) => {
-    return extractTextFromPDFForAnalysis(file);
-  };
-
   const extractDocText = async (file) => {
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.extractRawText({ arrayBuffer });
     return result.value;
   };
 
-  const handleDocFile = async (file) => {
+  const handleDocFileSelect = async (file) => {
     if (!file) return;
     const extension = getExtension(file.name);
     const supported = [".txt", ".pdf", ".doc", ".docx"];
     if (!supported.includes(extension)) return;
 
+    setDocText("");
+    setDocFileName(file.name);
+    setDocFileChars(0);
     setDocLoading(true);
     setDocResult("");
     try {
       let extracted = "";
+      if (file.type === "application/pdf" || extension === ".pdf") {
+        extracted = await extractTextFromPDFForAnalysis(file);
+        if (extracted && extracted.length > 50) {
+          setDocText(extracted);
+          setDocFileChars(extracted.length);
+        } else {
+          setDocText("");
+          setDocFileChars(0);
+          alert(lang === "tr"
+            ? "PDF metni otomatik okunamadı. Lütfen metni aşağıdaki alana yapıştırın."
+            : "Could not extract PDF text automatically. Please paste the text below.");
+        }
+        return;
+      }
+
       if (extension === ".txt") extracted = await readTxtFile(file);
-      if (extension === ".pdf") extracted = await extractPdfText(file);
       if (extension === ".doc" || extension === ".docx") extracted = await extractDocText(file);
       setDocText(extracted);
-      setDocFileName(file.name);
       setDocFileChars(extracted.length);
+    } catch (err) {
+      setDocText("");
+      setDocFileChars(0);
+      if (file.type === "application/pdf" || extension === ".pdf") {
+        alert(lang === "tr"
+          ? "PDF metni otomatik okunamadı. Lütfen metni aşağıdaki alana yapıştırın."
+          : "Could not extract PDF text automatically. Please paste the text below.");
+      }
     } finally {
       setDocLoading(false);
     }
@@ -1700,8 +1720,9 @@ The platform also allows users to analyze documents such as strategic plans, bud
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const analysisText = docText.trim() ? docText : pastedDocText;
-  const analysisWordCount = analysisText.trim() ? analysisText.trim().split(/\s+/).length : 0;
+  const analysisText = docText.trim().length > 50 ? docText : pastedDocText;
+  const analysisWordCount = docText.split(" ").filter(Boolean).length;
+  const isAnalyzeDisabled = docLoading || (docText.trim().length <= 50 && !pastedDocText.trim());
 
   const [phase, setPhase] = useState(0);
   const [sector, setSector] = useState(0);
@@ -2645,7 +2666,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
                 style={{ display: "none" }}
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
-                  if (f) await handleDocFile(f);
+                  if (f) await handleDocFileSelect(f);
                 }}
               />
               <div
@@ -2675,7 +2696,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
                   e.preventDefault();
                   setDocDragActive(false);
                   const f = e.dataTransfer.files?.[0];
-                  if (f) await handleDocFile(f);
+                  if (f) await handleDocFileSelect(f);
                 }}
               >
                 <div style={{ fontSize: "1.6rem" }}>📄</div><div>{L.docAnalysis.upload}</div><div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.uploadHint}</div>
@@ -2694,7 +2715,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
               <div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.wordCount}: {analysisWordCount}</div>
               <button className="btn" onClick={clearDocInputs}>{L.docAnalysis.clear}</button>
             </div>
-              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, analysisText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }} disabled={docLoading || !analysisText.trim()}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
+              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, analysisText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }} disabled={isAnalyzeDisabled}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
             {docLoading && <span className="muted pulse">{L.docAnalysis.analyzing}</span>}
             {resultCard(docResult)}
           </div>
