@@ -1460,6 +1460,34 @@ const URBAN_AREAS = [
 
 const POLICY_TEMPLATES = ['İstihdam', 'Eğitim', 'Sağlık', 'Ulaşım', 'Sosyal Koruma', 'Bakım Hizmetleri', 'Şiddetle Mücadele', 'Yerel Hizmetler'];
 
+async function extractTextFromPDFForAnalysis(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const binary = e.target.result;
+        const textBlocks = [];
+        const regex = /\(([^)\\]*(\\.[^)\\]*)*)\)\s*T[jJ]/g;
+        let match;
+        while ((match = regex.exec(binary)) !== null) {
+          const text = match[1]
+            .replace(/\\n/g, " ")
+            .replace(/\\r/g, " ")
+            .replace(/\\t/g, " ")
+            .replace(/\\\\/g, "\\")
+            .replace(/\\[()]/g, (m) => m[1]);
+          if (text.trim()) textBlocks.push(text);
+        }
+        resolve(textBlocks.join(" ").replace(/\s+/g, " ").trim());
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error("Dosya okunamadı"));
+    reader.readAsBinaryString(file);
+  });
+}
+
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function EsitlikAsistani() {
   const [lang, setLang] = useState("tr");
@@ -1633,7 +1661,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
   });
 
   const extractPdfText = async (file) => {
-    return extractTextFromPdf(file);
+    return extractTextFromPDFForAnalysis(file);
   };
 
   const extractDocText = async (file) => {
@@ -1878,7 +1906,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
   const resultCard = (content) => content && <div className="surface fade" style={{ padding: "1rem 1.2rem" }}><MD text={content} /></div>;
 
   if (!role) return (
-    <div className="app" suppressHydrationWarning style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
+    <div className="app" suppressHydrationWarning={true} style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
       <style>{css}</style>
       <div className="header" style={{ padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
@@ -1976,7 +2004,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
   );
 
   return (
-    <div className="app" suppressHydrationWarning style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
+    <div className="app" suppressHydrationWarning={true} style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
       <style>{css}</style>
       <div className="header" style={{ padding: "0.8rem 1.2rem" }}>
         <div className="header-top">
