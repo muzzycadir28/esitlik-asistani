@@ -1466,8 +1466,6 @@ const URBAN_AREAS = [
   { id: 'new', icon: '🏗️', label: 'Yeni Yerleşim' },
 ];
 
-const POLICY_TEMPLATES = ['İstihdam', 'Eğitim', 'Sağlık', 'Ulaşım', 'Sosyal Koruma', 'Bakım Hizmetleri', 'Şiddetle Mücadele', 'Yerel Hizmetler'];
-
 function generatePolicyDraft(data, lang) {
   return `POLİTİKA TASLAĞI
 ================
@@ -1579,8 +1577,6 @@ export default function EsitlikAsistani() {
   const [policyMessages, setPolicyMessages] = useState([]);
   const [policyLoading, setPolicyLoading] = useState(false);
   const [policyStarted, setPolicyStarted] = useState(false);
-  const [policyMode, setPolicyMode] = useState(null);
-  const [policyTemplate, setPolicyTemplate] = useState(null);
   const [urbanStep, setUrbanStep] = useState(0);
   const [urbanData, setUrbanData] = useState({
     planningArea: '', planType: '', planScale: '', planPurpose: '',
@@ -2206,70 +2202,51 @@ The platform also allows users to analyze documents such as strategic plans, bud
 
             {/* Start screen */}
             {!policyStarted && (
-              <div style={{ flex: 1, overflowY: 'auto', padding: 24, background: 'var(--bg)' }}>
-                <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
-                  <div style={{ fontSize: '1.1em', color: 'var(--text-primary)', marginBottom: 24, lineHeight: 1.7 }}>
-                    Adım adım sorularla bir politika veya program fikrini yapılandırmanıza yardımcı olacağım. Yanıtlarınıza göre amaç, hedef, faaliyet, gösterge ve bütçe bağlantısı içeren bir taslak oluşturacağım.
+              <div style={{ flex: 1, overflowY: 'auto', padding: 32, background: 'var(--bg)' }}>
+                <div style={{ maxWidth: 640, margin: '0 auto' }}>
+                  <div style={{ textAlign: 'center', marginBottom: 36 }}>
+                    <div style={{ fontSize: '2em', marginBottom: 12 }}>🏛️</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>
+                      Politika Tasarımı Asistanı
+                    </div>
+                    <div style={{ color: C.muted, lineHeight: 1.7, fontSize: '0.95em' }}>
+                      Politika fikrinizi <strong>9 adımda</strong> kadın erkek eşitliği perspektifiyle yapılandıracağım. Her adımda sorular soracağım, sağ panelde canlı taslak oluşacak. Sonunda indirilebilir bir politika belgesi hazır olacak.
+                    </div>
                   </div>
-                  <div style={{ fontSize: '1em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
-                    Nasıl başlamak istiyorsunuz?
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 32 }}>
-                    {[
-                      { id: 'scratch', icon: '✏️', title: 'Sıfırdan Başla', desc: 'Yeni bir politika taslağı oluştur' },
-                      { id: 'template', icon: '📋', title: 'Şablondan Başla', desc: 'Hazır sektör şablonu kullan' },
-                      { id: 'document', icon: '📄', title: 'Belgeden İlerle', desc: 'Mevcut belgenizi yükleyin' },
-                    ].map(m => (
-                      <button key={m.id} onClick={() => setPolicyMode(m.id)}
-                        className='card'
-                        style={{
-                          padding: '20px 16px', borderRadius: 12, cursor: 'pointer', textAlign: 'center',
-                          border: `2px solid ${policyMode === m.id ? 'var(--accent)' : C.border}`,
-                          background: policyMode === m.id ? 'var(--accent-soft)' : 'var(--surface)',
-                          transition: 'all .2s',
-                        }}>
-                        <div style={{ fontSize: '2em', marginBottom: 8 }}>{m.icon}</div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{m.title}</div>
-                        <div style={{ fontSize: '0.8em', color: C.muted }}>{m.desc}</div>
-                      </button>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 32 }}>
+                    {POLICY_STEPS.map((step, i) => (
+                      <div key={step.id} style={{
+                        padding: '12px 14px', borderRadius: 10,
+                        background: 'var(--surface)', border: `1px solid ${C.border}`,
+                        display: 'flex', alignItems: 'center', gap: 8,
+                      }}>
+                        <div style={{
+                          width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)',
+                          color: '#fff', fontSize: '0.75em', fontWeight: 700,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        }}>{i + 1}</div>
+                        <div style={{ fontSize: '0.82em', color: 'var(--text-primary)', fontWeight: 500, lineHeight: 1.3 }}>
+                          {step.title}
+                        </div>
+                      </div>
                     ))}
                   </div>
 
-                  {policyMode === 'template' && (
-                    <div style={{ marginBottom: 24 }}>
-                      <div style={{ fontSize: '0.9em', color: C.muted, marginBottom: 12 }}>Sektör seçin:</div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-                        {POLICY_TEMPLATES.map(t => (
-                          <button key={t} onClick={() => setPolicyTemplate(t)}
-                            style={{
-                              padding: '8px 16px', borderRadius: 20, cursor: 'pointer', fontSize: '0.9em',
-                              border: `1px solid ${policyTemplate === t ? 'var(--accent)' : C.border}`,
-                              background: policyTemplate === t ? 'var(--accent)' : 'var(--surface)',
-                              color: policyTemplate === t ? '#fff' : 'var(--text-secondary)',
-                              transition: 'all .2s',
-                            }}>
-                            {t}
-                          </button>
-                        ))}
-                      </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <button className='btn-primary'
+                      onClick={() => {
+                        setPolicyMessages([{ role: 'assistant', content: `Politika tasarımına başlıyoruz! 🎯\n\n**Modül 1: Bağlam Analizi**\n\n${POLICY_STEPS[0].aiPrompt}` }]);
+                        setPolicyStep(0);
+                        setPolicyStarted(true);
+                      }}
+                      style={{ padding: '14px 48px', borderRadius: 12, fontSize: '1.05em', fontWeight: 600 }}>
+                      Politika Tasarımına Başla →
+                    </button>
+                    <div style={{ fontSize: '0.8em', color: C.muted, marginTop: 10 }}>
+                      Yaklaşık 15-20 dakika sürer • İstediğiniz adımda durabilirsiniz
                     </div>
-                  )}
-
-                  <button
-                    className='btn-primary'
-                    disabled={!policyMode || (policyMode === 'template' && !policyTemplate)}
-                    onClick={() => {
-                      const firstStep = POLICY_STEPS[0];
-                      const welcomeMsg = policyTemplate
-                        ? `${policyTemplate} alanında politika tasarımına başlıyoruz. ${firstStep.aiPrompt}`
-                        : firstStep.aiPrompt;
-                      setPolicyMessages([{ role: 'assistant', content: welcomeMsg }]);
-                      setPolicyStep(0);
-                      setPolicyStarted(true);
-                    }}
-                    style={{ padding: '14px 40px', borderRadius: 12, fontSize: '1em' }}>
-                    Başla →
-                  </button>
+                  </div>
                 </div>
               </div>
             )}
