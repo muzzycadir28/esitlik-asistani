@@ -1217,7 +1217,7 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
   const timeoutId = setTimeout(() => controller.abort(), 45000);
 
   try {
-    const messages = [{ role: "user", content: userContent }];
+    const messages = [...history, { role: "user", content: userContent }];
 
     const res = await fetch("/api/chat", {
       method: "POST",
@@ -1330,69 +1330,181 @@ function MD({ text }) {
 const POLICY_STEPS = [
   {
     id: 1, title: 'Bağlam Analizi',
-    aiPrompt: 'Bu politika hangi sektörde geliştiriliyor? Kurumunuzun rolü nedir? Bu çalışma yeni mi yoksa mevcut bir programın revizyonu mu? Hangi üst politika belgelerine bağlı?',
-    chips: ['Sağlık', 'Eğitim', 'Tarım', 'Ulaşım', 'Sosyal Koruma', 'İstihdam', 'Yeni politika', 'Mevcut programı geliştirme'],
+    aiPrompt: 'Bu politika hangi sektörde geliştiriliyor?',
+    chips: [],
     outputFields: ['sector', 'institution_role', 'policy_type', 'strategic_link'],
     outputLabels: ['Sektör', 'Kurumsal rol', 'Politika türü', 'Stratejik bağlantı'],
+    paragraphField: 'context_paragraph',
+    summaryTitle: '1. Bağlam Analizi',
   },
   {
     id: 2, title: 'Sorun Analizi',
-    aiPrompt: 'Çözmek istediğiniz temel sorun nedir? Bu sorun kimleri etkiliyor? Kadınlar ve erkekler bu sorundan aynı şekilde mi etkileniyor? Elinizde veri var mı?',
+    aiPrompt: 'Çözmek istediğiniz temel sorun nedir?',
     chips: ['Veri var', 'Veri yok', 'Veri kısmi', 'Erişim sorunu', 'Katılım sorunu', 'Güvenlik sorunu'],
     outputFields: ['problem_definition', 'affected_groups', 'gender_gap', 'data_status'],
     outputLabels: ['Sorun tanımı', 'Etkilenen gruplar', 'Cinsiyet açığı', 'Veri durumu'],
+    paragraphField: 'problem_paragraph',
+    summaryTitle: '2. Sorun Analizi',
   },
   {
     id: 3, title: 'Hedef Grup Analizi',
-    aiPrompt: 'Politika kimleri hedefliyor? Kadınlar ve erkekler içinde farklı alt gruplar var mı? Hangi gruplar daha kırılgan? Coğrafi farklılık var mı?',
+    aiPrompt: 'Politika kimleri hedefliyor?',
     chips: ['Genç kadınlar', 'Yaşlılar', 'Engelli bireyler', 'Kırsal nüfus', 'Göçmenler', 'Tek ebeveynler', 'Düşük gelirli gruplar'],
     outputFields: ['primary_target', 'secondary_target', 'vulnerable_groups', 'intersectionality'],
     outputLabels: ['Birincil hedef grup', 'İkincil hedef grup', 'Kırılgan gruplar', 'Kesişen eşitsizlikler'],
+    paragraphField: 'target_paragraph',
+    summaryTitle: '3. Hedef Grup Analizi',
   },
   {
     id: 4, title: 'Ex-ante Etki Analizi',
-    aiPrompt: 'Politikanın uygulanmadan önceki etkilerini değerlendirelim:\n1. ERİŞİM: Politika kadınlar ve erkekler için eşit erişilebilir olacak mı? Kimler dışarıda kalabilir?\n2. FAYDA: Politikadan kim daha fazla fayda sağlayacak?\n3. KATILIM: Karar süreçlerine eşit katılım sağlanacak mı?\n4. ZAMAN: Politika bakım yükünü artırır mı azaltır mı?\n5. GÜVENLİK: Güvenlik açısından farklı etkiler yaratır mı?',
+    aiPrompt: 'İlk olarak erişim boyutundan başlayalım: Politika kadınlar ve erkekler için eşit erişilebilir olacak mı?',
     chips: ['Eşit erişim sağlar', 'Erişim engeli var', 'Fayda dengeli', 'Fayda eşitsiz', 'Bakım yükü azalır', 'Bakım yükü artar', 'Güvenli', 'Risk var'],
     outputFields: ['impact_access', 'impact_benefit', 'impact_participation', 'impact_time', 'impact_safety'],
     outputLabels: ['Erişim etkisi', 'Fayda dağılımı', 'Katılım etkisi', 'Zaman/bakım etkisi', 'Güvenlik etkisi'],
+    paragraphField: 'impact_paragraph',
+    summaryTitle: '4. Ex-ante Etki Analizi',
     isScoring: true,
   },
   {
     id: 5, title: 'Politika Tasarımı',
-    aiPrompt: 'Analiz sonuçlarına göre: Bu politika ile hangi eşitsizlik azaltılacak? Ne değişmeli? Hangi sonuç hedefleniyor?',
+    aiPrompt: 'Bu politika ile hangi eşitsizliği azaltmayı hedefliyorsunuz?',
     chips: ['Hizmet erişimi artırma', 'İstihdam desteği', 'Bakım hizmetleri', 'Kapasite geliştirme', 'Farkındalık artırma'],
     outputFields: ['policy_objective', 'expected_change'],
     outputLabels: ['Politika amacı', 'Beklenen değişim'],
+    paragraphField: 'design_paragraph',
+    summaryTitle: '5. Politika Tasarımı',
   },
   {
     id: 6, title: 'Faaliyet Tasarımı',
-    aiPrompt: 'Hedefe ulaşmak için hangi faaliyetler gerekli? Herkes için aynı mı yoksa farklılaştırılmış mı? Erişim engelleri nasıl kaldırılacak?',
+    aiPrompt: 'Hedefe ulaşmak için ilk kritik faaliyet nedir?',
     chips: ['Eğitim/kapasite', 'Hizmet sunumu', 'Altyapı', 'Mevzuat', 'Farkındalık', 'Koordinasyon', 'Veri toplama'],
     outputFields: ['activities', 'gender_adjustments', 'responsible_units'],
     outputLabels: ['Faaliyetler', 'Eşitlik uyarlamaları', 'Sorumlu birimler'],
+    paragraphField: 'activity_paragraph',
+    summaryTitle: '6. Faaliyet Tasarımı',
   },
   {
     id: 7, title: 'Bütçe Bağlantısı',
-    aiPrompt: 'Bu politika mevcut bütçede yer alıyor mu? Kaynak yeterli mi? Bütçe kimlere gidiyor? Harcamaların cinsiyete göre dağılımı izlenebilir mi?',
+    aiPrompt: 'Bu politika mevcut bütçede yer alıyor mu?',
     chips: ['Mevcut bütçe yeterli', 'Ek kaynak gerekli', 'Bütçe belirsiz', 'İzleme mevcut', 'İzleme yok'],
     outputFields: ['budget_link', 'resource_gap', 'beneficiary_distribution'],
     outputLabels: ['Bütçe bağı', 'Kaynak açığı', 'Yararlanıcı dağılımı'],
+    paragraphField: 'budget_paragraph',
+    summaryTitle: '7. Bütçe Bağlantısı',
   },
   {
     id: 8, title: 'Göstergeler',
-    aiPrompt: 'Başarı nasıl ölçülecek? Veriler cinsiyete göre ayrıştırılabilir mi? Hangi çıktı, sonuç ve etki göstergeleri kullanılacak?',
+    aiPrompt: 'Başarıyı ölçmek için kullanacağınız ilk gösterge nedir?',
     chips: ['Çıktı göstergesi', 'Sonuç göstergesi', 'Etki göstergesi', 'Cinsiyete göre ayrıştırılmış', 'Yıllık izleme'],
     outputFields: ['output_indicators', 'outcome_indicators', 'sex_disaggregated'],
     outputLabels: ['Çıktı göstergeleri', 'Sonuç göstergeleri', 'Cinsiyet ayrıştırması'],
+    paragraphField: 'indicators_paragraph',
+    summaryTitle: '8. Göstergeler',
   },
   {
     id: 9, title: 'Risk ve Öneri',
-    aiPrompt: 'Politikanın uygulanmasında karşılaşılabilecek riskler neler? Eşitsizlik açısından hangi önlemler alınmalı? Politikayı eşitlik açısından güçlendirmek için önerileriniz?',
+    aiPrompt: 'Politikanın uygulanmasında öngördüğünüz en önemli risk nedir?',
     chips: ['Kurumsal kapasite riski', 'Veri eksikliği riski', 'Uygulama riski', 'Katılım riski', 'Bütçe riski'],
     outputFields: ['risks', 'mitigation_measures', 'improvement_suggestions'],
     outputLabels: ['Riskler', 'Azaltma önlemleri', 'İyileştirme önerileri'],
+    paragraphField: 'risk_paragraph',
+    summaryTitle: '9. Risk ve Öneri',
   },
 ];
+
+const POLICY_PARAGRAPH_CONFIG = [
+  {
+    marker: 'BAĞLAM ANALİZİ ÖZETI:',
+    field: 'context_paragraph',
+    regex: /BAĞLAM ANALİZİ ÖZETI:([\s\S]*?)(?=Sorun|$)/,
+  },
+  {
+    marker: 'SORUN ANALİZİ ÖZETI:',
+    field: 'problem_paragraph',
+    regex: /SORUN ANALİZİ ÖZETI:([\s\S]*?)(?=Hedef|$)/,
+  },
+  {
+    marker: 'HEDEF GRUP ANALİZİ ÖZETİ:',
+    field: 'target_paragraph',
+    regex: /HEDEF GRUP ANALİZİ ÖZETİ:([\s\S]*?)(?=Ex-ante|EX-ANTE|$)/,
+  },
+  {
+    marker: 'EX-ANTE ETKİ ANALİZİ ÖZETİ:',
+    field: 'impact_paragraph',
+    regex: /EX-ANTE ETKİ ANALİZİ ÖZETİ:([\s\S]*?)(?=Politika Tasarımı|$)/,
+  },
+  {
+    marker: 'POLİTİKA TASARIMI ÖZETİ:',
+    field: 'design_paragraph',
+    regex: /POLİTİKA TASARIMI ÖZETİ:([\s\S]*?)(?=Faaliyet Tasarımı|$)/,
+  },
+  {
+    marker: 'FAALİYET TASARIMI ÖZETİ:',
+    field: 'activity_paragraph',
+    regex: /FAALİYET TASARIMI ÖZETİ:([\s\S]*?)(?=Bütçe Bağlantısı|$)/,
+  },
+  {
+    marker: 'BÜTÇE BAĞLANTISI ÖZETİ:',
+    field: 'budget_paragraph',
+    regex: /BÜTÇE BAĞLANTISI ÖZETİ:([\s\S]*?)(?=Göstergeler|$)/,
+  },
+  {
+    marker: 'GÖSTERGELER ÖZETİ:',
+    field: 'indicators_paragraph',
+    regex: /GÖSTERGELER ÖZETİ:([\s\S]*?)(?=Risk|$)/,
+  },
+  {
+    marker: 'RİSK VE ÖNERİ ÖZETİ:',
+    field: 'risk_paragraph',
+    regex: /RİSK VE ÖNERİ ÖZETİ:([\s\S]*)$/,
+  },
+];
+
+const buildPolicySystemPrompt = (policyStep, nextStep, riskWarning = '') => {
+  if (policyStep === 0) {
+    return `Sen KEEDB uzmanı bir politika tasarım asistanısın. Bağlam Analizi modülündesin.
+
+Görevin: Kullanıcının kısa yanıtlarını alarak 4 soruyu sırayla sor. Her soruyu ayrı ayrı sor, hepsini birden sorma.
+
+Sorular sırası:
+1. Bu politika hangi sektörde geliştiriliyor?
+2. Kurumunuzun bu politikadaki rolü nedir?
+3. Bu çalışma yeni bir politika mı yoksa mevcut bir programın revizyonu mu?
+4. Bu politika hangi üst belgeye veya stratejik hedefe bağlı?
+
+Kaç soru sorulduğunu takip et. Eğer kullanıcı ilk soruyu yanıtladıysa ikinci soruyu sor, vs.
+Son soruyu da yanıtladıktan sonra: kullanıcının tüm yanıtlarını birleştirerek akıcı, kurumsal Türkçeyle 3-4 cümlelik bir Bağlam Analizi paragrafı yaz. Paragrafın başına "📋 BAĞLAM ANALİZİ ÖZETI:" yaz.
+Ardından "Sorun Analizine geçiyoruz." de ve Modül 2'nin ilk sorusunu sor: Çözmek istediğiniz temel sorun nedir?`;
+  }
+
+  if (policyStep === 1) {
+    return `Sen KEEDB uzmanı bir politika tasarım asistanısın. Sorun Analizi modülündesin.
+
+Görevin: 5 soruyu sırayla sor, her seferinde bir tane.
+
+Sorular:
+1. Çözmek istediğiniz temel sorun nedir?
+2. Bu sorun kimleri etkiliyor?
+3. Kadınlar ve erkekler bu sorundan aynı şekilde mi etkileniyor? Farklılıklar var mı?
+4. Sorunun temel nedenleri nelerdir?
+5. Elinizde bu soruna ilişkin veri var mı? (var / yok / kısmi)
+
+Son soruyu yanıtladıktan sonra: tüm yanıtları birleştirerek akıcı, kurumsal dilde 4-5 cümlelik bir Sorun Analizi paragrafı yaz. Paragrafın başına "📋 SORUN ANALİZİ ÖZETI:" yaz. Eşitlik açığını mutlaka vurgula.
+Ardından Hedef Grup Analizine geç.`;
+  }
+
+  const modulePrompts = [
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Hedef Grup Analizi modülündesin. 4 soruyu sırayla sor, her mesajda yalnızca bir soru yönelt. Sorular: 1. Politika kimleri doğrudan hedefliyor? 2. Kadınlar ve erkekler içinde farklı alt gruplar var mı? 3. Hangi gruplar daha kırılgan veya öncelikli? 4. Coğrafi ya da sosyoekonomik farklılıklar var mı? Son sorudan sonra yanıtları birleştirip akıcı ve kurumsal Türkçeyle 3-4 cümlelik bir paragraf yaz. Başına "📋 HEDEF GRUP ANALİZİ ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Ex-ante Etki Analizi modülündesin. 5 soruyu sırayla sor, her mesajda tek bir soru sor. Sorular: 1. Politika kadınlar ve erkekler için eşit erişilebilir olacak mı? 2. Politikadan kim daha fazla fayda sağlayacak? 3. Karar süreçlerine eşit katılım sağlanacak mı? 4. Politika bakım yükünü artırır mı azaltır mı? 5. Güvenlik açısından farklı etkiler yaratır mı? Son sorudan sonra yanıtları 4-5 cümlelik kurumsal bir paragrafta birleştir. Başına "📋 EX-ANTE ETKİ ANALİZİ ÖZETİ:" yaz.${riskWarning ? ` ${riskWarning}` : ''} Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Politika Tasarımı modülündesin. 3 soruyu sırayla sor, her seferinde yalnızca bir soru yönelt. Sorular: 1. Bu politika ile hangi eşitsizlik azaltılacak? 2. Ne değişmeli? 3. Hangi sonuç hedefleniyor? Son sorudan sonra yanıtları birleştirerek 3-4 cümlelik bir paragraf yaz. Başına "📋 POLİTİKA TASARIMI ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Faaliyet Tasarımı modülündesin. 4 soruyu sırayla sor, her mesajda tek soru yönelt. Sorular: 1. Hedefe ulaşmak için hangi faaliyetler gerekli? 2. Faaliyetler herkes için aynı mı, farklılaştırılmış mı olacak? 3. Erişim engelleri nasıl kaldırılacak? 4. Hangi birimler sorumlu olacak? Son sorudan sonra yanıtları birleştirerek 3-4 cümlelik bir paragraf yaz. Başına "📋 FAALİYET TASARIMI ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Bütçe Bağlantısı modülündesin. 4 soruyu sırayla sor, her seferinde bir tane sor. Sorular: 1. Bu politika mevcut bütçede yer alıyor mu? 2. Kaynak yeterli mi? 3. Bütçe kimlere gidiyor? 4. Harcamaların cinsiyete göre dağılımı izlenebilir mi? Son sorudan sonra yanıtları akıcı, kurumsal Türkçeyle 3-4 cümlelik bir paragrafta özetle. Başına "📋 BÜTÇE BAĞLANTISI ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Göstergeler modülündesin. 4 soruyu sırayla sor ve her mesajda yalnızca bir soru sor. Sorular: 1. Başarı nasıl ölçülecek? 2. Veriler cinsiyete göre ayrıştırılabilir mi? 3. Hangi çıktı göstergeleri kullanılacak? 4. Hangi sonuç ve etki göstergeleri kullanılacak? Son sorudan sonra yanıtları birleştirerek 3-4 cümlelik bir paragraf yaz. Başına "📋 GÖSTERGELER ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Risk ve Öneri modülündesin. 4 soruyu sırayla sor, her seferinde tek soru yönelt. Sorular: 1. Politikanın uygulanmasında karşılaşılabilecek riskler neler? 2. Eşitsizlik açısından hangi önlemler alınmalı? 3. Politikayı güçlendirmek için hangi iyileştirmeler gerekli? 4. Kurumsal sahiplenmeyi artırmak için ne önerirsiniz? Son sorudan sonra yanıtları birleştirerek 3-4 cümlelik bir paragraf yaz. Başına "📋 RİSK VE ÖNERİ ÖZETİ:" yaz ve politika tasarım sürecinin tamamlandığını belirt.`
+  ];
+
+  return modulePrompts[policyStep - 2] || '';
+};
 
 const URBAN_STEPS = [
   {
@@ -1571,6 +1683,8 @@ export default function EsitlikAsistani() {
     budget_link: '', resource_gap: '', beneficiary_distribution: '',
     output_indicators: '', outcome_indicators: '', sex_disaggregated: '',
     risks: '', mitigation_measures: '', improvement_suggestions: '',
+    context_paragraph: '', problem_paragraph: '', target_paragraph: '', impact_paragraph: '',
+    design_paragraph: '', activity_paragraph: '', budget_paragraph: '', indicators_paragraph: '', risk_paragraph: '',
   });
   const [impactScores, setImpactScores] = useState({ access: 0, benefit: 0, participation: 0, time: 0, safety: 0 });
   const [policyInput, setPolicyInput] = useState('');
@@ -1856,7 +1970,6 @@ The platform also allows users to analyze documents such as strategic plans, bud
       updatedData[currentStep.outputFields[0]] = userText;
     }
 
-    // Add impact scores to data on step 4
     if (policyStep === 3) {
       const total = Object.values(impactScores).reduce((a, b) => a + b, 0);
       updatedData.impact_score = total;
@@ -1872,14 +1985,42 @@ The platform also allows users to analyze documents such as strategic plans, bud
     try {
       const total = Object.values(impactScores).reduce((a, b) => a + b, 0);
       const riskWarning = policyStep === 3 && total < 0
-        ? ' ÖNEMLİ UYARI: Etki skoru negatif, politika eşitsizliği artırabilir. Mutlaka iyileştirme önerileri sun.'
+        ? 'ÖNEMLİ UYARI: Etki skoru negatif, politika eşitsizliği artırabilir. Mutlaka iyileştirme önerileri sun.'
         : '';
 
-      const systemPrompt = `Sen Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uzmanı bir politika tasarım asistanısın. Şu an ${currentStep?.title} modülündesin (${policyStep + 1}/9). Kullanıcının yanıtını kısaca değerlendir, ${nextStep ? nextStep.title + ' modülüne geç ve şu soruları sor: ' + nextStep.aiPrompt : 'tüm modüllerin tamamlandığını belirt, politika taslağı hazır olduğunu söyle.'}${riskWarning} Yanıtını kısa ve odaklı tut.`;
+      const systemPrompt = buildPolicySystemPrompt(policyStep, nextStep, riskWarning);
+      const reply = await callClaude(userText, systemPrompt, policyMessages.slice(-12), lang, role);
 
-      const reply = await callClaude(userText, systemPrompt, newMessages.slice(-4), lang, role);
+      let nextPolicyData = { ...updatedData };
+
+      if (reply.includes('BAĞLAM ANALİZİ ÖZETI:')) {
+        const paragraphMatch = reply.match(/BAĞLAM ANALİZİ ÖZETI:([\s\S]*?)(?=Sorun|$)/);
+        if (paragraphMatch) {
+          nextPolicyData = { ...nextPolicyData, context_paragraph: paragraphMatch[1].trim() };
+        }
+      }
+
+      if (reply.includes('SORUN ANALİZİ ÖZETI:')) {
+        const match = reply.match(/SORUN ANALİZİ ÖZETI:([\s\S]*?)(?=Hedef|$)/);
+        if (match) nextPolicyData = { ...nextPolicyData, problem_paragraph: match[1].trim() };
+      }
+
+      POLICY_PARAGRAPH_CONFIG.forEach(({ marker, field, regex }) => {
+        if (reply.includes(marker)) {
+          const match = reply.match(regex);
+          if (match) {
+            nextPolicyData = { ...nextPolicyData, [field]: match[1].trim() };
+          }
+        }
+      });
+
+      setPolicyData(nextPolicyData);
       setPolicyMessages([...newMessages, { role: 'assistant', content: reply }]);
-      if (policyStep < 8) setPolicyStep(prev => prev + 1);
+
+      const completedCurrentStep = currentStep?.paragraphField && !!nextPolicyData[currentStep.paragraphField];
+      if (completedCurrentStep && policyStep < 8) {
+        setPolicyStep(prev => prev + 1);
+      }
     } catch (error) {
       setPolicyMessages([...newMessages, { role: 'assistant', content: 'Bir hata oluştu: ' + error.message }]);
     } finally {
@@ -1901,7 +2042,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
     setUrbanData(updatedData);
     try {
       const systemPrompt = `Sen Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uzmanı bir kentsel planlama asistanısın. Belediye çalışanlarına kentsel planlama kararlarını eşitlik perspektifiyle geliştirmeleri için yardım ediyorsun. Şu an ${currentStep?.title} adımındasın. Kullanıcının yanıtını kısa değerlendir (1-2 cümle), ardından ${nextStep ? nextStep.title + ' adımına geç: ' + nextStep.aiPrompt : 'planlama taslağının tamamlandığını belirt ve tebrik et.'}`;
-      const reply = await callClaude(userText, systemPrompt, newMessages.slice(-4), lang, role);
+      const reply = await callClaude(userText, systemPrompt, urbanMessages.slice(-4), lang, role);
       setUrbanMessages([...newMessages, { role: 'assistant', content: reply }]);
       if (urbanStep < 7) setUrbanStep(prev => prev + 1);
     } catch (error) {
@@ -2345,7 +2486,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
                   )}
 
                   {/* Quick chips */}
-                  {policyStep < 9 && POLICY_STEPS[policyStep]?.chips && (
+                  {policyStep < 9 && POLICY_STEPS[policyStep]?.chips?.length > 0 && (
                     <div style={{ padding: '8px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {POLICY_STEPS[policyStep].chips.map(chip => (
                         <button key={chip} onClick={() => setPolicyInput(prev => prev ? prev + ', ' + chip : chip)}
@@ -2366,7 +2507,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
                       value={policyInput}
                       onChange={e => setPolicyInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handlePolicySend(); } }}
-                      placeholder={policyStep < 9 ? `${POLICY_STEPS[policyStep]?.title} için yanıtınızı yazın...` : 'Ek notlarınızı yazın...'}
+                      placeholder={policyStep === 0 ? "Örnek: Tarım ve Orman Bakanlığı olarak kırsal kalkınma sektöründe yeni bir destek programı geliştiriyoruz. Programımız, TÜİK 2023 Kırsal Kalkınma Strateji Belgesi'ne bağlı olup kadın çiftçilerin tarımsal üretime katılımını artırmayı hedefliyor..." : policyStep < 9 ? `${POLICY_STEPS[policyStep]?.title} için yanıtınızı yazın...` : "Ek notlarınızı yazın..."}
                       style={{ flex: 1, padding: '10px 12px', borderRadius: 10, fontSize: '0.92em', resize: 'none', height: 56, lineHeight: 1.5, border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
                     />
                     <button className='btn-primary' onClick={handlePolicySend} disabled={policyLoading || !policyInput.trim()}
@@ -2382,18 +2523,15 @@ The platform also allows users to analyze documents such as strategic plans, bud
                     📄 Canlı Politika Taslağı
                   </div>
                   {POLICY_STEPS.map(step => (
-                    step.outputFields.some(f => policyData[f]) && (
+                    policyData[step.paragraphField] && (
                       <div key={step.id}>
                         <div style={{ background: 'var(--bg)', border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
                           <div style={{ fontSize: '0.78em', fontWeight: 600, color: 'var(--accent)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            {step.title}
+                            {step.summaryTitle}
                           </div>
-                          {step.outputFields.map((field, fi) => policyData[field] && (
-                            <div key={field} style={{ marginBottom: 8 }}>
-                              <div style={{ fontSize: '0.75em', color: C.muted, marginBottom: 2 }}>{step.outputLabels[fi]}</div>
-                              <div style={{ fontSize: '0.88em', color: 'var(--text-primary)', lineHeight: 1.5 }}>{policyData[field]}</div>
-                            </div>
-                          ))}
+                          <div style={{ fontSize: '0.88em', color: 'var(--text-primary)', lineHeight: 1.7 }}>
+                            {policyData[step.paragraphField]}
+                          </div>
                         </div>
                         {step.id === 4 && policyData.risk_level && (
                           <div style={{
