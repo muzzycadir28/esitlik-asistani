@@ -2329,17 +2329,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
         )}
 
         {activeTabId === 'policy' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 160px)', background: 'var(--surface)', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}>
-
-            {/* Header */}
-            <div style={{ background: 'var(--surface)', borderBottom: `1px solid ${C.border}`, padding: '16px 20px' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                🏛️ Politika Tasarımı Asistanı
-              </div>
-              <div style={{ fontSize: '0.85em', color: C.muted, marginTop: 2 }}>
-                Politika fikrinizi kadın erkek eşitliği perspektifiyle yapılandırın
-              </div>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)', background: 'var(--surface)', borderRadius: 12, overflow: 'hidden', border: `1px solid ${C.border}`, boxShadow: 'var(--shadow)' }}>
 
             {/* Start screen */}
             {!policyStarted && (
@@ -2393,41 +2383,54 @@ The platform also allows users to analyze documents such as strategic plans, bud
             )}
 
             {/* Main chat + output panel */}
-            {policyStarted && (
+            {policyStarted ? (
+              <>
+                {/* Compact header */}
+                <div style={{ background: 'var(--surface)', borderBottom: `1px solid ${C.border}`, padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>🏛️ Politika Tasarımı Asistanı</span>
+                    <span style={{ fontSize: '0.8em', color: C.muted, background: 'var(--bg)', padding: '3px 10px', borderRadius: 20, border: `1px solid ${C.border}` }}>
+                      Adım {policyStep + 1}/9: {POLICY_STEPS[policyStep]?.title}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => { setPolicyStarted(false); setPolicyStep(0); setPolicyData({}); setPolicyMessages([]); }}
+                    style={{ background: 'none', border: 'none', fontSize: '0.8em', color: C.muted, cursor: 'pointer' }}>
+                    ↺ Yeniden Başla
+                  </button>
+                </div>
+
+                {/* Slim progress bar - just a thin line with dots */}
+                <div style={{ padding: '6px 20px', background: 'var(--surface)', borderBottom: `1px solid ${C.border}` }}>
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                    {POLICY_STEPS.map((s, i) => (
+                      <div key={s.id} title={s.title} style={{
+                        flex: 1, height: 5, borderRadius: 3,
+                        background: i < policyStep ? 'var(--accent)' : i === policyStep ? 'var(--accent)' : C.border,
+                        opacity: i <= policyStep ? 1 : 0.35,
+                        cursor: 'default',
+                      }} />
+                    ))}
+                  </div>
+                </div>
+
               <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
 
                 {/* Left: Chat */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: `1px solid ${C.border}`, minHeight: 0 }}>
-
-                  {/* Progress bar */}
-                  <div style={{ padding: '10px 16px', background: 'var(--surface)', borderBottom: `1px solid ${C.border}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      {POLICY_STEPS.map((s, i) => (
-                        <div key={s.id} title={s.title}
-                          style={{
-                            flex: 1, height: 4, borderRadius: 2, marginRight: i < 8 ? 3 : 0,
-                            background: i < policyStep ? 'var(--accent)' : i === policyStep ? 'var(--accent)' : C.border,
-                            opacity: i <= policyStep ? 1 : 0.4,
-                          }} />
-                      ))}
-                    </div>
-                    <div style={{ fontSize: '0.78em', color: C.muted }}>
-                      Adım {policyStep + 1}/9: <strong style={{ color: 'var(--text-primary)' }}>{POLICY_STEPS[policyStep]?.title}</strong>
-                    </div>
-                  </div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
 
                   {/* Messages */}
-                  <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {policyMessages.map((m, i) => (
                       <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
                         {m.role === 'assistant' && (
-                          <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, marginRight: 8, flexShrink: 0, marginTop: 3 }}>🏛</div>
+                          <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, marginRight: 8, flexShrink: 0, marginTop: 3 }}>🏛</div>
                         )}
                         <div style={{
-                          maxWidth: '80%', padding: '10px 14px', borderRadius: m.role === 'user' ? '14px 4px 14px 14px' : '4px 14px 14px 14px',
+                          maxWidth: '80%', padding: '9px 13px', borderRadius: m.role === 'user' ? '14px 4px 14px 14px' : '4px 14px 14px 14px',
                           background: m.role === 'user' ? 'var(--accent-soft)' : 'var(--surface)',
                           border: `1px solid ${m.role === 'user' ? 'var(--accent-border)' : C.border}`,
-                          fontSize: '0.92em', lineHeight: 1.65, whiteSpace: 'pre-wrap',
+                          fontSize: '0.9em', lineHeight: 1.65, whiteSpace: 'pre-wrap',
                         }}>
                           {m.content}
                         </div>
@@ -2435,7 +2438,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
                     ))}
                     {policyLoading && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>🏛</div>
+                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>🏛</div>
                         <span style={{ color: C.muted, fontStyle: 'italic', fontSize: '0.9em' }} className='pulse'>Yanıt hazırlanıyor…</span>
                       </div>
                     )}
@@ -2487,12 +2490,12 @@ The platform also allows users to analyze documents such as strategic plans, bud
 
                   {/* Quick chips */}
                   {policyStep < 9 && POLICY_STEPS[policyStep]?.chips?.length > 0 && (
-                    <div style={{ padding: '8px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    <div style={{ padding: '8px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', flexWrap: 'wrap', gap: 6, background: 'var(--surface)' }}>
                       {POLICY_STEPS[policyStep].chips.map(chip => (
                         <button key={chip} onClick={() => setPolicyInput(prev => prev ? prev + ', ' + chip : chip)}
                           style={{
-                            padding: '5px 12px', borderRadius: 16, fontSize: '0.82em', cursor: 'pointer',
-                            border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-secondary)',
+                            padding: '4px 11px', borderRadius: 14, fontSize: '0.8em', cursor: 'pointer',
+                            border: `1px solid ${C.border}`, background: 'var(--bg)', color: 'var(--text-secondary)',
                             transition: 'all .2s',
                           }}>
                           + {chip}
@@ -2502,24 +2505,24 @@ The platform also allows users to analyze documents such as strategic plans, bud
                   )}
 
                   {/* Input */}
-                  <div style={{ padding: '12px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8 }}>
+                  <div style={{ padding: '10px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8, background: 'var(--surface)' }}>
                     <textarea
                       value={policyInput}
                       onChange={e => setPolicyInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handlePolicySend(); } }}
                       placeholder={policyStep === 0 ? "Örnek: Tarım ve Orman Bakanlığı olarak kırsal kalkınma sektöründe yeni bir destek programı geliştiriyoruz. Programımız, TÜİK 2023 Kırsal Kalkınma Strateji Belgesi'ne bağlı olup kadın çiftçilerin tarımsal üretime katılımını artırmayı hedefliyor..." : policyStep < 9 ? `${POLICY_STEPS[policyStep]?.title} için yanıtınızı yazın...` : "Ek notlarınızı yazın..."}
-                      style={{ flex: 1, padding: '10px 12px', borderRadius: 10, fontSize: '0.92em', resize: 'none', height: 56, lineHeight: 1.5, border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+                      style={{ flex: 1, padding: '9px 12px', borderRadius: 10, fontSize: '0.9em', resize: 'none', height: 52, lineHeight: 1.5, border: `1px solid ${C.border}`, background: 'var(--bg)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
                     />
                     <button className='btn-primary' onClick={handlePolicySend} disabled={policyLoading || !policyInput.trim()}
-                      style={{ padding: '0 16px', borderRadius: 10, fontSize: '0.9em' }}>
-                      {policyStep < 8 ? 'İleri →' : 'Tamamla'}
+                      style={{ padding: '0 18px', borderRadius: 10, fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                      {policyStep < 8 ? 'Gönder' : 'Tamamla'}
                     </button>
                   </div>
                 </div>
 
                 {/* Right: Live output */}
-                <div style={{ width: 340, flexShrink: 0, overflowY: 'auto', background: 'var(--surface)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ fontSize: '0.9em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+                <div style={{ width: 300, flexShrink: 0, overflowY: 'auto', background: 'var(--surface)', borderLeft: `1px solid ${C.border}`, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ fontSize: '0.82em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
                     📄 Canlı Politika Taslağı
                   </div>
                   {POLICY_STEPS.map(step => (
@@ -2584,7 +2587,8 @@ The platform also allows users to analyze documents such as strategic plans, bud
                   )}
                 </div>
               </div>
-            )}
+              </>
+            ) : null}
           </div>
         )}
 
