@@ -2440,7 +2440,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
                       Politika Tasarımına Başla →
                     </button>
                     <div style={{ fontSize: '0.8em', color: C.muted, marginTop: 10 }}>
-                      Yaklaşık 15-20 dakika sürer • İstediğiniz adımda durabilirsiniz
+                      Yaklaşık 15-20 dakika sürer
                     </div>
                   </div>
                 </div>
