@@ -1416,7 +1416,7 @@ const POLICY_STEP1_CHIPS = [
   ['Sağlık', 'Eğitim', 'Tarım', 'Ulaşım', 'Sosyal Koruma', 'İstihdam', 'Çevre', 'Konut', 'Güvenlik', 'Dijital Dönüşüm'],
   ['Politika yapıcı bakanlık', 'Uygulayıcı kurum', 'Koordinatör kurum', 'Yerel yönetim', 'Denetleyici kurum', 'Finansman sağlayan kurum'],
   ['Yeni politika', 'Mevcut programın revizyonu', 'Pilot proje', 'Strateji belgesi', 'Eylem planı'],
-  ['Cumhurbaşkanlığı Yıllık Programı', 'Orta Vadeli Program', 'Kalkınma Planı', 'Sektörel Strateji Belgesi', 'AB Uyum Programı', 'SDG/BM Gündem 2030', 'Toplumsal Cinsiyet Eşitliği Ulusal Eylem Planı'],
+  ['Cumhurbaşkanlığı Yıllık Programı', 'Orta Vadeli Program', 'Kalkınma Planı', 'Sektörel Strateji Belgesi', 'AB Uyum Programı', 'SDG/BM Gündem 2030', 'Kadının Güçlenmesi Ulusal Eylem Planı', 'Kadına Yönelik Şiddetle Mücadele Ulusal Eylem Planı'],
 ];
 
 const POLICY_STEP2_CHIPS = [
