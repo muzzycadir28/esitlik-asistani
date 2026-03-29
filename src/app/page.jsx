@@ -1432,6 +1432,55 @@ const POLICY_STEP2_CHIPS = [
   ['Veri var', 'Veri yok', 'Veri kısmi'],
 ];
 
+const SECTOR_SUB_PROBLEMS = {
+  Tarım: {
+    'Erişim Sorunu': ['Kadın çiftçilerin tarımsal krediye erişiminin kısıtlı olması', 'Tarımsal girdilere (tohum, gübre, ekipman) erişimde eşitsizlik', 'Pazara erişim ve pazarlama kanallarına ulaşmada güçlükler', 'Kooperatif ve meslek örgütlerine katılımın düşüklüğü'],
+    'Yapısal Sorunlar': ['Arazi mülkiyetinin büyük çoğunluğunun erkeklere ait olması', 'Tarım sigortası ve sosyal güvenlik kapsamı dışında kalma', 'Yasal miras ve mülkiyet haklarında fiili eşitsizlikler', 'Tarımsal destek programlarına kayıt ve başvuru engelleri'],
+    'Veri Sorunu': ['Cinsiyete ayrıştırılmış tarımsal üretim verisinin bulunmaması', 'Kadın çiftçilerin kayıt dışı emeğinin istatistiklere yansımaması', 'Tarımsal gelir dağılımında hanehalkı bazlı veri yetersizliği'],
+    'Bakım Yükü ve Zaman Kullanım Sorunu': ['Tarımsal üretimin yanı sıra ev içi bakım yükünün kadınlarda yoğunlaşması', 'Çocuk bakım hizmetlerinin kırsal alanda yetersizliği', 'Mevsimlik işlerde çocuk bakımı sorununun çözümsüz kalması'],
+    'Katılım Sorunu': ['Tarımsal karar alma mekanizmalarında kadın temsili eksikliği', 'Tarımsal eğitim ve yayım hizmetlerinde kadınlara ulaşım yetersizliği', 'Köy muhtarlığı ve kooperatif yönetiminde kadın katılımının düşüklüğü'],
+  },
+  Sağlık: {
+    'Erişim Sorunu': ['Kırsal alanda sağlık hizmetlerine fiziksel erişim güçlüğü', 'Üreme sağlığı hizmetlerine erişimin kısıtlı olması', 'Sağlık hizmetleri maliyetinin kadınlar üzerindeki yükü', 'Engelli kadınların sağlık hizmetlerine erişim engelleri'],
+    'Yapısal Sorunlar': ['Sağlık politikalarında cinsiyete duyarlı yaklaşım eksikliği', 'Kadın sağlık çalışanlarının karar alma pozisyonlarında azınlıkta kalması', 'Anne sağlığı programlarının yetersiz finansmanı'],
+    'Veri Sorunu': ['Cinsiyete ayrıştırılmış sağlık göstergelerinin eksikliği', 'Kadına yönelik şiddetin sağlık sistemine yansımasının kayıt altına alınmaması'],
+    'Bakım Yükü ve Zaman Kullanım Sorunu': ['Hasta bakımının büyük bölümünün kadınlara yüklenmesi', 'Yaşlı bakımında kadın emeğinin görünmez kalması'],
+  },
+  Eğitim: {
+    'Erişim Sorunu': ['Kız çocuklarının okula erişimindeki coğrafi ve ekonomik engeller', 'Yükseköğretimde belirli alanlara girişte cinsiyete dayalı engeller', 'Mesleki eğitimde kadın katılımının düşüklüğü'],
+    'Yapısal Sorunlar': ['Müfredatta toplumsal cinsiyet kalıp yargılarının yeniden üretilmesi', 'Kadın öğretmenlerin yönetim pozisyonlarına geçişte cam tavan'],
+    'Bakım Yükü ve Zaman Kullanım Sorunu': ['Ev içi sorumlulukların kız çocuklarının okul devamını etkilemesi', 'Okul öncesi eğitim hizmetlerinin yetersizliği'],
+  },
+  Ulaşım: {
+    'Güvenlik Sorunu': ['Toplu taşımada taciz ve güvenlik kaygıları', 'Gece saatlerinde ulaşımda güvenlik eksikliği', 'Kaldırım ve yürüyüş yollarında aydınlatma yetersizliği'],
+    'Erişim Sorunu': ['Engelli kadınların toplu taşımaya erişim güçlüğü', 'Kırsal kesimde toplu taşıma hizmetlerinin yetersizliği', 'Çocuklu kadınlar için toplu taşıma tasarımının uygunsuzluğu'],
+    'Yapısal Sorunlar': ['Ulaşım altyapısı planlamasında cinsiyete duyarlı yaklaşım eksikliği', 'Kadın ihtiyaçlarının ulaşım politikalarına yansımaması'],
+  },
+  'Sosyal Koruma': {
+    'Erişim Sorunu': ['Kayıt dışı çalışan kadınların sosyal güvenlik dışında kalması', 'Sosyal yardım programlarına başvuru süreçlerindeki bürokratik engeller'],
+    'Yapısal Sorunlar': ['Sosyal yardımların hanehalkı yerine bireysel bazda tasarlanmaması', 'Boşanmış veya ayrı yaşayan kadınların sosyal koruma açıklarına düşmesi'],
+    'Bakım Yükü ve Zaman Kullanım Sorunu': ['Yaşlı ve engelli bakımının devlet desteği olmadan ailede (kadınlarda) kalması', 'Kreş ve bakım hizmetlerinin yetersizliği'],
+  },
+  İstihdam: {
+    'Yapısal Sorunlar': ['Belirli sektörlerde işe alımda kadınlara yönelik örtük ayrımcılık', 'Üst yönetim pozisyonlarında cam tavan etkisi', 'Eşit işe eşit ücret ilkesinin hayata geçirilmemesi'],
+    'Bakım Yükü ve Zaman Kullanım Sorunu': ['Doğum/ebeveyn izninin kariyer üzerindeki olumsuz etkisi', 'İşyeri kreş hizmetlerinin yetersizliği', 'Esnek çalışma düzenlemelerinin yetersizliği'],
+    'Erişim Sorunu': ['İstihdam programlarına kadınların erişiminin düşük olması', 'Aktif işgücü programlarında kadın katılımının erkeklerin gerisinde kalması'],
+  },
+};
+
+const GENERIC_SUB_PROBLEMS = {
+  'Erişim Sorunu': ['Hizmetlere fiziksel erişim engelleri', 'Bilgi ve farkındalık eksikliği nedeniyle hizmetlerden yararlanamama', 'Ekonomik engeller'],
+  'Yapısal Sorunlar': ['Mevzuatta cinsiyete duyarlı yaklaşım eksikliği', 'Kurumsal kapasite eksikliği', 'Politika tasarımında eşitlik boyutunun gözetilmemesi'],
+  'Veri Sorunu': ['Cinsiyete ayrıştırılmış veri eksikliği', 'İzleme ve değerlendirme sistemlerinin yetersizliği'],
+  'Bakım Yükü ve Zaman Kullanım Sorunu': ['Ev içi bakım yükünün kadınlarda yoğunlaşması', 'Bakım hizmetlerinin yetersizliği'],
+  'Katılım Sorunu': ['Karar alma süreçlerinde kadın temsili eksikliği', 'Sivil katılım mekanizmalarına erişim güçlüğü'],
+  'Güvenlik Sorunu': ['Fiziksel güvenlik kaygıları', 'Şiddet ve taciz riski'],
+  'Temsil Sorunu': ['Üst düzey pozisyonlarda kadın temsilinin düşüklüğü', 'Karar mekanizmalarında görünmezlik'],
+  'Kalıp Yargılar Sorunu': ['Toplumsal cinsiyet rollerine ilişkin önyargılar', 'Medya ve iletişimde kalıp yargıların yeniden üretilmesi'],
+  'Uygulama Sorunu': ['Politika ve mevzuatın uygulamaya yansımaması', 'Denetim mekanizmalarının yetersizliği'],
+  'Kesişimsellik Sorunu': ['Birden fazla dezavantajın bir arada yaşanması', 'Kırılgan gruplara yönelik özel mekanizmaların eksikliği'],
+};
+
 const POLICY_STEP5_CHIPS = [
   ['Hizmet erişimi artırma', 'İstihdam desteği', 'Bakım hizmetleri', 'Kapasite geliştirme', 'Farkındalık artırma', 'Ekonomik katılım', 'Karar alma süreçlerine katılım', 'Temsil artırma'],
   ['Politika tasarımına eşitlik perspektifi entegre edilmeli', 'Cinsiyete duyarlı veri ve göstergeler kullanılmalı', 'Hedefli ve kapsayıcı hizmetler geliştirilmeli', 'Kaynak ve bütçe dağılımı eşitlikçi hale getirilmeli', 'Kadınların ve kırılgan grupların katılımı artırılmalı'],
@@ -1735,6 +1784,9 @@ export default function EsitlikAsistani() {
   const [policyInput, setPolicyInput] = useState('');
   const [policySubQuestion, setPolicySubQuestion] = useState(0);
   const [policyMessages, setPolicyMessages] = useState([]);
+  const [selectedProblems, setSelectedProblems] = useState([]);
+  const [subProblemSelections, setSubProblemSelections] = useState({});
+  const [showSubProblems, setShowSubProblems] = useState(false);
   const [policyLoading, setPolicyLoading] = useState(false);
   const [policyStarted, setPolicyStarted] = useState(false);
   const [urbanStep, setUrbanStep] = useState(0);
@@ -1858,6 +1910,9 @@ The platform also allows users to analyze documents such as strategic plans, bud
 
   useEffect(() => {
     setPolicySubQuestion(0);
+    setShowSubProblems(false);
+    setSelectedProblems([]);
+    setSubProblemSelections({});
   }, [policyStep]);
 
   const [messages, setMessages] = useState([]);
@@ -2043,6 +2098,38 @@ The platform also allows users to analyze documents such as strategic plans, bud
     const nextStep = POLICY_STEPS[policyStep + 1];
     const updatedData = { ...policyData };
     const currentFieldIndex = Math.min(policySubQuestion, (currentStep?.outputFields?.length || 1) - 1);
+
+    if (policyStep === 1 && policySubQuestion === 0) {
+      const sector = policyData.sector || '';
+      const sectorProblems = SECTOR_SUB_PROBLEMS[sector] || GENERIC_SUB_PROBLEMS;
+      const problems = userText.split(/[,،\n]/).map(p => p.trim()).filter(Boolean);
+      setSelectedProblems(problems);
+
+      const relevantSubProblems = {};
+      problems.forEach((prob) => {
+        const key = Object.keys(sectorProblems).find(k => prob.toLowerCase().includes(k.toLowerCase().split(' ')[0]));
+        if (key && sectorProblems[key]) {
+          relevantSubProblems[key] = sectorProblems[key];
+        }
+      });
+
+      if (Object.keys(relevantSubProblems).length > 0) {
+        setShowSubProblems(true);
+        setSubProblemSelections({});
+        setPolicyMessages([
+          ...newMessages,
+          {
+            role: 'assistant',
+            content: 'Anlaşıldı. Seçtiğiniz sorun alanlarını derinleştirelim. Her kategori için size özel alt sorunları aşağıdan seçebilirsiniz:',
+            isSubProblemSelector: true,
+            subProblems: relevantSubProblems,
+          },
+        ]);
+        setPolicyLoading(false);
+        return;
+      }
+    }
+
     if (currentStep?.outputFields?.[currentFieldIndex]) {
       updatedData[currentStep.outputFields[currentFieldIndex]] = userText;
     }
@@ -2077,6 +2164,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
         : policyStep === 3 && total < 0
           ? 'ÖNEMLİ UYARI: Etki skoru negatif, politika eşitsizliği artırabilir. Mutlaka iyileştirme önerileri sun.'
           : '';
+      const subProblemContext = Object.entries(subProblemSelections).filter(([, v]) => v).map(([k]) => k).join(', ');
 
       const systemPrompt = isOptionalDataFollowUp
         ? `Sen KEEDB uzmanı bir politika tasarım asistanısın. Sorun Analizi modülündesin. Beş soru zaten tamamlandı ve kullanıcı opsiyonel veri notu paylaşıyor. Yeni soru sorma. Kullanıcının önceki yanıtlarını ve varsa paylaşılan veriyi birlikte kullanarak akıcı, kurumsal dilde 4-5 cümlelik bir Sorun Analizi paragrafı yaz. Paragrafın başına "📋 SORUN ANALİZİ ÖZETI:" yaz. Eşitlik açığını mutlaka vurgula. Ardından Hedef Grup Analizine geç ve ilk soruyu sor: ${nextStep?.aiPrompt || 'Politika kimleri hedefliyor?'}.`
@@ -2093,6 +2181,7 @@ ${policySubQuestion === 1 ? 'Kullanıcı etkilenen grupları belirtti. Kısaca "
 ${policySubQuestion === 2 ? 'Kullanıcı etki farkını belirtti. Kısaca "Anlaşıldı." de ve şunu sor: "Bu sorunun temel nedenleri nelerdir?"' : ''}
 ${policySubQuestion === 3 ? 'Kullanıcı nedenleri belirtti. Kısaca "Anlaşıldı." de ve şunu sor: "Elinizde bu soruna ilişkin veri var mı? (Var / Yok / Kısmi)"' : ''}
 ${policySubQuestion >= 4 ? `Kullanıcı veri durumunu belirtti. Tüm yanıtlara dayanarak 5-6 cümlelik Sorun Analizi özeti yaz.
+Seçilen alt sorunlar: ${subProblemContext || 'Belirtilmedi'}
 
 ÖZET KURALLARI:
 - İlk cümle sorunu net tanımla
@@ -2519,7 +2608,7 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
                     </span>
                   </div>
                   <button
-                    onClick={() => { setPolicyStarted(false); setPolicyStep(0); setPolicySubQuestion(0); setPolicyData({}); setPolicyMessages([]); }}
+                    onClick={() => { setPolicyStarted(false); setPolicyStep(0); setPolicySubQuestion(0); setPolicyData({}); setPolicyMessages([]); setSelectedProblems([]); setSubProblemSelections({}); setShowSubProblems(false); }}
                     style={{ background: 'none', border: 'none', fontSize: '0.8em', color: C.muted, cursor: 'pointer' }}>
                     ↺ Yeniden Başla
                   </button>
@@ -2558,6 +2647,51 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
                           fontSize: '0.9em', lineHeight: 1.65, whiteSpace: 'pre-wrap',
                         }}>
                           {m.content}
+                          {m.isSubProblemSelector && m.subProblems && (
+                            <div style={{ background: 'var(--bg)', border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginTop: 8 }}>
+                              {Object.entries(m.subProblems).map(([category, options]) => (
+                                <div key={category} style={{ marginBottom: 14 }}>
+                                  <div style={{ fontSize: '0.85em', fontWeight: 600, color: 'var(--accent)', marginBottom: 8 }}>
+                                    📌 {category}
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    {options.map((opt) => (
+                                      <label key={opt} style={{
+                                        display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', padding: '6px 10px', borderRadius: 8,
+                                        border: `1px solid ${subProblemSelections[opt] ? 'var(--accent)' : C.border}`,
+                                        background: subProblemSelections[opt] ? 'var(--accent-soft)' : 'var(--surface)', transition: 'all .15s',
+                                      }}>
+                                        <input
+                                          type='checkbox'
+                                          checked={!!subProblemSelections[opt]}
+                                          onChange={e => setSubProblemSelections(prev => ({ ...prev, [opt]: e.target.checked }))}
+                                          style={{ marginTop: 2, accentColor: 'var(--accent)' }}
+                                        />
+                                        <span style={{ fontSize: '0.85em', color: 'var(--text-primary)', lineHeight: 1.5 }}>{opt}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                              <button
+                                className='btn-primary'
+                                onClick={() => {
+                                  const selected = Object.entries(subProblemSelections).filter(([, v]) => v).map(([k]) => k);
+                                  const combinedProblem = [...selectedProblems, ...selected].join('; ');
+                                  setPolicyData(prev => ({ ...prev, problem_definition: combinedProblem }));
+                                  setShowSubProblems(false);
+                                  setPolicySubQuestion(1);
+                                  setPolicyMessages(prev => [...prev, {
+                                    role: 'assistant',
+                                    content: '✅ Sorun alanları detaylandırıldı.\n\n**Soru 2/5:** Bu sorunlar kimleri etkiliyor? (Spesifik grupları belirtiniz)',
+                                  }]);
+                                }}
+                                style={{ width: '100%', marginTop: 10, padding: '10px', borderRadius: 10, fontSize: '0.88em' }}
+                              >
+                                Seçimleri Onayla ve Devam Et →
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -2645,7 +2779,7 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
                   )}
 
                   {/* Quick chips */}
-                  {policyStep !== 3 && policyStep < 9 && getCurrentChips().length > 0 && (
+                  {policyStep !== 3 && policyStep < 9 && getCurrentChips().length > 0 && !(policyStep === 1 && policySubQuestion === 0 && showSubProblems) && (
                     <div style={{ padding: '8px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', flexWrap: 'wrap', gap: 6, background: 'var(--surface)' }}>
                       {policyStep === 0 && policySubQuestion === 2 ? (
                         getCurrentChips().map(chip => (
@@ -2681,7 +2815,7 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
                   )}
 
                   {/* Input */}
-                  {policyStep !== 3 && (
+                  {policyStep !== 3 && !(policyStep === 1 && policySubQuestion === 0 && showSubProblems) && (
                     <div style={{ padding: '10px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8, background: 'var(--surface)' }}>
                       <textarea
                         value={policyInput}
@@ -2779,7 +2913,7 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
                         📋 Panoya Kopyala
                       </button>
                       <button className='btn-ghost'
-                        onClick={() => { setPolicyStep(0); setPolicyData({}); setPolicyMessages([]); setPolicyStarted(false); setPolicyMode(null); setImpactScores({ access: 0, benefit: 0, participation: 0, time: 0, safety: 0 }); }}
+                        onClick={() => { setPolicyStep(0); setPolicyData({}); setPolicyMessages([]); setPolicyStarted(false); setPolicyMode(null); setImpactScores({ access: 0, benefit: 0, participation: 0, time: 0, safety: 0 }); setSelectedProblems([]); setSubProblemSelections({}); setShowSubProblems(false); }}
                         style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
                         🔄 Yeni Politika Başlat
                       </button>
