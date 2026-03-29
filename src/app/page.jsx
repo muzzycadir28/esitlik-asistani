@@ -1285,6 +1285,42 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
   }
 }
 
+async function editorialReview(rawSummary, context) {
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{
+          role: 'user',
+          content: `Aşağıdaki metni editöryal olarak gözden geçir ve düzelt. 
+
+GÖREVIN:
+1. Anlamsız, kopuk veya yarım kalan cümleleri düzelt
+2. "---", "##", "**" gibi markdown işaretlerini temizle (başlık ve özet etiketi hariç)
+3. Cümle akışını ve tutarlılığını iyileştir
+4. Tekrar eden ifadeleri temizle
+5. Kurumsal ve akıcı Türkçe kullan
+6. "📋 ${context} ÖZETİ:" başlığını koru, sadece içeriği düzelt
+7. Uzunluğu koru, özetleme yapma
+
+METİN:
+${rawSummary}
+
+Sadece düzeltilmiş metni yaz, başka açıklama ekleme.`
+        }],
+        customSystem: 'Sen bir Türkçe editör ve dil uzmanısın. Kurumsal metinleri akıcı, tutarlı ve hatasız hale getirirsin. Sadece düzeltilmiş metni döndür.',
+        lang: 'tr',
+        role: 'official'
+      })
+    });
+    const data = await response.json();
+    return data.text || rawSummary;
+  } catch {
+    return rawSummary;
+  }
+}
+
 // ─── MARKDOWN RENDERER ────────────────────────────────────────────────────────
 function MD({ text }) {
   const lines = text.split("\n");
@@ -1811,6 +1847,12 @@ export default function EsitlikAsistani() {
   const [resourceFilter, setResourceFilter] = useState('all');
   const [resourceSearch, setResourceSearch] = useState('');
   const [selectedResource, setSelectedResource] = useState(null);
+  const cleanText = (text) => text
+    ?.replace(/\*\*/g, '')
+    ?.replace(/---/g, '')
+    ?.replace(/##\s*/g, '')
+    ?.replace(/📋[^:]+ÖZETİ:/g, '')
+    ?.trim() || '';
 
   const C = {
     background: "var(--bg)",
@@ -2201,23 +2243,58 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
         .slice(-6);
       const reply = await callClaude(userText || 'Ek veri paylaşılmadı.', systemPrompt, history, lang, role);
 
+      const summaryMarkers = ['BAĞLAM ANALİZİ ÖZETİ', 'SORUN ANALİZİ ÖZETİ', 'HEDEF GRUP ANALİZİ ÖZETİ', 'POLİTİKA TASARIMI ÖZETİ', 'FAALİYET TASARIMI ÖZETİ', 'BÜTÇE BAĞLANTISI ÖZETİ', 'GÖSTERGELER ÖZETİ', 'RİSK VE ÖNERİ ÖZETİ'];
+      const normalizedReply = reply.replaceAll('ÖZETI', 'ÖZETİ');
+      let finalReply = reply;
+      const foundMarker = summaryMarkers.find(m => normalizedReply.includes(m));
+
       let nextPolicyData = { ...updatedData };
 
-      if (reply.includes('BAĞLAM ANALİZİ ÖZETI:')) {
-        const paragraphMatch = reply.match(/BAĞLAM ANALİZİ ÖZETI:([\s\S]*?)(?=Sorun|$)/);
+      if (foundMarker && reply.includes('📋')) {
+        const summaryStart = reply.indexOf('📋');
+        const summaryPart = summaryStart >= 0 ? reply.slice(summaryStart) : reply;
+        const beforeSummary = summaryStart >= 0 ? reply.slice(0, summaryStart) : '';
+
+        const reviewedSummary = await editorialReview(summaryPart, foundMarker.replace(' ÖZETİ', ''));
+        finalReply = beforeSummary + reviewedSummary;
+
+        const markerKey = foundMarker.toLowerCase().replace(/ /g, '_').replace('ı', 'i').replace('ü', 'u').replace('ö', 'o').replace('ş', 's').replace('ğ', 'g').replace('ç', 'c');
+        const paragraphField = markerKey.includes('bagla') ? 'context_paragraph'
+          : markerKey.includes('sorun') ? 'problem_paragraph'
+          : markerKey.includes('hedef') ? 'target_paragraph'
+          : markerKey.includes('politika') ? 'design_paragraph'
+          : markerKey.includes('faaliyet') ? 'activity_paragraph'
+          : markerKey.includes('butce') ? 'budget_paragraph'
+          : markerKey.includes('goster') ? 'indicators_paragraph'
+          : markerKey.includes('risk') ? 'risk_paragraph'
+          : null;
+
+        if (paragraphField) {
+          const cleanParagraph = reviewedSummary
+            .replace(/📋[^:]+ÖZETİ:/g, '')
+            .replace(/\*\*/g, '')
+            .replace(/---/g, '')
+            .replace(/##/g, '')
+            .trim();
+          nextPolicyData = { ...nextPolicyData, [paragraphField]: cleanParagraph };
+        }
+      }
+
+      if (finalReply.includes('BAĞLAM ANALİZİ ÖZETI:') || finalReply.includes('BAĞLAM ANALİZİ ÖZETİ:')) {
+        const paragraphMatch = finalReply.match(/BAĞLAM ANALİZİ ÖZET[İI]:([\s\S]*?)(?=Sorun|$)/);
         if (paragraphMatch) {
           nextPolicyData = { ...nextPolicyData, context_paragraph: paragraphMatch[1].trim() };
         }
       }
 
-      if (reply.includes('SORUN ANALİZİ ÖZETI:')) {
-        const match = reply.match(/SORUN ANALİZİ ÖZETI:([\s\S]*?)(?=Hedef|$)/);
+      if (finalReply.includes('SORUN ANALİZİ ÖZETI:') || finalReply.includes('SORUN ANALİZİ ÖZETİ:')) {
+        const match = finalReply.match(/SORUN ANALİZİ ÖZET[İI]:([\s\S]*?)(?=Hedef|$)/);
         if (match) nextPolicyData = { ...nextPolicyData, problem_paragraph: match[1].trim() };
       }
 
       POLICY_PARAGRAPH_CONFIG.forEach(({ marker, field, regex }) => {
-        if (reply.includes(marker)) {
-          const match = reply.match(regex);
+        if (finalReply.includes(marker)) {
+          const match = finalReply.match(regex);
           if (match) {
             nextPolicyData = { ...nextPolicyData, [field]: match[1].trim() };
           }
@@ -2225,7 +2302,7 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
       });
 
       setPolicyData(nextPolicyData);
-      setPolicyMessages([...newMessages, { role: 'assistant', content: reply }]);
+      setPolicyMessages([...newMessages, { role: 'assistant', content: finalReply }]);
       scrollPolicyChatToBottom();
 
       const completedCurrentStep = currentStep?.paragraphField && !!nextPolicyData[currentStep.paragraphField];
@@ -2875,7 +2952,7 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
                             {step.summaryTitle}
                           </div>
                           <div style={{ fontSize: '0.88em', color: 'var(--text-primary)', lineHeight: 1.7 }}>
-                            {policyData[step.paragraphField]}
+                            {cleanText(policyData[step.paragraphField])}
                           </div>
                         </div>
                         {step.id === 4 && policyData.risk_level && (
