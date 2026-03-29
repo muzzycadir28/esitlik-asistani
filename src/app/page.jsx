@@ -1420,10 +1420,15 @@ const POLICY_STEP1_CHIPS = [
 ];
 
 const POLICY_STEP2_CHIPS = [
+  // Q1 (subQuestion 0): Sorun türü
   ['Veri Sorunu', 'Erişim Sorunu', 'Katılım Sorunu', 'Güvenlik Sorunu', 'Temsil Sorunu', 'Yapısal Sorunlar', 'Kalıp Yargılar Sorunu', 'Bakım Yükü ve Zaman Kullanım Sorunu', 'Uygulama Sorunu', 'Kesişimsellik Sorunu'],
+  // Q2 (subQuestion 1): Kimler etkileniyor
   ['Kadınlar', 'Kırsal bölgede yaşayan kadınlar', 'Genç kadınlar ve kız çocukları', 'Yaşlı kadınlar', 'Engelli kadınlar', 'Göçmen / mülteci kadınlar'],
+  // Q3 (subQuestion 2): Eşit etkileniyor mu
   ['Evet, kadınlar daha fazla etkileniyor', 'Hayır, eşit etkileniyorlar'],
+  // Q4 (subQuestion 3): Temel nedenler
   ['Yapısal eşitsizlikler', 'Toplumsal normlar ve kalıp yargılar', 'Cinsiyete duyarlı veri eksikliği', 'Temsil eksikliği (karar alma süreçlerinde)', 'Kurumsal kapasite ve farkındalık eksikliği', 'Kaynak ve bütçe dağılımında eşitsizlik'],
+  // Q5 (subQuestion 4): Veri durumu
   ['Veri var', 'Veri yok', 'Veri kısmi'],
 ];
 
@@ -1966,9 +1971,19 @@ The platform also allows users to analyze documents such as strategic plans, bud
   };
 
   const getCurrentChips = () => {
-    if (policyStep === 0) return POLICY_STEP1_CHIPS[Math.min(policySubQuestion, POLICY_STEP1_CHIPS.length - 1)] || [];
-    if (policyStep === 1) return POLICY_STEP2_CHIPS[Math.min(policySubQuestion, POLICY_STEP2_CHIPS.length - 1)] || [];
-    if (policyStep === 4) return POLICY_STEP5_CHIPS[Math.min(policySubQuestion, POLICY_STEP5_CHIPS.length - 1)] || [];
+    if (policyStep === 3) return [];
+    if (policyStep === 0) {
+      const q = Math.min(policySubQuestion, POLICY_STEP1_CHIPS.length - 1);
+      return POLICY_STEP1_CHIPS[q] || [];
+    }
+    if (policyStep === 1) {
+      const q = Math.min(policySubQuestion, POLICY_STEP2_CHIPS.length - 1);
+      return POLICY_STEP2_CHIPS[q] || [];
+    }
+    if (policyStep === 4) {
+      const q = Math.min(policySubQuestion, POLICY_STEP5_CHIPS.length - 1);
+      return POLICY_STEP5_CHIPS[q] || [];
+    }
     return POLICY_STEPS[policyStep]?.chips || [];
   };
 
@@ -2065,7 +2080,31 @@ The platform also allows users to analyze documents such as strategic plans, bud
 
       const systemPrompt = isOptionalDataFollowUp
         ? `Sen KEEDB uzmanı bir politika tasarım asistanısın. Sorun Analizi modülündesin. Beş soru zaten tamamlandı ve kullanıcı opsiyonel veri notu paylaşıyor. Yeni soru sorma. Kullanıcının önceki yanıtlarını ve varsa paylaşılan veriyi birlikte kullanarak akıcı, kurumsal dilde 4-5 cümlelik bir Sorun Analizi paragrafı yaz. Paragrafın başına "📋 SORUN ANALİZİ ÖZETI:" yaz. Eşitlik açığını mutlaka vurgula. Ardından Hedef Grup Analizine geç ve ilk soruyu sor: ${nextStep?.aiPrompt || 'Politika kimleri hedefliyor?'}.`
-        : buildPolicySystemPrompt(policyStep, nextStep, riskWarning);
+        : policyStep === 1
+          ? `Sen KEEDB uzmanı bir politika tasarım asistanısın. Sorun Analizi modülündesin.
+
+KRİTİK KURAL: Kullanıcının yanıtını ASLA sorgulama, derinleştirme veya ek açıklama isteme. Yanıtı olduğu gibi kabul et ve bir sonraki soruya geç.
+
+Şu ana kadar kaç soru soruldu: ${policySubQuestion}
+
+SIRADAKI YAPILACAK:
+${policySubQuestion === 0 ? 'Kullanıcı sorun türünü belirtti. Kısaca "Anlaşıldı." de ve şunu sor: "Bu sorun kimleri etkiliyor? (Spesifik grupları belirtiniz)"' : ''}
+${policySubQuestion === 1 ? 'Kullanıcı etkilenen grupları belirtti. Kısaca "Anlaşıldı." de ve şunu sor: "Kadınlar ve erkekler bu sorundan aynı şekilde mi etkileniyor?"' : ''}
+${policySubQuestion === 2 ? 'Kullanıcı etki farkını belirtti. Kısaca "Anlaşıldı." de ve şunu sor: "Bu sorunun temel nedenleri nelerdir?"' : ''}
+${policySubQuestion === 3 ? 'Kullanıcı nedenleri belirtti. Kısaca "Anlaşıldı." de ve şunu sor: "Elinizde bu soruna ilişkin veri var mı? (Var / Yok / Kısmi)"' : ''}
+${policySubQuestion >= 4 ? `Kullanıcı veri durumunu belirtti. Tüm yanıtlara dayanarak 5-6 cümlelik Sorun Analizi özeti yaz.
+
+ÖZET KURALLARI:
+- İlk cümle sorunu net tanımla
+- İkinci cümle MUTLAKA çarpıcı bir uluslararası veya ulusal istatistik içersin (UN Women, TÜİK, Dünya Bankası kaynaklı, sektöre uygun)
+- Üçüncü cümle kadın-erkek eşitsizliği boyutunu somutlaştırsın
+- Dördüncü cümle temel nedenleri özetlesin
+- Beşinci cümle veri durumunu vurgulasın
+- Öncesinde "📋 SORUN ANALİZİ ÖZETI:" yaz
+- Sonrasında "Hedef Grup Analizine geçiyoruz." de` : ''}
+
+SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum yapma.`
+          : buildPolicySystemPrompt(policyStep, nextStep, riskWarning);
       const reply = await callClaude(userText || 'Ek veri paylaşılmadı.', systemPrompt, policyMessages.slice(-12), lang, role);
 
       let nextPolicyData = { ...updatedData };
@@ -2098,7 +2137,10 @@ The platform also allows users to analyze documents such as strategic plans, bud
       const completedCurrentStep = currentStep?.paragraphField && !!nextPolicyData[currentStep.paragraphField];
       if (completedCurrentStep && policyStep < 8) {
         setPolicyStep(prev => prev + 1);
-      } else {
+      }
+      if (policyStep === 0 || policyStep === 1) {
+        setPolicySubQuestion(prev => prev + 1);
+      } else if (!completedCurrentStep) {
         setPolicySubQuestion(prev => prev + 1);
       }
     } catch (error) {
