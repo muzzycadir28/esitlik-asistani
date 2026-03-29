@@ -1217,7 +1217,7 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
   const timeoutId = setTimeout(() => controller.abort(), 45000);
 
   try {
-    const messages = [{ role: "user", content: userContent }];
+    const messages = [...history, { role: "user", content: userContent }];
 
     const res = await fetch("/api/chat", {
       method: "POST",
@@ -1329,62 +1329,222 @@ function MD({ text }) {
 
 const POLICY_STEPS = [
   {
-    id: 1, title: 'Politika Alanı',
-    aiPrompt: 'Hangi politika alanında çalışıyorsunuz? Bu yeni bir politika mı, mevcut programın iyileştirilmesi mi? Kurumunuzun yetki alanı nedir?',
-    chips: ['Yeni politika', 'Mevcut programı geliştirme', 'Stratejik plana bağlı', 'Performans programına bağlı'],
-    outputFields: ['area', 'context', 'strategicGoal'],
-    outputLabels: ['Politika alanı', 'Kurumsal bağlam', 'İlgili stratejik hedef'],
+    id: 1, title: 'Bağlam Analizi',
+    aiPrompt: 'Bu politika hangi sektörde geliştiriliyor?',
+    chips: [],
+    outputFields: ['sector', 'institution_role', 'policy_type', 'strategic_link'],
+    outputLabels: ['Sektör', 'Kurumsal rol', 'Politika türü', 'Stratejik bağlantı'],
+    paragraphField: 'context_paragraph',
+    summaryTitle: '1. Bağlam Analizi',
   },
   {
-    id: 2, title: 'Sorun Tanımı',
-    aiPrompt: 'Çözmek istediğiniz temel sorun nedir? Bu sorun kadınlar ve erkekleri farklı biçimde etkiliyor mu? Elinizde veri var mı?',
-    chips: ['Hizmet erişimi sorunu', 'Zaman kullanımı sorunu', 'Güvenlik sorunu', 'Gelir/istihdam sorunu'],
-    outputFields: ['problem', 'problemCauses', 'affectedGroups', 'equalityDimension'],
-    outputLabels: ['Sorun tanımı', 'Temel nedenler', 'Etkilenen gruplar', 'Eşitlik boyutu'],
+    id: 2, title: 'Sorun Analizi',
+    aiPrompt: 'Çözmek istediğiniz temel sorun nedir?',
+    chips: [],
+    outputFields: ['problem_definition', 'affected_groups', 'gender_gap', 'data_status'],
+    outputLabels: ['Sorun tanımı', 'Etkilenen gruplar', 'Cinsiyet açığı', 'Veri durumu'],
+    paragraphField: 'problem_paragraph',
+    summaryTitle: '2. Sorun Analizi',
   },
   {
-    id: 3, title: 'Hedef Grup',
-    aiPrompt: 'Politika kimleri hedefliyor? Kadınlar ve erkekler içinde farklı alt gruplar var mı? Kırılgan gruplar kimler?',
-    chips: ['Genç kadınlar', 'Yaşlılar', 'Engelli bireyler', 'Kırsal nüfus', 'Bakım verenler', 'İşsizler'],
-    outputFields: ['targetGroup', 'secondaryGroup', 'intersections'],
-    outputLabels: ['Birincil hedef grup', 'İkincil hedef grup', 'Kesişen eşitsizlikler'],
+    id: 3, title: 'Hedef Grup Analizi',
+    aiPrompt: 'Politika kimleri hedefliyor?',
+    chips: ['Genç kadınlar', 'Yaşlılar', 'Engelli bireyler', 'Kırsal nüfus', 'Göçmenler', 'Tek ebeveynler', 'Düşük gelirli gruplar', 'Bölgesel yoğunlaşma var (kırsal ve dezavantajlı bölgelerde daha yüksek)', 'Gelir düzeyi belirleyici (düşük gelir grupları daha fazla etkileniyor)'],
+    outputFields: ['primary_target', 'secondary_target', 'vulnerable_groups', 'intersectionality'],
+    outputLabels: ['Birincil hedef grup', 'İkincil hedef grup', 'Kırılgan gruplar', 'Kesişen eşitsizlikler'],
+    paragraphField: 'target_paragraph',
+    summaryTitle: '3. Hedef Grup Analizi',
   },
   {
-    id: 4, title: 'Politika Amacı',
-    aiPrompt: 'Bu politika sonunda ne değişsin istiyorsunuz? Eşitsizlik hangi yönde azalmalı? Hizmet erişimi mi, katılım mı, temsil mi öncelik?',
-    chips: ['Hizmet erişimi', 'İşgücü katılımı', 'Temsil', 'Güvenlik', 'Ekonomik güçlenme'],
-    outputFields: ['objective', 'transformation'],
-    outputLabels: ['Genel amaç', 'Beklenen dönüşüm'],
+    id: 4, title: 'Ex-ante Etki Analizi',
+    aiPrompt: 'İlk olarak erişim boyutundan başlayalım: Politika kadınlar ve erkekler için eşit erişilebilir olacak mı?',
+    chips: ['Eşit erişim sağlar', 'Erişim engeli var', 'Fayda dengeli', 'Fayda eşitsiz', 'Bakım yükü azalır', 'Bakım yükü artar', 'Güvenli', 'Risk var'],
+    outputFields: ['impact_access', 'impact_benefit', 'impact_participation', 'impact_time', 'impact_safety'],
+    outputLabels: ['Erişim etkisi', 'Fayda dağılımı', 'Katılım etkisi', 'Zaman/bakım etkisi', 'Güvenlik etkisi'],
+    paragraphField: 'impact_paragraph',
+    summaryTitle: '4. Ex-ante Etki Analizi',
+    isScoring: true,
   },
   {
-    id: 5, title: 'Hedefler ve Sonuçlar',
-    aiPrompt: '1 yıl içinde hangi kısa vadeli sonuç bekleniyor? 3 yıl içinde hangi kurumsal değişim hedefleniyor? Ölçülebilir bir hedef yazabilir misiniz?',
-    chips: ['Çıktı göstergesi', 'Sonuç göstergesi', 'Etki göstergesi'],
-    outputFields: ['shortTermResults', 'midTermGoals', 'measurements'],
-    outputLabels: ['Kısa vadeli sonuçlar', 'Orta vadeli hedefler', 'Ölçüm alanları'],
+    id: 5, title: 'Politika Tasarımı',
+    aiPrompt: 'Bu politika ile hangi eşitsizliği azaltmayı hedefliyorsunuz?',
+    chips: [],
+    outputFields: ['policy_objective', 'expected_change'],
+    outputLabels: ['Politika amacı', 'Beklenen değişim'],
+    paragraphField: 'design_paragraph',
+    summaryTitle: '5. Politika Tasarımı',
   },
   {
     id: 6, title: 'Faaliyet Tasarımı',
-    aiPrompt: 'Hedefe ulaşmak için hangi faaliyetler yapılacak? Hangi kurumlarla iş birliği gerekecek?',
-    chips: ['Eğitim/kapasite', 'Hizmet sunumu', 'Veri toplama', 'Farkındalık', 'Altyapı', 'Mevzuat güncellemesi'],
-    outputFields: ['activities', 'responsibleUnits', 'stakeholders'],
-    outputLabels: ['Faaliyet listesi', 'Sorumlu birimler', 'Paydaşlar'],
+    aiPrompt: 'Hedefe ulaşmak için ilk kritik faaliyet nedir?',
+    chips: ['Eğitim/kapasite', 'Hizmet sunumu', 'Altyapı', 'Mevzuat', 'Farkındalık', 'Koordinasyon', 'Veri toplama'],
+    outputFields: ['activities', 'gender_adjustments', 'responsible_units'],
+    outputLabels: ['Faaliyetler', 'Eşitlik uyarlamaları', 'Sorumlu birimler'],
+    paragraphField: 'activity_paragraph',
+    summaryTitle: '6. Faaliyet Tasarımı',
   },
   {
     id: 7, title: 'Bütçe Bağlantısı',
-    aiPrompt: 'Bu politikanın mevcut bütçede karşılığı var mı? Yeni kaynak gerekiyor mu? Bütçeden kimlerin yararlanacağı izlenebiliyor mu?',
-    chips: ['Mevcut bütçe yeterli', 'Kısmi kaynak gerekli', 'Yeni kaynak gerekli', 'Belirsiz'],
-    outputFields: ['budgetNote', 'spendingItems', 'resourceNeeds'],
-    outputLabels: ['Bütçe notu', 'Muhtemel harcama başlıkları', 'Kaynak ihtiyacı'],
+    aiPrompt: 'Bu politika mevcut bütçede yer alıyor mu?',
+    chips: ['Mevcut bütçe yeterli', 'Ek kaynak gerekli', 'Bütçe belirsiz', 'İzleme mevcut', 'İzleme yok'],
+    outputFields: ['budget_link', 'resource_gap', 'beneficiary_distribution'],
+    outputLabels: ['Bütçe bağı', 'Kaynak açığı', 'Yararlanıcı dağılımı'],
+    paragraphField: 'budget_paragraph',
+    summaryTitle: '7. Bütçe Bağlantısı',
   },
   {
-    id: 8, title: 'Gösterge ve İzleme',
-    aiPrompt: 'Veriler cinsiyete göre ayrıştırılabiliyor mu? Hangi göstergeler izlenecek? Uygulamada karşılaşılabilecek riskler neler?',
-    chips: ['Veri mevcut', 'Veri kısmen var', 'Veri yok', 'Dış veri gerekli'],
-    outputFields: ['indicators', 'dataNeeds', 'risks', 'monitoringPlan'],
-    outputLabels: ['Gösterge seti', 'Veri ihtiyacı', 'Riskler', 'İzleme planı'],
+    id: 8, title: 'Göstergeler',
+    aiPrompt: 'Başarıyı ölçmek için kullanacağınız ilk gösterge nedir?',
+    chips: ['Çıktı göstergesi', 'Sonuç göstergesi', 'Etki göstergesi', 'Cinsiyete göre ayrıştırılmış', 'Yıllık izleme'],
+    outputFields: ['output_indicators', 'outcome_indicators', 'sex_disaggregated'],
+    outputLabels: ['Çıktı göstergeleri', 'Sonuç göstergeleri', 'Cinsiyet ayrıştırması'],
+    paragraphField: 'indicators_paragraph',
+    summaryTitle: '8. Göstergeler',
+  },
+  {
+    id: 9, title: 'Risk ve Öneri',
+    aiPrompt: 'Politikanın uygulanmasında öngördüğünüz en önemli risk nedir?',
+    chips: ['Kurumsal kapasite riski', 'Veri eksikliği riski', 'Uygulama riski', 'Katılım riski', 'Bütçe riski'],
+    outputFields: ['risks', 'mitigation_measures', 'improvement_suggestions'],
+    outputLabels: ['Riskler', 'Azaltma önlemleri', 'İyileştirme önerileri'],
+    paragraphField: 'risk_paragraph',
+    summaryTitle: '9. Risk ve Öneri',
   },
 ];
+
+const POLICY_STEP1_CHIPS = [
+  ['Sağlık', 'Eğitim', 'Tarım', 'Ulaşım', 'Sosyal Koruma', 'İstihdam', 'Çevre', 'Konut', 'Güvenlik', 'Dijital Dönüşüm'],
+  ['Politika yapıcı', 'Uygulayıcı kurum', 'Koordinatör kurum', 'Yerel yönetim', 'Denetleyici kurum', 'Finansman sağlayan kurum'],
+  ['Yeni politika', 'Mevcut programın revizyonu'],
+  ['Cumhurbaşkanlığı Yıllık Programı', 'Orta Vadeli Program', 'Kalkınma Planı', 'Sektörel Strateji Belgesi', 'AB Uyum Programı', 'SDG/BM Gündem 2030', 'Kadının Güçlenmesi Ulusal Eylem Planı', 'Kadına Yönelik Şiddetle Mücadele Ulusal Eylem Planı'],
+];
+
+const POLICY_STEP2_CHIPS = [
+  ['Veri Sorunu', 'Erişim Sorunu', 'Katılım Sorunu', 'Güvenlik Sorunu', 'Temsil Sorunu', 'Yapısal Sorunlar', 'Kalıp Yargılar Sorunu', 'Bakım Yükü ve Zaman Kullanım Sorunu', 'Uygulama Sorunu', 'Kesişimsellik Sorunu'],
+  ['Kadınlar', 'Kırsal bölgede yaşayan kadınlar', 'Genç kadınlar ve kız çocukları', 'Yaşlı kadınlar', 'Engelli kadınlar', 'Göçmen / mülteci kadınlar'],
+  ['Evet, kadınlar daha fazla etkileniyor', 'Hayır, eşit etkileniyorlar'],
+  ['Yapısal eşitsizlikler', 'Toplumsal normlar ve kalıp yargılar', 'Cinsiyete duyarlı veri eksikliği', 'Temsil eksikliği (karar alma süreçlerinde)', 'Kurumsal kapasite ve farkındalık eksikliği', 'Kaynak ve bütçe dağılımında eşitsizlik'],
+  ['Veri var', 'Veri yok', 'Veri kısmi'],
+];
+
+const POLICY_STEP5_CHIPS = [
+  ['Hizmet erişimi artırma', 'İstihdam desteği', 'Bakım hizmetleri', 'Kapasite geliştirme', 'Farkındalık artırma', 'Ekonomik katılım', 'Karar alma süreçlerine katılım', 'Temsil artırma'],
+  ['Politika tasarımına eşitlik perspektifi entegre edilmeli', 'Cinsiyete duyarlı veri ve göstergeler kullanılmalı', 'Hedefli ve kapsayıcı hizmetler geliştirilmeli', 'Kaynak ve bütçe dağılımı eşitlikçi hale getirilmeli', 'Kadınların ve kırılgan grupların katılımı artırılmalı'],
+  ['Eşitsizliklerin azalması', 'Kadınların hizmetlere erişiminin artması', 'Ekonomik ve sosyal katılımın güçlenmesi', 'Karar alma süreçlerinde temsilin artması'],
+];
+
+const POLICY_PARAGRAPH_CONFIG = [
+  {
+    marker: 'BAĞLAM ANALİZİ ÖZETI:',
+    field: 'context_paragraph',
+    regex: /BAĞLAM ANALİZİ ÖZETI:([\s\S]*?)(?=Sorun|$)/,
+  },
+  {
+    marker: 'SORUN ANALİZİ ÖZETI:',
+    field: 'problem_paragraph',
+    regex: /SORUN ANALİZİ ÖZETI:([\s\S]*?)(?=Hedef|$)/,
+  },
+  {
+    marker: 'HEDEF GRUP ANALİZİ ÖZETİ:',
+    field: 'target_paragraph',
+    regex: /HEDEF GRUP ANALİZİ ÖZETİ:([\s\S]*?)(?=Ex-ante|EX-ANTE|$)/,
+  },
+  {
+    marker: 'EX-ANTE ETKİ ANALİZİ ÖZETİ:',
+    field: 'impact_paragraph',
+    regex: /EX-ANTE ETKİ ANALİZİ ÖZETİ:([\s\S]*?)(?=Politika Tasarımı|$)/,
+  },
+  {
+    marker: 'POLİTİKA TASARIMI ÖZETİ:',
+    field: 'design_paragraph',
+    regex: /POLİTİKA TASARIMI ÖZETİ:([\s\S]*?)(?=Faaliyet Tasarımı|$)/,
+  },
+  {
+    marker: 'FAALİYET TASARIMI ÖZETİ:',
+    field: 'activity_paragraph',
+    regex: /FAALİYET TASARIMI ÖZETİ:([\s\S]*?)(?=Bütçe Bağlantısı|$)/,
+  },
+  {
+    marker: 'BÜTÇE BAĞLANTISI ÖZETİ:',
+    field: 'budget_paragraph',
+    regex: /BÜTÇE BAĞLANTISI ÖZETİ:([\s\S]*?)(?=Göstergeler|$)/,
+  },
+  {
+    marker: 'GÖSTERGELER ÖZETİ:',
+    field: 'indicators_paragraph',
+    regex: /GÖSTERGELER ÖZETİ:([\s\S]*?)(?=Risk|$)/,
+  },
+  {
+    marker: 'RİSK VE ÖNERİ ÖZETİ:',
+    field: 'risk_paragraph',
+    regex: /RİSK VE ÖNERİ ÖZETİ:([\s\S]*)$/,
+  },
+];
+
+const buildPolicySystemPrompt = (policyStep, nextStep, riskWarning = '') => {
+  if (policyStep === 0) {
+    return `Sen KEEDB uzmanı bir politika tasarım asistanısın. Bağlam Analizi modülündesin.
+
+Görevin: 4 soruyu sırayla sor, her seferinde bir tane.
+
+Sorular sırası:
+1. Bu politika hangi sektörde geliştiriliyor?
+2. Kurumunuzun bu politikadaki rolü nedir?
+3. Bu çalışma yeni bir politika mı yoksa mevcut bir programın revizyonu mu?
+4. Bu politika hangi üst belgeye veya stratejik hedefe bağlı?
+
+Son soruyu da yanıtladıktan sonra: 
+Kullanıcının tüm yanıtlarını birleştirerek 4-5 cümlelik akıcı ve kurumsal Türkçe bir Bağlam Analizi özeti yaz.
+
+ÖZET YAZIM KURALLARI:
+- İlk 1-2 cümle MUTLAKA bu politikanın kadın-erkek eşitliği ve kadının güçlenmesiyle bağlantısını kuran çarpıcı bir ifade içermeli. Bu cümlede o sektöre özgü somut bir uluslararası veya ulusal istatistik, araştırma bulgusu veya politika referansı kullan. Örneğin ulaşım sektörü için: "Dünya genelinde kadınlar ulaşım hizmetlerine erkeklere kıyasla %30 daha az erişebilmektedir (ITF, 2023)" veya tarım için "Türkiye'de kadın çiftçiler tarım işgücünün %48'ini oluştururken yalnızca %7'si araziye sahiptir (TÜİK, 2022)" gibi.
+- Kurumsal rolü ve stratejik bağlantıyı belirt.
+- Son cümle bu politikanın cinsiyete duyarlı yaklaşımla nasıl fark yaratacağını özetlesin.
+- Öncesinde "📋 BAĞLAM ANALİZİ ÖZETI:" yaz.
+
+Ardından "Sorun Analizine geçiyoruz." de ve Modül 2'nin ilk sorusunu sor.`;
+  }
+
+  if (policyStep === 1) {
+    return `Sen KEEDB uzmanı bir politika tasarım asistanısın. Sorun Analizi modülündesin.
+
+Görevin: 5 soruyu sırayla sor, her seferinde bir tane.
+
+Sorular:
+1. Çözmek istediğiniz temel sorun nedir?
+2. Bu sorun kimleri etkiliyor?
+3. Kadınlar ve erkekler bu sorundan aynı şekilde mi etkileniyor?
+4. Bu sorunların temel nedenleri nelerdir?
+5. Elinizde bu soruna ilişkin veri var mı?
+
+Son soruyu yanıtlandıktan sonra:
+Kullanıcının tüm yanıtlarını birleştirerek 5-6 cümlelik akıcı ve kurumsal Türkçe bir Sorun Analizi özeti yaz.
+
+ÖZET YAZIM KURALLARI:
+- İlk cümle sorunu net tanımla.
+- İkinci cümle MUTLAKA o soruna ilişkin çarpıcı bir uluslararası veya ulusal istatistik veya araştırma bulgusu içersin. Sektör ve sorun türüne göre gerçekçi, kaynaklı veri kullan. Örneğin: "UN Women (2023) verilerine göre gelişmekte olan ülkelerde kadınlar bakım yükünün %75'ini üstlenmekte ve bu durum işgücüne katılımlarını doğrudan kısıtlamaktadır." veya "TÜİK 2022 verilerine göre kırsal alanda yaşayan kadınların yalnızca %28'i düzenli gelire sahipken bu oran erkeklerde %61'dir."
+- Üçüncü cümle kadın-erkek eşitsizliği boyutunu (gender gap) somutlaştırsın.
+- Dördüncü cümle temel nedenleri özetlesin.
+- Beşinci cümle veri durumunu ve eksikliğini vurgulasın; eğer veri yoksa şunu ekle: "Bu alanda güvenilir cinsiyete ayrıştırılmış verinin bulunmaması, sorunun görünürlüğünü ve müdahale etkinliğini önemli ölçüde sınırlandırmaktadır."
+- Öncesinde "📋 SORUN ANALİZİ ÖZETI:" yaz.
+
+Eğer kullanıcı veri yoksa şunu da özete ekle: "(Not: Bu alanda yapılacak kapsamlı veri toplama çalışması politika etkinliğini artıracaktır.)"${riskWarning ? ` ${riskWarning}` : ''}
+
+Ardından Hedef Grup Analizine geç.`;
+  }
+
+  const modulePrompts = [
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Hedef Grup Analizi modülündesin. 3 soruyu sırayla sor, her mesajda yalnızca bir soru yönelt. Sorular: 1. Politika kimleri doğrudan hedefliyor? 2. Hangi gruplar daha kırılgan veya öncelikli? 3. Coğrafi ya da sosyoekonomik farklılıklar var mı? Son sorudan sonra yanıtları birleştirip akıcı ve kurumsal Türkçeyle 3-4 cümlelik bir paragraf yaz. Başına "📋 HEDEF GRUP ANALİZİ ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve kullanıcıyı değerlendirme kartı üzerinden puanlama yapmaya yönlendir.` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Ex-ante Etki Analizi modülü kullanıcı arayüzündeki puanlama bileşeni ile yürütülür. Bu modül için soru sorma; kullanıcı puanlamayı tamamladıktan sonra bir sonraki modüle geçileceğini varsay.`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Politika Tasarımı modülündesin. 3 soruyu sırayla sor, her seferinde yalnızca bir soru yönelt. Sorular: 1. Bu politika ile hangi eşitsizlik azaltılacak? 2. Ne değişmeli? 3. Hangi sonuç hedefleniyor? Son sorudan sonra yanıtları birleştirerek 3-4 cümlelik bir paragraf yaz. Başına "📋 POLİTİKA TASARIMI ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Faaliyet Tasarımı modülündesin. 4 soruyu sırayla sor, her mesajda tek soru yönelt. Sorular: 1. Hedefe ulaşmak için hangi faaliyetler gerekli? 2. Faaliyetler herkes için aynı mı, farklılaştırılmış mı olacak? 3. Erişim engelleri nasıl kaldırılacak? 4. Hangi birimler sorumlu olacak? Son sorudan sonra yanıtları birleştirerek 3-4 cümlelik bir paragraf yaz. Başına "📋 FAALİYET TASARIMI ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Bütçe Bağlantısı modülündesin. 4 soruyu sırayla sor, her seferinde bir tane sor. Sorular: 1. Bu politika mevcut bütçede yer alıyor mu? 2. Kaynak yeterli mi? 3. Bütçe kimlere gidiyor? 4. Harcamaların cinsiyete göre dağılımı izlenebilir mi? Son sorudan sonra yanıtları akıcı, kurumsal Türkçeyle 3-4 cümlelik bir paragrafta özetle. Başına "📋 BÜTÇE BAĞLANTISI ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Göstergeler modülündesin. 4 soruyu sırayla sor ve her mesajda yalnızca bir soru sor. Sorular: 1. Başarı nasıl ölçülecek? 2. Veriler cinsiyete göre ayrıştırılabilir mi? 3. Hangi çıktı göstergeleri kullanılacak? 4. Hangi sonuç ve etki göstergeleri kullanılacak? Son sorudan sonra yanıtları birleştirerek 3-4 cümlelik bir paragraf yaz. Başına "📋 GÖSTERGELER ÖZETİ:" yaz. Ardından ${nextStep ? `${nextStep.title} modülüne geç ve ilk soruyu sor: ${nextStep.aiPrompt}` : 'modülün tamamlandığını belirt.'}`,
+    `Sen KEEDB uzmanı bir politika tasarım asistanısın. Risk ve Öneri modülündesin. 4 soruyu sırayla sor, her seferinde tek soru yönelt. Sorular: 1. Politikanın uygulanmasında karşılaşılabilecek riskler neler? 2. Eşitsizlik açısından hangi önlemler alınmalı? 3. Politikayı güçlendirmek için hangi iyileştirmeler gerekli? 4. Kurumsal sahiplenmeyi artırmak için ne önerirsiniz? Son sorudan sonra yanıtları birleştirerek 3-4 cümlelik bir paragraf yaz. Başına "📋 RİSK VE ÖNERİ ÖZETİ:" yaz ve politika tasarım sürecinin tamamlandığını belirt.`
+  ];
+
+  return modulePrompts[policyStep - 2] || '';
+};
 
 const URBAN_STEPS = [
   {
@@ -1458,7 +1618,92 @@ const URBAN_AREAS = [
   { id: 'new', icon: '🏗️', label: 'Yeni Yerleşim' },
 ];
 
-const POLICY_TEMPLATES = ['İstihdam', 'Eğitim', 'Sağlık', 'Ulaşım', 'Sosyal Koruma', 'Bakım Hizmetleri', 'Şiddetle Mücadele', 'Yerel Hizmetler'];
+function generatePolicyDraft(data, lang) {
+  return `POLİTİKA TASLAĞI
+================
+
+1. BAĞLAM ANALİZİ
+Sektör: ${data.sector || '-'}
+Kurumsal Rol: ${data.institution_role || '-'}
+Politika Türü: ${data.policy_type || '-'}
+Stratejik Bağlantı: ${data.strategic_link || '-'}
+
+2. SORUN ANALİZİ
+Sorun Tanımı: ${data.problem_definition || '-'}
+Etkilenen Gruplar: ${data.affected_groups || '-'}
+Cinsiyet Açığı: ${data.gender_gap || '-'}
+Veri Durumu: ${data.data_status || '-'}
+
+3. HEDEF GRUP ANALİZİ
+Birincil Hedef Grup: ${data.primary_target || '-'}
+İkincil Hedef Grup: ${data.secondary_target || '-'}
+Kırılgan Gruplar: ${data.vulnerable_groups || '-'}
+Kesişen Eşitsizlikler: ${data.intersectionality || '-'}
+
+4. EX-ANTE ETKİ ANALİZİ
+Risk Seviyesi: ${data.risk_level || '-'} (Skor: ${data.impact_score ?? '-'})
+Erişim Etkisi: ${data.impact_access || '-'}
+Fayda Dağılımı: ${data.impact_benefit || '-'}
+Katılım Etkisi: ${data.impact_participation || '-'}
+Zaman/Bakım Etkisi: ${data.impact_time || '-'}
+Güvenlik Etkisi: ${data.impact_safety || '-'}
+
+5. POLİTİKA TASARIMI
+Politika Amacı: ${data.policy_objective || '-'}
+Beklenen Değişim: ${data.expected_change || '-'}
+
+6. FAALİYET TASARIMI
+Faaliyetler: ${data.activities || '-'}
+Eşitlik Uyarlamaları: ${data.gender_adjustments || '-'}
+Sorumlu Birimler: ${data.responsible_units || '-'}
+
+7. BÜTÇE BAĞLANTISI
+Bütçe Bağı: ${data.budget_link || '-'}
+Kaynak Açığı: ${data.resource_gap || '-'}
+Yararlanıcı Dağılımı: ${data.beneficiary_distribution || '-'}
+
+8. GÖSTERGELER
+Çıktı Göstergeleri: ${data.output_indicators || '-'}
+Sonuç Göstergeleri: ${data.outcome_indicators || '-'}
+Cinsiyet Ayrıştırması: ${data.sex_disaggregated || '-'}
+
+9. RİSK VE ÖNERİLER
+Riskler: ${data.risks || '-'}
+Azaltma Önlemleri: ${data.mitigation_measures || '-'}
+İyileştirme Önerileri: ${data.improvement_suggestions || '-'}
+
+---
+Bu taslak Eşitlik Asistanı tarafından oluşturulmuştur.
+Tarih: ${new Date().toLocaleDateString('tr-TR')}`;
+}
+
+async function extractTextFromPDFForAnalysis(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const binary = e.target.result;
+        const textBlocks = [];
+        const regex = /\(([^)\\]*(\\.[^)\\]*)*)\)\s*T[jJ]/g;
+        let match;
+        while ((match = regex.exec(binary)) !== null) {
+          const text = match[1]
+            .replace(/\\n/g, " ")
+            .replace(/\\r/g, " ")
+            .replace(/\\t/g, " ")
+            .replace(/\\\\/g, "\\")
+            .replace(/\\[()]/g, (m) => m[1]);
+          if (text.trim()) textBlocks.push(text);
+        }
+        resolve(textBlocks.join(" ").replace(/\s+/g, " ").trim());
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error("Dosya okunamadı"));
+    reader.readAsBinaryString(file);
+  });
+}
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function EsitlikAsistani() {
@@ -1468,21 +1713,25 @@ export default function EsitlikAsistani() {
   const [activeNav, setActiveNav] = useState(null);
   const [policyStep, setPolicyStep] = useState(0);
   const [policyData, setPolicyData] = useState({
-    area: '', context: '', strategicGoal: '',
-    problem: '', problemCauses: '', affectedGroups: '', equalityDimension: '',
-    targetGroup: '', secondaryGroup: '', intersections: '',
-    objective: '', transformation: '',
-    shortTermResults: '', midTermGoals: '', measurements: '',
-    activities: '', responsibleUnits: '', stakeholders: '',
-    budgetNote: '', spendingItems: '', resourceNeeds: '',
-    indicators: '', dataNeeds: '', risks: '', monitoringPlan: ''
+    sector: '', institution_role: '', policy_type: '', strategic_link: '',
+    problem_definition: '', affected_groups: '', gender_gap: '', data_status: '', existing_data_notes: '',
+    primary_target: '', secondary_target: '', vulnerable_groups: '', intersectionality: '',
+    impact_access: '', impact_benefit: '', impact_participation: '', impact_time: '', impact_safety: '',
+    impact_score: null, risk_level: '',
+    policy_objective: '', expected_change: '',
+    activities: '', gender_adjustments: '', responsible_units: '',
+    budget_link: '', resource_gap: '', beneficiary_distribution: '',
+    output_indicators: '', outcome_indicators: '', sex_disaggregated: '',
+    risks: '', mitigation_measures: '', improvement_suggestions: '',
+    context_paragraph: '', problem_paragraph: '', target_paragraph: '', impact_paragraph: '',
+    design_paragraph: '', activity_paragraph: '', budget_paragraph: '', indicators_paragraph: '', risk_paragraph: '',
   });
+  const [impactScores, setImpactScores] = useState({ access: 0, benefit: 0, participation: 0, time: 0, safety: 0 });
   const [policyInput, setPolicyInput] = useState('');
+  const [policySubQuestion, setPolicySubQuestion] = useState(0);
   const [policyMessages, setPolicyMessages] = useState([]);
   const [policyLoading, setPolicyLoading] = useState(false);
   const [policyStarted, setPolicyStarted] = useState(false);
-  const [policyMode, setPolicyMode] = useState(null);
-  const [policyTemplate, setPolicyTemplate] = useState(null);
   const [urbanStep, setUrbanStep] = useState(0);
   const [urbanData, setUrbanData] = useState({
     planningArea: '', planType: '', planScale: '', planPurpose: '',
@@ -1602,6 +1851,10 @@ The platform also allows users to analyze documents such as strategic plans, bud
     }
   }, [activeTabId]);
 
+  useEffect(() => {
+    setPolicySubQuestion(0);
+  }, [policyStep]);
+
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -1632,32 +1885,52 @@ The platform also allows users to analyze documents such as strategic plans, bud
     reader.readAsText(file);
   });
 
-  const extractPdfText = async (file) => {
-    return extractTextFromPdf(file);
-  };
-
   const extractDocText = async (file) => {
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.extractRawText({ arrayBuffer });
     return result.value;
   };
 
-  const handleDocFile = async (file) => {
+  const handleDocFileSelect = async (file) => {
     if (!file) return;
     const extension = getExtension(file.name);
     const supported = [".txt", ".pdf", ".doc", ".docx"];
     if (!supported.includes(extension)) return;
 
+    setDocText("");
+    setDocFileName(file.name);
+    setDocFileChars(0);
     setDocLoading(true);
     setDocResult("");
     try {
       let extracted = "";
+      if (file.type === "application/pdf" || extension === ".pdf") {
+        extracted = await extractTextFromPDFForAnalysis(file);
+        if (extracted && extracted.length > 50) {
+          setDocText(extracted);
+          setDocFileChars(extracted.length);
+        } else {
+          setDocText("");
+          setDocFileChars(0);
+          alert(lang === "tr"
+            ? "PDF metni otomatik okunamadı. Lütfen metni aşağıdaki alana yapıştırın."
+            : "Could not extract PDF text automatically. Please paste the text below.");
+        }
+        return;
+      }
+
       if (extension === ".txt") extracted = await readTxtFile(file);
-      if (extension === ".pdf") extracted = await extractPdfText(file);
       if (extension === ".doc" || extension === ".docx") extracted = await extractDocText(file);
       setDocText(extracted);
-      setDocFileName(file.name);
       setDocFileChars(extracted.length);
+    } catch (err) {
+      setDocText("");
+      setDocFileChars(0);
+      if (file.type === "application/pdf" || extension === ".pdf") {
+        alert(lang === "tr"
+          ? "PDF metni otomatik okunamadı. Lütfen metni aşağıdaki alana yapıştırın."
+          : "Could not extract PDF text automatically. Please paste the text below.");
+      }
     } finally {
       setDocLoading(false);
     }
@@ -1672,8 +1945,9 @@ The platform also allows users to analyze documents such as strategic plans, bud
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const analysisText = docText.trim() ? docText : pastedDocText;
-  const analysisWordCount = analysisText.trim() ? analysisText.trim().split(/\s+/).length : 0;
+  const analysisText = docText.trim().length > 50 ? docText : pastedDocText;
+  const analysisWordCount = docText.split(" ").filter(Boolean).length;
+  const isAnalyzeDisabled = docLoading || (docText.trim().length <= 50 && !pastedDocText.trim());
 
   const [phase, setPhase] = useState(0);
   const [sector, setSector] = useState(0);
@@ -1683,6 +1957,20 @@ The platform also allows users to analyze documents such as strategic plans, bud
   const [rpForm, setRpForm] = useState({ institution: "", year: String(new Date().getFullYear()), sector: "", context: "" });
   const [rpResult, setRpResult] = useState("");
   const [rpLoading, setRpLoading] = useState(false);
+
+  const scrollPolicyChatToBottom = () => {
+    setTimeout(() => {
+      const chatDiv = document.getElementById('policy-chat-messages');
+      if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight;
+    }, 100);
+  };
+
+  const getCurrentChips = () => {
+    if (policyStep === 0) return POLICY_STEP1_CHIPS[Math.min(policySubQuestion, POLICY_STEP1_CHIPS.length - 1)] || [];
+    if (policyStep === 1) return POLICY_STEP2_CHIPS[Math.min(policySubQuestion, POLICY_STEP2_CHIPS.length - 1)] || [];
+    if (policyStep === 4) return POLICY_STEP5_CHIPS[Math.min(policySubQuestion, POLICY_STEP5_CHIPS.length - 1)] || [];
+    return POLICY_STEPS[policyStep]?.chips || [];
+  };
 
   const sendChat = async (override, fromQuick = false) => {
     const text = override ?? chatInput;
@@ -1727,32 +2015,95 @@ The platform also allows users to analyze documents such as strategic plans, bud
   };
 
   const handlePolicySend = async () => {
-    if (!policyInput.trim() || policyLoading) return;
+    const isOptionalDataFollowUp = policyStep === 1 && policySubQuestion >= 5 && (policyData.data_status === 'Veri var' || policyData.data_status === 'Veri kısmi');
+    if ((!policyInput.trim() && !isOptionalDataFollowUp) || policyLoading) return;
     const userText = policyInput.trim();
     setPolicyInput('');
-
-    const newMessages = [...policyMessages, { role: 'user', content: userText }];
+    const newMessages = userText ? [...policyMessages, { role: 'user', content: userText }] : [...policyMessages];
     setPolicyMessages(newMessages);
+    scrollPolicyChatToBottom();
     setPolicyLoading(true);
 
     const currentStep = POLICY_STEPS[policyStep];
     const nextStep = POLICY_STEPS[policyStep + 1];
-
-    // Update policyData with user's answer for current step fields
     const updatedData = { ...policyData };
-    if (currentStep?.outputFields?.[0]) {
-      updatedData[currentStep.outputFields[0]] = userText;
+    const currentFieldIndex = Math.min(policySubQuestion, (currentStep?.outputFields?.length || 1) - 1);
+    if (currentStep?.outputFields?.[currentFieldIndex]) {
+      updatedData[currentStep.outputFields[currentFieldIndex]] = userText;
+    }
+    if (policyStep === 1 && policySubQuestion > 4 && (policyData.data_status === 'Veri var' || policyData.data_status === 'Veri kısmi')) {
+      updatedData.existing_data_notes = userText;
+    }
+
+    if (policyStep === 3) {
+      const total = Object.values(impactScores).reduce((a, b) => a + b, 0);
+      updatedData.impact_score = total;
+      updatedData.risk_level = total > 0 ? 'Eşitlik destekleyici' : total < 0 ? 'Eşitsizlik artırabilir' : 'Nötr';
+      updatedData.impact_access = impactScores.access > 0 ? 'Olumlu' : impactScores.access < 0 ? 'Olumsuz' : 'Nötr';
+      updatedData.impact_benefit = impactScores.benefit > 0 ? 'Dengeli' : impactScores.benefit < 0 ? 'Eşitsiz' : 'Nötr';
+      updatedData.impact_participation = impactScores.participation > 0 ? 'Eşit katılım' : impactScores.participation < 0 ? 'Katılım engeli' : 'Nötr';
+      updatedData.impact_time = impactScores.time > 0 ? 'Bakım yükü azalır' : impactScores.time < 0 ? 'Bakım yükü artar' : 'Nötr';
+      updatedData.impact_safety = impactScores.safety > 0 ? 'Güvenli' : impactScores.safety < 0 ? 'Risk var' : 'Nötr';
     }
     setPolicyData(updatedData);
 
-    try {
-      const systemPrompt = `Sen Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uzmanı bir politika tasarım asistanısın. Kullanıcıyı adım adım bir politika taslağı oluşturmak için yönlendiriyorsun. Şu an ${currentStep?.title} adımındasın. Kullanıcının yanıtını kısa değerlendir (1-2 cümle), gerekirse somutlaştırmak için 1 soru sor veya öneri ver, ardından ${nextStep ? nextStep.title + ' adımına geç: ' + nextStep.aiPrompt : 'politika taslağının tamamlandığını belirt ve tebrik et.'}. Yanıtını kısa ve odaklı tut.`;
+    if (policyStep === 1 && policySubQuestion === 4 && (userText === 'Veri var' || userText === 'Veri kısmi')) {
+      setPolicyMessages([...newMessages, { role: 'assistant', content: 'Mevcut veriyi buraya yapıştırabilirsiniz (opsiyonel):' }]);
+      scrollPolicyChatToBottom();
+      setPolicySubQuestion(5);
+      setPolicyLoading(false);
+      return;
+    }
 
-      const reply = await callClaude(userText, systemPrompt, newMessages.slice(-4), lang, role);
+    try {
+      const total = Object.values(impactScores).reduce((a, b) => a + b, 0);
+      const riskWarning = policyStep === 1 && updatedData.data_status === 'Veri yok'
+        ? 'Veri mevcut değil. Sorun analizine bu konuyla ilgili genel 1-2 istatistiksel veri veya referans ekle (UN Women, TÜİK, Dünya Bankası kaynaklı).'
+        : policyStep === 3 && total < 0
+          ? 'ÖNEMLİ UYARI: Etki skoru negatif, politika eşitsizliği artırabilir. Mutlaka iyileştirme önerileri sun.'
+          : '';
+
+      const systemPrompt = isOptionalDataFollowUp
+        ? `Sen KEEDB uzmanı bir politika tasarım asistanısın. Sorun Analizi modülündesin. Beş soru zaten tamamlandı ve kullanıcı opsiyonel veri notu paylaşıyor. Yeni soru sorma. Kullanıcının önceki yanıtlarını ve varsa paylaşılan veriyi birlikte kullanarak akıcı, kurumsal dilde 4-5 cümlelik bir Sorun Analizi paragrafı yaz. Paragrafın başına "📋 SORUN ANALİZİ ÖZETI:" yaz. Eşitlik açığını mutlaka vurgula. Ardından Hedef Grup Analizine geç ve ilk soruyu sor: ${nextStep?.aiPrompt || 'Politika kimleri hedefliyor?'}.`
+        : buildPolicySystemPrompt(policyStep, nextStep, riskWarning);
+      const reply = await callClaude(userText || 'Ek veri paylaşılmadı.', systemPrompt, policyMessages.slice(-12), lang, role);
+
+      let nextPolicyData = { ...updatedData };
+
+      if (reply.includes('BAĞLAM ANALİZİ ÖZETI:')) {
+        const paragraphMatch = reply.match(/BAĞLAM ANALİZİ ÖZETI:([\s\S]*?)(?=Sorun|$)/);
+        if (paragraphMatch) {
+          nextPolicyData = { ...nextPolicyData, context_paragraph: paragraphMatch[1].trim() };
+        }
+      }
+
+      if (reply.includes('SORUN ANALİZİ ÖZETI:')) {
+        const match = reply.match(/SORUN ANALİZİ ÖZETI:([\s\S]*?)(?=Hedef|$)/);
+        if (match) nextPolicyData = { ...nextPolicyData, problem_paragraph: match[1].trim() };
+      }
+
+      POLICY_PARAGRAPH_CONFIG.forEach(({ marker, field, regex }) => {
+        if (reply.includes(marker)) {
+          const match = reply.match(regex);
+          if (match) {
+            nextPolicyData = { ...nextPolicyData, [field]: match[1].trim() };
+          }
+        }
+      });
+
+      setPolicyData(nextPolicyData);
       setPolicyMessages([...newMessages, { role: 'assistant', content: reply }]);
-      if (policyStep < 7) setPolicyStep(prev => prev + 1);
+      scrollPolicyChatToBottom();
+
+      const completedCurrentStep = currentStep?.paragraphField && !!nextPolicyData[currentStep.paragraphField];
+      if (completedCurrentStep && policyStep < 8) {
+        setPolicyStep(prev => prev + 1);
+      } else {
+        setPolicySubQuestion(prev => prev + 1);
+      }
     } catch (error) {
       setPolicyMessages([...newMessages, { role: 'assistant', content: 'Bir hata oluştu: ' + error.message }]);
+      scrollPolicyChatToBottom();
     } finally {
       setPolicyLoading(false);
     }
@@ -1772,7 +2123,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
     setUrbanData(updatedData);
     try {
       const systemPrompt = `Sen Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uzmanı bir kentsel planlama asistanısın. Belediye çalışanlarına kentsel planlama kararlarını eşitlik perspektifiyle geliştirmeleri için yardım ediyorsun. Şu an ${currentStep?.title} adımındasın. Kullanıcının yanıtını kısa değerlendir (1-2 cümle), ardından ${nextStep ? nextStep.title + ' adımına geç: ' + nextStep.aiPrompt : 'planlama taslağının tamamlandığını belirt ve tebrik et.'}`;
-      const reply = await callClaude(userText, systemPrompt, newMessages.slice(-4), lang, role);
+      const reply = await callClaude(userText, systemPrompt, urbanMessages.slice(-4), lang, role);
       setUrbanMessages([...newMessages, { role: 'assistant', content: reply }]);
       if (urbanStep < 7) setUrbanStep(prev => prev + 1);
     } catch (error) {
@@ -1878,7 +2229,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
   const resultCard = (content) => content && <div className="surface fade" style={{ padding: "1rem 1.2rem" }}><MD text={content} /></div>;
 
   if (!role) return (
-    <div className="app" suppressHydrationWarning style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
+    <div className="app" suppressHydrationWarning={true} style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
       <style>{css}</style>
       <div className="header" style={{ padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
@@ -1976,7 +2327,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
   );
 
   return (
-    <div className="app" suppressHydrationWarning style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
+    <div className="app" suppressHydrationWarning={true} style={{ minHeight: "100vh", backgroundImage: `url(${bgImage.src})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundAttachment: "fixed" }}>
       <style>{css}</style>
       <div className="header" style={{ padding: "0.8rem 1.2rem" }}>
         <div className="header-top">
@@ -2059,124 +2410,110 @@ The platform also allows users to analyze documents such as strategic plans, bud
         )}
 
         {activeTabId === 'policy' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 160px)', background: 'var(--surface)', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}>
-
-            {/* Header */}
-            <div style={{ background: 'var(--surface)', borderBottom: `1px solid ${C.border}`, padding: '16px 20px' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                🏛️ Politika Tasarımı Asistanı
-              </div>
-              <div style={{ fontSize: '0.85em', color: C.muted, marginTop: 2 }}>
-                Politika fikrinizi kadın erkek eşitliği perspektifiyle yapılandırın
-              </div>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)', background: 'var(--surface)', borderRadius: 12, overflow: 'hidden', border: `1px solid ${C.border}`, boxShadow: 'var(--shadow)' }}>
 
             {/* Start screen */}
             {!policyStarted && (
-              <div style={{ flex: 1, overflowY: 'auto', padding: 24, background: 'var(--bg)' }}>
-                <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
-                  <div style={{ fontSize: '1.1em', color: 'var(--text-primary)', marginBottom: 24, lineHeight: 1.7 }}>
-                    Adım adım sorularla bir politika veya program fikrini yapılandırmanıza yardımcı olacağım. Yanıtlarınıza göre amaç, hedef, faaliyet, gösterge ve bütçe bağlantısı içeren bir taslak oluşturacağım.
+              <div style={{ flex: 1, overflowY: 'auto', padding: 32, background: 'var(--bg)' }}>
+                <div style={{ maxWidth: 640, margin: '0 auto' }}>
+                  <div style={{ textAlign: 'center', marginBottom: 36 }}>
+                    <div style={{ fontSize: '2em', marginBottom: 12 }}>🏛️</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>
+                      Politika Tasarımı Asistanı
+                    </div>
+                    <div style={{ color: C.muted, lineHeight: 1.7, fontSize: '0.95em' }}>
+                      Politika fikrinizi <strong>9 adımda</strong> kadın erkek eşitliği perspektifiyle yapılandıracağım. Her adımda sorular soracağım, sağ panelde canlı taslak oluşacak. Sonunda indirilebilir bir politika belgesi hazır olacak.
+                    </div>
                   </div>
-                  <div style={{ fontSize: '1em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
-                    Nasıl başlamak istiyorsunuz?
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 32 }}>
-                    {[
-                      { id: 'scratch', icon: '✏️', title: 'Sıfırdan Başla', desc: 'Yeni bir politika taslağı oluştur' },
-                      { id: 'template', icon: '📋', title: 'Şablondan Başla', desc: 'Hazır sektör şablonu kullan' },
-                      { id: 'document', icon: '📄', title: 'Belgeden İlerle', desc: 'Mevcut belgenizi yükleyin' },
-                    ].map(m => (
-                      <button key={m.id} onClick={() => setPolicyMode(m.id)}
-                        className='card'
-                        style={{
-                          padding: '20px 16px', borderRadius: 12, cursor: 'pointer', textAlign: 'center',
-                          border: `2px solid ${policyMode === m.id ? 'var(--accent)' : C.border}`,
-                          background: policyMode === m.id ? 'var(--accent-soft)' : 'var(--surface)',
-                          transition: 'all .2s',
-                        }}>
-                        <div style={{ fontSize: '2em', marginBottom: 8 }}>{m.icon}</div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{m.title}</div>
-                        <div style={{ fontSize: '0.8em', color: C.muted }}>{m.desc}</div>
-                      </button>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 32 }}>
+                    {POLICY_STEPS.map((step, i) => (
+                      <div key={step.id} style={{
+                        padding: '12px 14px', borderRadius: 10,
+                        background: 'var(--surface)', border: `1px solid ${C.border}`,
+                        display: 'flex', alignItems: 'center', gap: 8,
+                      }}>
+                        <div style={{
+                          width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)',
+                          color: '#fff', fontSize: '0.75em', fontWeight: 700,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        }}>{i + 1}</div>
+                        <div style={{ fontSize: '0.82em', color: 'var(--text-primary)', fontWeight: 500, lineHeight: 1.3 }}>
+                          {step.title}
+                        </div>
+                      </div>
                     ))}
                   </div>
 
-                  {policyMode === 'template' && (
-                    <div style={{ marginBottom: 24 }}>
-                      <div style={{ fontSize: '0.9em', color: C.muted, marginBottom: 12 }}>Sektör seçin:</div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-                        {POLICY_TEMPLATES.map(t => (
-                          <button key={t} onClick={() => setPolicyTemplate(t)}
-                            style={{
-                              padding: '8px 16px', borderRadius: 20, cursor: 'pointer', fontSize: '0.9em',
-                              border: `1px solid ${policyTemplate === t ? 'var(--accent)' : C.border}`,
-                              background: policyTemplate === t ? 'var(--accent)' : 'var(--surface)',
-                              color: policyTemplate === t ? '#fff' : 'var(--text-secondary)',
-                              transition: 'all .2s',
-                            }}>
-                            {t}
-                          </button>
-                        ))}
-                      </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <button className='btn-primary'
+                      onClick={() => {
+                        setPolicyMessages([{ role: 'assistant', content: `Politika tasarımına başlıyoruz! 🎯\n\n**Modül 1: Bağlam Analizi**\n\n${POLICY_STEPS[0].aiPrompt}` }]);
+                        setPolicyStep(0);
+                        setPolicySubQuestion(0);
+                        setPolicyStarted(true);
+                        scrollPolicyChatToBottom();
+                      }}
+                      style={{ padding: '14px 48px', borderRadius: 12, fontSize: '1.05em', fontWeight: 600 }}>
+                      Politika Tasarımına Başla →
+                    </button>
+                    <div style={{ fontSize: '0.8em', color: C.muted, marginTop: 10 }}>
+                      Yaklaşık 15-20 dakika sürer
                     </div>
-                  )}
-
-                  <button
-                    className='btn-primary'
-                    disabled={!policyMode || (policyMode === 'template' && !policyTemplate)}
-                    onClick={() => {
-                      const firstStep = POLICY_STEPS[0];
-                      const welcomeMsg = policyTemplate
-                        ? `${policyTemplate} alanında politika tasarımına başlıyoruz. ${firstStep.aiPrompt}`
-                        : firstStep.aiPrompt;
-                      setPolicyMessages([{ role: 'assistant', content: welcomeMsg }]);
-                      setPolicyStep(0);
-                      setPolicyStarted(true);
-                    }}
-                    style={{ padding: '14px 40px', borderRadius: 12, fontSize: '1em' }}>
-                    Başla →
-                  </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Main chat + output panel */}
-            {policyStarted && (
+            {policyStarted ? (
+              <>
+                {/* Compact header */}
+                <div style={{ background: 'var(--surface)', borderBottom: `1px solid ${C.border}`, padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>🏛️ Politika Tasarımı Asistanı</span>
+                    <span style={{ fontSize: '0.8em', color: C.muted, background: 'var(--bg)', padding: '3px 10px', borderRadius: 20, border: `1px solid ${C.border}` }}>
+                      Adım {policyStep + 1}/9: {POLICY_STEPS[policyStep]?.title}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => { setPolicyStarted(false); setPolicyStep(0); setPolicySubQuestion(0); setPolicyData({}); setPolicyMessages([]); }}
+                    style={{ background: 'none', border: 'none', fontSize: '0.8em', color: C.muted, cursor: 'pointer' }}>
+                    ↺ Yeniden Başla
+                  </button>
+                </div>
+
+                {/* Slim progress bar - just a thin line with dots */}
+                <div style={{ padding: '6px 20px', background: 'var(--surface)', borderBottom: `1px solid ${C.border}` }}>
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                    {POLICY_STEPS.map((s, i) => (
+                      <div key={s.id} title={s.title} style={{
+                        flex: 1, height: 5, borderRadius: 3,
+                        background: i < policyStep ? 'var(--accent)' : i === policyStep ? 'var(--accent)' : C.border,
+                        opacity: i <= policyStep ? 1 : 0.35,
+                        cursor: 'default',
+                      }} />
+                    ))}
+                  </div>
+                </div>
+
               <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
 
                 {/* Left: Chat */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: `1px solid ${C.border}`, minHeight: 0 }}>
-
-                  {/* Progress bar */}
-                  <div style={{ padding: '10px 16px', background: 'var(--surface)', borderBottom: `1px solid ${C.border}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      {POLICY_STEPS.map((s, i) => (
-                        <div key={s.id} title={s.title}
-                          style={{
-                            flex: 1, height: 4, borderRadius: 2, marginRight: i < 7 ? 3 : 0,
-                            background: i < policyStep ? 'var(--accent)' : i === policyStep ? 'var(--accent)' : C.border,
-                            opacity: i <= policyStep ? 1 : 0.4,
-                          }} />
-                      ))}
-                    </div>
-                    <div style={{ fontSize: '0.78em', color: C.muted }}>
-                      Adım {policyStep + 1}/8: <strong style={{ color: 'var(--text-primary)' }}>{POLICY_STEPS[policyStep]?.title}</strong>
-                    </div>
-                  </div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
 
                   {/* Messages */}
-                  <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div id='policy-chat-messages' style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {policyMessages.map((m, i) => (
                       <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
                         {m.role === 'assistant' && (
-                          <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, marginRight: 8, flexShrink: 0, marginTop: 3 }}>🏛</div>
+                          <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, marginRight: 8, flexShrink: 0, marginTop: 3 }}>🏛</div>
                         )}
                         <div style={{
-                          maxWidth: '80%', padding: '10px 14px', borderRadius: m.role === 'user' ? '14px 4px 14px 14px' : '4px 14px 14px 14px',
+                          maxWidth: '80%', padding: '9px 13px', borderRadius: m.role === 'user' ? '14px 4px 14px 14px' : '4px 14px 14px 14px',
                           background: m.role === 'user' ? 'var(--accent-soft)' : 'var(--surface)',
                           border: `1px solid ${m.role === 'user' ? 'var(--accent-border)' : C.border}`,
-                          fontSize: '0.92em', lineHeight: 1.65, whiteSpace: 'pre-wrap',
+                          fontSize: '0.9em', lineHeight: 1.65, whiteSpace: 'pre-wrap',
                         }}>
                           {m.content}
                         </div>
@@ -2184,61 +2521,191 @@ The platform also allows users to analyze documents such as strategic plans, bud
                     ))}
                     {policyLoading && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>🏛</div>
+                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>🏛</div>
                         <span style={{ color: C.muted, fontStyle: 'italic', fontSize: '0.9em' }} className='pulse'>Yanıt hazırlanıyor…</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Quick chips */}
-                  {policyStep < 8 && POLICY_STEPS[policyStep]?.chips && (
-                    <div style={{ padding: '8px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                      {POLICY_STEPS[policyStep].chips.map(chip => (
-                        <button key={chip} onClick={() => setPolicyInput(prev => prev ? prev + ', ' + chip : chip)}
-                          style={{
-                            padding: '5px 12px', borderRadius: 16, fontSize: '0.82em', cursor: 'pointer',
-                            border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-secondary)',
-                            transition: 'all .2s',
-                          }}>
-                          + {chip}
+                  {policyStep === 3 && policyStarted && (
+                    <div style={{ flex: 1, overflowY: 'auto', padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      <div style={{ background: 'var(--surface)', border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
+                        <div style={{ fontWeight: 600, fontSize: '1em', color: 'var(--text-primary)', marginBottom: 4 }}>
+                          📊 Ex-ante Etki Analizi
+                        </div>
+                        <div style={{ fontSize: '0.85em', color: C.muted, marginBottom: 20 }}>
+                          Her boyut için politikanın etkisini değerlendirin
+                        </div>
+                        {[
+                          { key: 'access', label: 'Erişim', question: 'Politika kadınlar ve erkekler için eşit şekilde erişilebilir olacak mı?' },
+                          { key: 'benefit', label: 'Fayda', question: 'Politikadan sağlanan faydalar dengeli dağılacak mı?' },
+                          { key: 'participation', label: 'Katılım', question: 'Karar süreçlerine eşit katılım sağlanacak mı?' },
+                          { key: 'time', label: 'Zaman/Bakım', question: 'Politika bakım yükünü azaltacak mı?' },
+                          { key: 'safety', label: 'Güvenlik', question: 'Politika güvenlik açısından olumlu etki yaratacak mı?' },
+                        ].map(dim => (
+                          <div key={dim.key} style={{ marginBottom: 16, padding: '14px', background: 'var(--bg)', borderRadius: 10, border: `1px solid ${C.border}` }}>
+                            <div style={{ fontSize: '0.88em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>{dim.label}</div>
+                            <div style={{ fontSize: '0.82em', color: C.muted, marginBottom: 10 }}>{dim.question}</div>
+                            <div style={{ display: 'flex', gap: 8 }}>
+                              {[{ val: -1, label: 'Hayır', color: '#ef4444' }, { val: 0, label: 'Kısmi', color: '#f59e0b' }, { val: 1, label: 'Evet', color: '#22c55e' }].map(opt => (
+                                <button key={opt.val}
+                                  onClick={() => setImpactScores(prev => ({ ...prev, [dim.key]: opt.val }))}
+                                  style={{
+                                    flex: 1, padding: '8px', borderRadius: 8, cursor: 'pointer', fontSize: '0.88em', fontWeight: 500,
+                                    border: `2px solid ${impactScores[dim.key] === opt.val ? opt.color : C.border}`,
+                                    background: impactScores[dim.key] === opt.val ? opt.color : 'var(--surface)',
+                                    color: impactScores[dim.key] === opt.val ? '#fff' : 'var(--text-secondary)',
+                                    transition: 'all .2s',
+                                  }}>
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                        {(() => {
+                          const total = Object.values(impactScores).reduce((a, b) => a + b, 0);
+                          const color = total > 1 ? '#22c55e' : total < -1 ? '#ef4444' : '#f59e0b';
+                          const label = total > 1 ? '🟢 Eşitlik destekleyici' : total < -1 ? '🔴 Eşitsizlik artırabilir' : '🟡 Kısmi / Nötr';
+                          return (
+                            <div style={{ padding: '12px 16px', borderRadius: 10, background: color + '20', border: `1px solid ${color}`, marginTop: 8 }}>
+                              <div style={{ fontWeight: 600, color, fontSize: '0.95em' }}>{label}</div>
+                              <div style={{ fontSize: '0.82em', color: C.muted, marginTop: 2 }}>Toplam skor: {total > 0 ? '+' : ''}{total} / 5</div>
+                            </div>
+                          );
+                        })()}
+                        <button className='btn-primary'
+                          onClick={() => {
+                            const total = Object.values(impactScores).reduce((a, b) => a + b, 0);
+                            const riskLevel = total > 1 ? 'Eşitlik destekleyici' : total < -1 ? 'Eşitsizlik artırabilir' : 'Kısmi / Nötr';
+                            setPolicyData(prev => ({
+                              ...prev,
+                              impact_score: total,
+                              risk_level: riskLevel,
+                              impact_access: impactScores.access === 1 ? 'Evet' : impactScores.access === 0 ? 'Kısmi' : 'Hayır',
+                              impact_benefit: impactScores.benefit === 1 ? 'Evet' : impactScores.benefit === 0 ? 'Kısmi' : 'Hayır',
+                              impact_participation: impactScores.participation === 1 ? 'Evet' : impactScores.participation === 0 ? 'Kısmi' : 'Hayır',
+                              impact_time: impactScores.time === 1 ? 'Evet' : impactScores.time === 0 ? 'Kısmi' : 'Hayır',
+                              impact_safety: impactScores.safety === 1 ? 'Evet' : impactScores.safety === 0 ? 'Kısmi' : 'Hayır',
+                              impact_paragraph: `Ex-ante etki analizi sonucuna göre politika "${riskLevel}" olarak değerlendirilmiştir (Toplam skor: ${total}/5). Erişim boyutunda ${impactScores.access === 1 ? 'eşit erişim sağlanacak' : impactScores.access === 0 ? 'kısmi erişim sağlanacak' : 'erişim engeli öngörülmektedir'}. Fayda dağılımı ${impactScores.benefit === 1 ? 'dengeli' : impactScores.benefit === 0 ? 'kısmen dengeli' : 'eşitsiz'} olarak değerlendirilmektedir. Katılım açısından ${impactScores.participation === 1 ? 'eşit katılım sağlanacak' : 'iyileştirme gerekmektedir'}. Bakım yükü ${impactScores.time === 1 ? 'azalacak' : impactScores.time === 0 ? 'kısmen etkilenecek' : 'artabilir'}. Güvenlik boyutunda ${impactScores.safety === 1 ? 'olumlu etki beklenmektedir' : 'dikkat edilmesi gereken riskler mevcuttur'}.`,
+                            }));
+                            setPolicyStep(4);
+                            setPolicyMessages(prev => [...prev,
+                              { role: 'assistant', content: `✅ Ex-ante Etki Analizi tamamlandı!\n\nToplam skor: ${Object.values(impactScores).reduce((a,b)=>a+b,0)}/5\n\n**Modül 5: Politika Tasarımı**\n\nBu politika ile hangi eşitsizliği azaltmayı hedefliyorsunuz?` }
+                            ]);
+                            scrollPolicyChatToBottom();
+                          }}
+                          style={{ width: '100%', marginTop: 16, padding: '12px', borderRadius: 10, fontSize: '0.95em' }}>
+                          Analizi Tamamla ve Devam Et →
                         </button>
-                      ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quick chips */}
+                  {policyStep !== 3 && policyStep < 9 && getCurrentChips().length > 0 && (
+                    <div style={{ padding: '8px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', flexWrap: 'wrap', gap: 6, background: 'var(--surface)' }}>
+                      {policyStep === 0 && policySubQuestion === 2 ? (
+                        getCurrentChips().map(chip => (
+                          <label key={chip} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 14, border: `1px solid ${C.border}`, background: 'var(--bg)', color: 'var(--text-secondary)', fontSize: '0.8em', cursor: 'pointer' }}>
+                            <input
+                              type='radio'
+                              name='policy-step1-type'
+                              checked={policyInput === chip}
+                              onChange={() => setPolicyInput(chip)}
+                            />
+                            {chip}
+                          </label>
+                        ))
+                      ) : (
+                        getCurrentChips().map(chip => (
+                          <button key={chip} onClick={() => setPolicyInput(prev => {
+                            if (policyStep === 0 && policySubQuestion === 3) {
+                              const values = prev.split(',').map(v => v.trim()).filter(Boolean);
+                              return values.includes(chip) ? prev : [...values, chip].join(', ');
+                            }
+                            return prev ? prev + ', ' + chip : chip;
+                          })}
+                            style={{
+                              padding: '4px 11px', borderRadius: 14, fontSize: '0.8em', cursor: 'pointer',
+                              border: `1px solid ${C.border}`, background: 'var(--bg)', color: 'var(--text-secondary)',
+                              transition: 'all .2s',
+                            }}>
+                            + {chip}
+                          </button>
+                        ))
+                      )}
                     </div>
                   )}
 
                   {/* Input */}
-                  <div style={{ padding: '12px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8 }}>
-                    <textarea
-                      value={policyInput}
-                      onChange={e => setPolicyInput(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handlePolicySend(); } }}
-                      placeholder={policyStep < 8 ? `${POLICY_STEPS[policyStep]?.title} için yanıtınızı yazın...` : 'Ek notlarınızı yazın...'}
-                      style={{ flex: 1, padding: '10px 12px', borderRadius: 10, fontSize: '0.92em', resize: 'none', height: 56, lineHeight: 1.5, border: `1px solid ${C.border}`, background: 'var(--surface)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
-                    />
-                    <button className='btn-primary' onClick={handlePolicySend} disabled={policyLoading || !policyInput.trim()}
-                      style={{ padding: '0 16px', borderRadius: 10, fontSize: '0.9em' }}>
-                      {policyStep < 7 ? 'İleri →' : 'Tamamla'}
-                    </button>
-                  </div>
+                  {policyStep !== 3 && (
+                    <div style={{ padding: '10px 16px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8, background: 'var(--surface)' }}>
+                      <textarea
+                        value={policyInput}
+                        onChange={e => setPolicyInput(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !(policyStep === 1 && policySubQuestion >= 5 && (policyData.data_status === 'Veri var' || policyData.data_status === 'Veri kısmi'))) { e.preventDefault(); handlePolicySend(); } }}
+                        placeholder={policyStep === 1 && policySubQuestion >= 5 && (policyData.data_status === 'Veri var' || policyData.data_status === 'Veri kısmi')
+                          ? 'Mevcut veriyi buraya yapıştırabilirsiniz (opsiyonel):'
+                          : policyStep === 0
+                            ? "Örnek: Tarım ve Orman Bakanlığı olarak kırsal kalkınma sektöründe yeni bir destek programı geliştiriyoruz. Programımız, TÜİK 2023 Kırsal Kalkınma Strateji Belgesi'ne bağlı olup kadın çiftçilerin tarımsal üretime katılımını artırmayı hedefliyor..."
+                            : policyStep < 9
+                              ? `${POLICY_STEPS[policyStep]?.title} için yanıtınızı yazın...`
+                              : "Ek notlarınızı yazın..."}
+                        style={{
+                          flex: 1,
+                          padding: '9px 12px',
+                          borderRadius: 10,
+                          fontSize: '0.9em',
+                          resize: policyStep === 1 && policySubQuestion >= 5 && (policyData.data_status === 'Veri var' || policyData.data_status === 'Veri kısmi') ? 'vertical' : 'none',
+                          height: policyStep === 1 && policySubQuestion >= 5 && (policyData.data_status === 'Veri var' || policyData.data_status === 'Veri kısmi') ? 96 : 52,
+                          lineHeight: 1.5,
+                          border: `1px solid ${C.border}`,
+                          background: 'var(--bg)',
+                          color: 'var(--text-primary)',
+                          fontFamily: 'inherit'
+                        }}
+                      />
+                      <button className='btn-primary' onClick={handlePolicySend} disabled={policyLoading || (!policyInput.trim() && !(policyStep === 1 && policySubQuestion >= 5 && (policyData.data_status === 'Veri var' || policyData.data_status === 'Veri kısmi')))}
+                        style={{ padding: '0 18px', borderRadius: 10, fontSize: '0.9em', whiteSpace: 'nowrap' }}>
+                        {policyStep === 1 && policySubQuestion >= 5 && (policyData.data_status === 'Veri var' || policyData.data_status === 'Veri kısmi') && !policyInput.trim()
+                          ? 'Atla ve Devam Et'
+                          : policyStep < 8
+                            ? 'Gönder'
+                            : 'Tamamla'}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Right: Live output */}
-                <div style={{ width: 340, flexShrink: 0, overflowY: 'auto', background: 'var(--surface)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ fontSize: '0.9em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+                <div style={{ width: 300, flexShrink: 0, overflowY: 'auto', background: 'var(--surface)', borderLeft: `1px solid ${C.border}`, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ fontSize: '0.82em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
                     📄 Canlı Politika Taslağı
                   </div>
                   {POLICY_STEPS.map(step => (
-                    step.outputFields.some(f => policyData[f]) && (
-                      <div key={step.id} style={{ background: 'var(--bg)', border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
-                        <div style={{ fontSize: '0.78em', fontWeight: 600, color: 'var(--accent)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                          {step.title}
-                        </div>
-                        {step.outputFields.map((field, fi) => policyData[field] && (
-                          <div key={field} style={{ marginBottom: 8 }}>
-                            <div style={{ fontSize: '0.75em', color: C.muted, marginBottom: 2 }}>{step.outputLabels[fi]}</div>
-                            <div style={{ fontSize: '0.88em', color: 'var(--text-primary)', lineHeight: 1.5 }}>{policyData[field]}</div>
+                    policyData[step.paragraphField] && (
+                      <div key={step.id}>
+                        <div style={{ background: 'var(--bg)', border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+                          <div style={{ fontSize: '0.78em', fontWeight: 600, color: 'var(--accent)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            {step.summaryTitle}
                           </div>
-                        ))}
+                          <div style={{ fontSize: '0.88em', color: 'var(--text-primary)', lineHeight: 1.7 }}>
+                            {policyData[step.paragraphField]}
+                          </div>
+                        </div>
+                        {step.id === 4 && policyData.risk_level && (
+                          <div style={{
+                            padding: '10px 14px', borderRadius: 10, marginTop: 8,
+                            background: policyData.impact_score > 0 ? '#dcfce7' : policyData.impact_score < 0 ? '#fee2e2' : '#fef9c3',
+                            border: `1px solid ${policyData.impact_score > 0 ? '#22c55e' : policyData.impact_score < 0 ? '#ef4444' : '#eab308'}`,
+                            fontSize: '0.85em', fontWeight: 600,
+                          }}>
+                            {policyData.impact_score > 0 ? '🟢' : policyData.impact_score < 0 ? '🔴' : '🟡'} Risk Seviyesi: {policyData.risk_level}
+                            <br/>
+                            <span style={{ fontWeight: 400, fontSize: '0.9em' }}>Toplam skor: {policyData.impact_score > 0 ? '+' : ''}{policyData.impact_score}</span>
+                          </div>
+                        )}
                       </div>
                     )
                   ))}
@@ -2249,20 +2716,37 @@ The platform also allows users to analyze documents such as strategic plans, bud
                   )}
                   {policyStep >= 8 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-                      <button className='btn-primary' style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
-                        📝 Word'e Aktar
+                      <button className='btn-primary'
+                        onClick={() => {
+                          const draft = generatePolicyDraft(policyData, lang);
+                          const blob = new Blob([draft], { type: 'text/plain;charset=utf-8' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url; a.download = 'politika_taslagi.txt'; a.click();
+                        }}
+                        style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
+                        📥 Politika Taslağını İndir
                       </button>
-                      <button className='btn-ghost' style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
-                        📊 Performans Programı Formatı
+                      <button className='btn-ghost'
+                        onClick={() => {
+                          const draft = generatePolicyDraft(policyData, lang);
+                          navigator.clipboard.writeText(draft);
+                          alert('Taslak panoya kopyalandı!');
+                        }}
+                        style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
+                        📋 Panoya Kopyala
                       </button>
-                      <button className='btn-ghost' style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
-                        📋 Yönetici Özeti
+                      <button className='btn-ghost'
+                        onClick={() => { setPolicyStep(0); setPolicyData({}); setPolicyMessages([]); setPolicyStarted(false); setPolicyMode(null); setImpactScores({ access: 0, benefit: 0, participation: 0, time: 0, safety: 0 }); }}
+                        style={{ padding: '10px', borderRadius: 10, fontSize: '0.88em' }}>
+                        🔄 Yeni Politika Başlat
                       </button>
                     </div>
                   )}
                 </div>
               </div>
-            )}
+              </>
+            ) : null}
           </div>
         )}
 
@@ -2617,7 +3101,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
                 style={{ display: "none" }}
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
-                  if (f) await handleDocFile(f);
+                  if (f) await handleDocFileSelect(f);
                 }}
               />
               <div
@@ -2647,7 +3131,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
                   e.preventDefault();
                   setDocDragActive(false);
                   const f = e.dataTransfer.files?.[0];
-                  if (f) await handleDocFile(f);
+                  if (f) await handleDocFileSelect(f);
                 }}
               >
                 <div style={{ fontSize: "1.6rem" }}>📄</div><div>{L.docAnalysis.upload}</div><div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.uploadHint}</div>
@@ -2666,7 +3150,7 @@ The platform also allows users to analyze documents such as strategic plans, bud
               <div className="muted" style={{ fontSize: ".85rem" }}>{L.docAnalysis.wordCount}: {analysisWordCount}</div>
               <button className="btn" onClick={clearDocInputs}>{L.docAnalysis.clear}</button>
             </div>
-              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, analysisText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }} disabled={docLoading || !analysisText.trim()}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
+              <button className="btn btn-primary" onClick={async () => { setDocLoading(true); setDocResult(""); const r = await callClaude(buildDocPrompt(lang, analysisText), buildSystemPrompt(lang, role)); setDocResult(r); setDocLoading(false); }} disabled={isAnalyzeDisabled}>{docLoading ? L.docAnalysis.analyzing : L.docAnalysis.analyze}</button>
             {docLoading && <span className="muted pulse">{L.docAnalysis.analyzing}</span>}
             {resultCard(docResult)}
           </div>
