@@ -1621,7 +1621,12 @@ Kullanıcının tüm yanıtlarını birleştirerek 5-6 cümlelik akıcı ve kuru
 
 Eğer kullanıcı veri yoksa şunu da özete ekle: "(Not: Bu alanda yapılacak kapsamlı veri toplama çalışması politika etkinliğini artıracaktır.)"${riskWarning ? ` ${riskWarning}` : ''}
 
-Ardından Hedef Grup Analizine geç.`;
+Özeti yazdıktan hemen sonra şunu ekle: "Hedef Grup Analizine geçiyoruz.
+
+**Modül 3: Hedef Grup Analizi**
+
+**Soru 1/3:** Politika kimleri hedefliyor? Bu politikanın birincil hedef grubu kimler?"
+Do not change anything else.`;
   }
 
   const modulePrompts = [
@@ -2233,7 +2238,11 @@ Seçilen alt sorunlar: ${subProblemContext || 'Belirtilmedi'}
 - Dördüncü cümle temel nedenleri özetlesin
 - Beşinci cümle veri durumunu vurgulasın
 - Öncesinde "📋 SORUN ANALİZİ ÖZETI:" yaz
-- Sonrasında "Hedef Grup Analizine geçiyoruz." de` : ''}
+- Özeti yazdıktan hemen sonra şunu ekle: "Hedef Grup Analizine geçiyoruz.
+
+**Modül 3: Hedef Grup Analizi**
+
+**Soru 1/3:** Politika kimleri hedefliyor? Bu politikanın birincil hedef grubu kimler? (Birden fazla seçebilirsiniz)"` : ''}
 
 SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum yapma.`
           : buildPolicySystemPrompt(policyStep, nextStep, riskWarning);
@@ -2308,6 +2317,21 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
       const completedCurrentStep = currentStep?.paragraphField && !!nextPolicyData[currentStep.paragraphField];
       if (completedCurrentStep && policyStep < 8) {
         setPolicyStep(prev => prev + 1);
+        if (policyStep === 1 && policySubQuestion >= 4) {
+          setTimeout(() => {
+            setPolicyMessages(prev => {
+              const lastMsg = prev[prev.length - 1]?.content || '';
+              if (!lastMsg.includes('Politika kimleri hedefliyor')) {
+                return [...prev, {
+                  role: 'assistant',
+                  content: `**Modül 3: Hedef Grup Analizi**\n\n**Soru 1/3:** Politika kimleri hedefliyor? Bu politikanın birincil hedef grubu kimler? (Birden fazla seçebilirsiniz)`
+                }];
+              }
+              return prev;
+            });
+            setPolicySubQuestion(0);
+          }, 300);
+        }
       }
       if (policyStep === 0 || policyStep === 1) {
         setPolicySubQuestion(prev => prev + 1);
