@@ -1218,11 +1218,12 @@ async function callClaude(userContent, systemPrompt, history = [], lang, role) {
 
   try {
     const messages = [...history, { role: "user", content: userContent }];
+    const cleanMessages = messages.map((m) => ({ role: m.role, content: String(m.content || "") }));
 
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages, lang, role, customSystem: systemPrompt }),
+      body: JSON.stringify({ messages: cleanMessages, lang, role, customSystem: systemPrompt }),
       signal: controller.signal,
     });
 
@@ -2194,7 +2195,11 @@ Seçilen alt sorunlar: ${subProblemContext || 'Belirtilmedi'}
 
 SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum yapma.`
           : buildPolicySystemPrompt(policyStep, nextStep, riskWarning);
-      const reply = await callClaude(userText || 'Ek veri paylaşılmadı.', systemPrompt, policyMessages.slice(-12), lang, role);
+      const history = policyMessages
+        .filter(m => !m.isSubProblemSelector)
+        .map(m => ({ role: m.role, content: m.content }))
+        .slice(-6);
+      const reply = await callClaude(userText || 'Ek veri paylaşılmadı.', systemPrompt, history, lang, role);
 
       let nextPolicyData = { ...updatedData };
 
@@ -2254,7 +2259,10 @@ SADECE yukarıda belirtilen işlemi yap. Başka soru sorma, detay isteme, yorum 
     setUrbanData(updatedData);
     try {
       const systemPrompt = `Sen Kadın Erkek Eşitliğine Duyarlı Bütçeleme (KEEDB) uzmanı bir kentsel planlama asistanısın. Belediye çalışanlarına kentsel planlama kararlarını eşitlik perspektifiyle geliştirmeleri için yardım ediyorsun. Şu an ${currentStep?.title} adımındasın. Kullanıcının yanıtını kısa değerlendir (1-2 cümle), ardından ${nextStep ? nextStep.title + ' adımına geç: ' + nextStep.aiPrompt : 'planlama taslağının tamamlandığını belirt ve tebrik et.'}`;
-      const reply = await callClaude(userText, systemPrompt, urbanMessages.slice(-4), lang, role);
+      const history = urbanMessages
+        .map(m => ({ role: m.role, content: m.content }))
+        .slice(-4);
+      const reply = await callClaude(userText, systemPrompt, history, lang, role);
       setUrbanMessages([...newMessages, { role: 'assistant', content: reply }]);
       if (urbanStep < 7) setUrbanStep(prev => prev + 1);
     } catch (error) {
