@@ -1469,6 +1469,16 @@ const POLICY_STEP2_CHIPS = [
   ['Veri var', 'Veri yok', 'Veri kısmi'],
 ];
 
+
+const POLICY_STEP3_CHIPS = [
+  // Q1 (subQuestion 0): Politika kimleri hedefliyor
+  ['Kadınlar', 'Erkekler', 'Genç kadınlar ve kız çocukları', 'Yaşlı kadınlar', 'Engelli bireyler', 'Kırsal nüfus', 'Göçmen / mülteci kadınlar', 'Tek ebeveynler', 'Düşük gelirli gruplar'],
+  // Q2 (subQuestion 1): Coğrafi/sosyoekonomik farklılıklar
+  ['Bölgesel yoğunlaşma var (kırsal ve dezavantajlı bölgelerde daha yüksek)', 'Gelir düzeyi belirleyici (düşük gelir grupları daha fazla etkileniyor)', 'Kentsel-kırsal fark belirgin', 'Bölgesel fark yok'],
+  // Q3 (subQuestion 2): Kırılgan gruplar
+  ['Engelli kadınlar', 'Yaşlı kadınlar', 'Göçmen kadınlar', 'Şiddet mağdurları', 'Yoksul hanelerdeki kadınlar', 'Mevsimlik işçi kadınlar'],
+];
+
 const SECTOR_SUB_PROBLEMS = {
   Tarım: {
     'Erişim Sorunu': ['Kadın çiftçilerin tarımsal krediye erişiminin kısıtlı olması', 'Tarımsal girdilere (tohum, gübre, ekipman) erişimde eşitsizlik', 'Pazara erişim ve pazarlama kanallarına ulaşmada güçlükler', 'Kooperatif ve meslek örgütlerine katılımın düşüklüğü'],
@@ -2082,6 +2092,10 @@ The platform also allows users to analyze documents such as strategic plans, bud
     if (policyStep === 1) {
       const q = Math.min(policySubQuestion, POLICY_STEP2_CHIPS.length - 1);
       return POLICY_STEP2_CHIPS[q] || [];
+    }
+    if (policyStep === 2) {
+      const q = Math.min(policySubQuestion, POLICY_STEP3_CHIPS.length - 1);
+      return POLICY_STEP3_CHIPS[q] || [];
     }
     if (policyStep === 4) {
       const q = Math.min(policySubQuestion, POLICY_STEP5_CHIPS.length - 1);
