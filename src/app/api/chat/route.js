@@ -36,22 +36,33 @@ async function searchRelevantChunks(query, language = 'tr') {
 export async function POST(request) {
   try {
     const { messages, customSystem, lang } = await request.json();
-    const lastUserMessage = messages[messages.length - 1]?.content || '';
+    const trimmedMessages = messages.slice(-6);
+    const lastUserMessage = trimmedMessages[trimmedMessages.length - 1]?.content || '';
 
     // Search relevant chunks from knowledge base
     const relevantContext = await searchRelevantChunks(lastUserMessage, lang || 'tr');
 
     // Build system prompt with context
-    let systemWithContext = customSystem || '';
+    const systemWithContext = [
+      {
+        type: 'text',
+        text: customSystem || '',
+        cache_control: { type: 'ephemeral' },
+      },
+    ];
     if (relevantContext) {
-      systemWithContext += `\n\n## İLGİLİ KAYNAK BİLGİLERİ\nAşağıdaki bilgiler veritabanından bulunmuştur. Cevabında bu kaynaklara öncelik ver:\n\n${relevantContext}`;
+      systemWithContext.push({
+        type: 'text',
+        text: `## İLGİLİ KAYNAK BİLGİLERİ\nAşağıdaki bilgiler veritabanından bulunmuştur. Cevabında bu kaynaklara öncelik ver:\n\n${relevantContext}`,
+        cache_control: { type: 'ephemeral' },
+      });
     }
 
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       system: systemWithContext,
-      messages: messages,
+      messages: trimmedMessages,
     });
 
     const text = response.content?.[0]?.text || '';
